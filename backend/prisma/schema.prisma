@@ -40,6 +40,10 @@ model Company {
   slug           String          @unique
   description    String?
   imageUrl       String?
+  ville          String?         // City
+  adresse        String?         // Address
+  tel            String?         // Telephone
+  activite       String?         // Activity/Business type
   categoryId     Int
   category       Category        @relation(fields: [categoryId], references: [id])
   reviews        Review[]

@@ -27,3 +27,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Extracted data files (keep scripts, ignore generated data)
+scripts/*.json
+scripts/*.cjs
