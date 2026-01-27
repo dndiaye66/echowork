@@ -6,12 +6,18 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { PrismaModule } from '../prisma/prisma.module';
 
+const jwtSecret = process.env.JWT_SECRET;
+
+if (!jwtSecret) {
+  throw new Error('JWT_SECRET environment variable is required');
+}
+
 @Module({
   imports: [
     PrismaModule,
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'your-secret-key-change-this-in-production',
+      secret: jwtSecret,
       signOptions: { expiresIn: '7d' },
     }),
   ],

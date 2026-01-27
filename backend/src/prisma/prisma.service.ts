@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit, INestApplication, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
 /**
@@ -12,17 +12,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
    */
   async onModuleInit() {
     await this.$connect();
-  }
-
-  /**
-   * Registers shutdown hooks to gracefully close database connections
-   * @param app - The NestJS application instance
-   */
-  async enableShutdownHooks(app: INestApplication) {
-    // Use process signals for graceful shutdown instead of beforeExit
-    process.on('beforeExit', async () => {
-      await app.close();
-    });
   }
 
   /**

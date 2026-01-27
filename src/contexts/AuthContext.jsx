@@ -21,8 +21,16 @@ export const AuthProvider = ({ children }) => {
     const storedUser = localStorage.getItem('user');
     
     if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setToken(storedToken);
+        setUser(parsedUser);
+      } catch (error) {
+        // Clear invalid data
+        console.error('Failed to parse stored user data:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
     }
     setLoading(false);
   }, []);
