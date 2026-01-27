@@ -7,18 +7,22 @@ import Foot from "../components/Foot";
 import imageBack2 from "../assets/image/imgback2.jpg";
 import { useCompanyReviews } from "../hooks/useReviews";
 import { reviewService } from "../services/reviewService";
+import { useVoting } from "../hooks/useVoting";
 
 const CompanyPage = () => {
-  const { entrepriseSlug } = useParams();
+  const { slug } = useParams();
   const [entreprise, setEntreprise] = useState(null);
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(0);
 
+  // Hook pour les votes
+  const { upvote, downvote, votingStates } = useVoting();
+
   // On trouve l'entreprise
   useEffect(() => {
-    const found = ToutesEntreprises.find((e) => e.slug === entrepriseSlug);
+    const found = ToutesEntreprises.find((e) => e.slug === slug);
     setEntreprise(found);
-  }, [entrepriseSlug]);
+  }, [slug]);
 
   // Hook pour récupérer les avis dynamiques
   const { reviews, loading, refresh } = useCompanyReviews(entreprise?.id);
@@ -31,12 +35,41 @@ const CompanyPage = () => {
     }
 
     try {
-      await reviewService.createReview(entreprise.id, { comment, rating });
+      await reviewService.createReview({ 
+        companyId: entreprise.id, 
+        comment, 
+        rating 
+      });
       setComment("");
       setRating(0);
       refresh(); // Recharge les avis
-    } catch {
-      alert("Erreur lors de la publication de l'avis.");
+      alert("Avis publié avec succès!");
+    } catch (error) {
+      console.error("Erreur lors de la publication de l'avis:", error);
+      if (error.response?.status === 401) {
+        alert("Vous devez être connecté pour publier un avis.");
+      } else {
+        alert("Erreur lors de la publication de l'avis.");
+      }
+    }
+  };
+
+  // Gestion des votes
+  const handleUpvote = async (reviewId) => {
+    try {
+      await upvote(reviewId);
+      refresh(); // Recharge les avis pour afficher les nouveaux scores
+    } catch (error) {
+      console.error("Erreur lors du vote:", error);
+    }
+  };
+
+  const handleDownvote = async (reviewId) => {
+    try {
+      await downvote(reviewId);
+      refresh(); // Recharge les avis pour afficher les nouveaux scores
+    } catch (error) {
+      console.error("Erreur lors du vote:", error);
     }
   };
 
@@ -117,7 +150,7 @@ const CompanyPage = () => {
           ) : reviews && reviews.length > 0 ? (
             reviews.map((avis) => (
               <div key={avis.id} className="bg-white max-w-3xl p-6">
-                <p className="font-semibold">{avis.user || "Anonyme"}</p>
+                <p className="font-semibold">{avis.user?.email || "Anonyme"}</p>
                 <div className="flex items-center my-2">
                   {[...Array(5)].map((_, i) => (
                     <Star
@@ -127,9 +160,23 @@ const CompanyPage = () => {
                   ))}
                 </div>
                 <p>{avis.comment}</p>
-                <div className="flex gap-2 mt-2">
-                  <ThumbsUp className="text-white bg-red-600 p-1 rounded-full" size={32} />
-                  <ThumbsDown className="text-white bg-red-600 p-1 rounded-full" size={32} />
+                <div className="flex gap-2 mt-2 items-center">
+                  <button
+                    onClick={() => handleUpvote(avis.id)}
+                    disabled={votingStates[avis.id]}
+                    className="flex items-center gap-1 disabled:opacity-50"
+                  >
+                    <ThumbsUp className="text-white bg-red-600 p-1 rounded-full cursor-pointer hover:bg-red-700" size={32} />
+                    <span className="text-sm font-semibold">{avis.upvotes || 0}</span>
+                  </button>
+                  <button
+                    onClick={() => handleDownvote(avis.id)}
+                    disabled={votingStates[avis.id]}
+                    className="flex items-center gap-1 disabled:opacity-50"
+                  >
+                    <ThumbsDown className="text-white bg-red-600 p-1 rounded-full cursor-pointer hover:bg-red-700" size={32} />
+                    <span className="text-sm font-semibold">{avis.downvotes || 0}</span>
+                  </button>
                 </div>
               </div>
             ))
