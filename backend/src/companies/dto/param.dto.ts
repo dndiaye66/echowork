@@ -8,7 +8,7 @@ export class CompanyIdParamDto {
   @IsNumberString()
   @Transform(({ value }) => parseInt(value, 10))
   @IsPositive({ message: 'Company ID must be a positive number' })
-  id: string;
+  id: number;
 }
 
 /**
@@ -18,5 +18,5 @@ export class CategoryIdParamDto {
   @IsNumberString()
   @Transform(({ value }) => parseInt(value, 10))
   @IsPositive({ message: 'Category ID must be a positive number' })
-  categoryId: string;
+  categoryId: number;
 }

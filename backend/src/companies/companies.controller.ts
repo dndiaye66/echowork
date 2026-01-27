@@ -1,4 +1,4 @@
-import { Controller, Get, Param, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 import { CompanyIdParamDto, CategoryIdParamDto } from './dto/param.dto';
 
@@ -29,16 +29,10 @@ export class CompaniesController {
    */
   @Get(':id')
   async getById(@Param() params: CompanyIdParamDto) {
-    const idNum = parseInt(params.id, 10);
-    
-    if (isNaN(idNum) || idNum <= 0) {
-      throw new BadRequestException('Invalid company ID - must be a positive number');
-    }
-    
-    const company = await this.companiesService.findById(idNum);
+    const company = await this.companiesService.findById(params.id);
     
     if (!company) {
-      throw new NotFoundException(`Company with ID ${idNum} not found`);
+      throw new NotFoundException(`Company with ID ${params.id} not found`);
     }
     
     return company;
@@ -53,12 +47,6 @@ export class CompaniesController {
    */
   @Get('category/:categoryId')
   async getByCategory(@Param() params: CategoryIdParamDto) {
-    const idNum = parseInt(params.categoryId, 10);
-    
-    if (isNaN(idNum) || idNum <= 0) {
-      throw new BadRequestException('Invalid category ID - must be a positive number');
-    }
-    
-    return this.companiesService.findByCategory(idNum);
+    return this.companiesService.findByCategory(params.categoryId);
   }
 }
