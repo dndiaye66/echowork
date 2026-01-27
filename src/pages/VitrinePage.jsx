@@ -182,23 +182,16 @@ const VitrinePage = () => {
                   <li key={i} className="p-2 ml-12 flex flex-col gap-1 bg-white">
                     <p className="text-xl font-bold text-black">{i + 1}. {company.name}</p>
                     <p className="flex items-center text-lg font-black text-gray-700">
-                      <MapPin size={24} className="mr-1" /> {company.address}
+                      <MapPin size={24} className="mr-1" /> {company.adresse || company.ville || "N/A"}
                     </p>
                     <p className="text-black text-sm mt-2">{company.description}</p>
-
-                    <div className="flex flex-row border-2 border-red-600 p-1 w-fit gap-2">
-                      <ChartNetwork className="text-black" />
-                      <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-black underline">
-                        Voir le site
-                      </a>
-                    </div>
 
                     <div className="flex">
                       {[...Array(5)].map((_, starIdx) => (
                         <Star
                           key={starIdx}
                           size={20}
-                          className={starIdx < company.rating ? "fill-red-600 text-red-600" : "text-gray-300"}
+                          className={starIdx < Math.round(company.averageRating || 0) ? "fill-red-600 text-red-600" : "text-gray-300"}
                         />
                       ))}
                     </div>

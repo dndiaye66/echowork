@@ -32,3 +32,15 @@ export class CategorySlugParamDto {
   })
   slug!: string;
 }
+
+/**
+ * DTO for validating company slug parameter
+ */
+export class CompanySlugParamDto {
+  @IsString({ message: 'Company slug must be a string' })
+  @IsNotEmpty({ message: 'Company slug cannot be empty' })
+  @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+    message: 'Company slug must be lowercase alphanumeric with hyphens',
+  })
+  slug!: string;
+}
