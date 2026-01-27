@@ -86,4 +86,27 @@ export class CompaniesService {
       throw new InternalServerErrorException('Failed to fetch companies by category');
     }
   }
+
+  /**
+   * Retrieves all companies belonging to a specific category by slug
+   * @param categorySlug - The category slug
+   * @returns Promise<Company[]> List of companies in the category
+   * @throws InternalServerErrorException if database query fails
+   */
+  async findByCategorySlug(categorySlug: string) {
+    try {
+      return await this.prisma.company.findMany({
+        where: {
+          category: {
+            slug: categorySlug,
+          },
+        },
+        include: { category: true },
+        orderBy: { name: 'asc' },
+      });
+    } catch (error) {
+      this.logger.error(`Failed to fetch companies for category slug ${categorySlug}`, error);
+      throw new InternalServerErrorException('Failed to fetch companies by category slug');
+    }
+  }
 }
