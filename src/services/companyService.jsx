@@ -2,15 +2,21 @@
 import apiClient from '../api/Config';
 
 export const companyService = {
-  // Récupérer les entreprises par catégorie (slug)
+  // Recuperer les entreprises par categorie (slug)
   getCompaniesByCategory: async (categorySlug) => {
     const response = await apiClient.get(`/companies/category/slug/${categorySlug}`);
     return response.data;
   },
 
-  // Récupérer les détails d’une entreprise
+  // Recuperer les details d'une entreprise par ID
   getCompanyDetails: async (companyId) => {
     const response = await apiClient.get(`/companies/${companyId}`);
+    return response.data;
+  },
+
+  // Recuperer les details d'une entreprise par slug
+  getCompanyBySlug: async (companySlug) => {
+    const response = await apiClient.get(`/companies/slug/${companySlug}`);
     return response.data;
   },
 };
