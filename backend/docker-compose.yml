@@ -10,12 +10,38 @@ services:
       - db-data:/var/lib/postgresql/data
     ports:
       - '5432:5432'
+    networks:
+      - echowork-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_URL: postgresql://postgres:password@db:5432/echowork_db?schema=public
+      PORT: 3000
+      FRONTEND_URL: http://localhost:5173
+      JWT_SECRET: your-secret-key-change-this-in-production
+    depends_on:
+      - db
+    networks:
+      - echowork-network
+    command: sh -c "npx prisma migrate deploy && npm run start"
 
   adminer:
     image: adminer
     restart: always
     ports:
       - '8080:8080'
+    networks:
+      - echowork-network
 
 volumes:
   db-data:
+
+networks:
+  echowork-network:
+    driver: bridge
+
