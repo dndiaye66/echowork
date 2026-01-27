@@ -1,19 +1,62 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
+/**
+ * Service responsible for company-related business logic
+ */
 @Injectable()
 export class CompaniesService {
+  private readonly logger = new Logger(CompaniesService.name);
+
   constructor(private prisma: PrismaService) {}
 
+  /**
+   * Retrieves all companies with their associated categories
+   * @returns Promise<Company[]> List of all companies
+   * @throws InternalServerErrorException if database query fails
+   */
   async findAll() {
-    return this.prisma.company.findMany({ include: { category: true } });
+    try {
+      return await this.prisma.company.findMany({ include: { category: true } });
+    } catch (error) {
+      this.logger.error('Failed to fetch companies', error);
+      throw new InternalServerErrorException('Failed to fetch companies');
+    }
   }
 
+  /**
+   * Retrieves a single company by its ID
+   * @param id - The company ID
+   * @returns Promise<Company | null> The company if found, null otherwise
+   * @throws InternalServerErrorException if database query fails
+   */
   async findById(id: number) {
-    return this.prisma.company.findUnique({ where: { id }, include: { category: true } });
+    try {
+      return await this.prisma.company.findUnique({ 
+        where: { id }, 
+        include: { category: true } 
+      });
+    } catch (error) {
+      this.logger.error(`Failed to fetch company with ID ${id}`, error);
+      throw new InternalServerErrorException('Failed to fetch company');
+    }
   }
 
+  /**
+   * Retrieves all companies belonging to a specific category
+   * @param categoryId - The category ID
+   * @returns Promise<Company[]> List of companies in the category
+   * @throws InternalServerErrorException if database query fails
+   */
   async findByCategory(categoryId: number) {
-    return this.prisma.company.findMany({ where: { categoryId }, include: { category: true } });
+    try {
+      return await this.prisma.company.findMany({ 
+        where: { categoryId }, 
+        include: { category: true } 
+      });
+    } catch (error) {
+      this.logger.error(`Failed to fetch companies for category ${categoryId}`, error);
+      throw new InternalServerErrorException('Failed to fetch companies by category');
+    }
   }
 }
