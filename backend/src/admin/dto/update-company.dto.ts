@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsInt } from 'class-validator';
+import { IsOptional, IsString, IsInt, IsUrl } from 'class-validator';
 
 export class UpdateCompanyDto {
   @IsString({ message: 'Name must be a string' })
@@ -13,7 +13,7 @@ export class UpdateCompanyDto {
   @IsOptional()
   description?: string;
 
-  @IsString({ message: 'Image URL must be a string' })
+  @IsUrl({}, { message: 'Image URL must be a valid URL' })
   @IsOptional()
   imageUrl?: string;
 

@@ -51,8 +51,9 @@ export class AdminController {
   }
 
   @Get('job-offers')
-  async getJobOffers(@Query('companyId', ParseIntPipe) companyId?: number) {
-    return this.adminService.getJobOffers(companyId);
+  async getJobOffers(@Query('companyId') companyId?: string) {
+    const companyIdNum = companyId ? parseInt(companyId, 10) : undefined;
+    return this.adminService.getJobOffers(companyIdNum);
   }
 
   @Put('job-offers/:id')

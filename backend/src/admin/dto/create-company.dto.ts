@@ -13,7 +13,7 @@ export class CreateCompanyDto {
   @IsOptional()
   description?: string;
 
-  @IsString({ message: 'Image URL must be a string' })
+  @IsUrl({}, { message: 'Image URL must be a valid URL' })
   @IsOptional()
   imageUrl?: string;
 

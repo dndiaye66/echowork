@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsInt, IsOptional, IsBoolean, IsDateString } from 'class-validator';
+import { IsNotEmpty, IsString, IsInt, IsOptional, IsBoolean, IsDateString, IsUrl } from 'class-validator';
 
 export class CreateAdvertisementDto {
   @IsString({ message: 'Title must be a string' })
@@ -9,7 +9,7 @@ export class CreateAdvertisementDto {
   @IsNotEmpty({ message: 'Content is required' })
   content!: string;
 
-  @IsString({ message: 'Image URL must be a string' })
+  @IsUrl({}, { message: 'Image URL must be a valid URL' })
   @IsOptional()
   imageUrl?: string;
 
