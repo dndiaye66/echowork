@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 /**
@@ -6,6 +6,8 @@ import { PrismaService } from '../prisma/prisma.service';
  */
 @Injectable()
 export class CompaniesService {
+  private readonly logger = new Logger(CompaniesService.name);
+
   constructor(private prisma: PrismaService) {}
 
   /**
@@ -17,6 +19,7 @@ export class CompaniesService {
     try {
       return await this.prisma.company.findMany({ include: { category: true } });
     } catch (error) {
+      this.logger.error('Failed to fetch companies', error);
       throw new InternalServerErrorException('Failed to fetch companies');
     }
   }
@@ -34,6 +37,7 @@ export class CompaniesService {
         include: { category: true } 
       });
     } catch (error) {
+      this.logger.error(`Failed to fetch company with ID ${id}`, error);
       throw new InternalServerErrorException('Failed to fetch company');
     }
   }
@@ -51,6 +55,7 @@ export class CompaniesService {
         include: { category: true } 
       });
     } catch (error) {
+      this.logger.error(`Failed to fetch companies for category ${categoryId}`, error);
       throw new InternalServerErrorException('Failed to fetch companies by category');
     }
   }
