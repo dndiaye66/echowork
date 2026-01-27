@@ -14,15 +14,15 @@ enum UserRole {
 
 model User {
   id        Int      @id @default(autoincrement())
-  email     String   @unique
+  username  String   @unique
+  email     String?
   password  String
-  name      String?
   role      UserRole @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   reviews   Review[]
 
-  @@index([email])
+  @@index([username])
 }
 
 model Category {
@@ -35,18 +35,22 @@ model Category {
 }
 
 model Company {
-  id          Int      @id @default(autoincrement())
-  name        String
-  slug        String   @unique
-  description String?
-  categoryId  Int
-  category    Category @relation(fields: [categoryId], references: [id])
-  reviews     Review[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             Int             @id @default(autoincrement())
+  name           String
+  slug           String          @unique
+  description    String?
+  imageUrl       String?
+  categoryId     Int
+  category       Category        @relation(fields: [categoryId], references: [id])
+  reviews        Review[]
+  jobOffers      JobOffer[]
+  advertisements Advertisement[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
   @@index([slug])
   @@index([categoryId])
+  @@index([name])
 }
 
 model Review {
@@ -65,4 +69,38 @@ model Review {
   @@index([companyId])
   @@index([userId])
   @@index([rating])
+}
+
+model JobOffer {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  salary      String?
+  location    String?
+  companyId   Int
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([isActive])
+}
+
+model Advertisement {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String
+  imageUrl    String?
+  companyId   Int?
+  company     Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([isActive])
+  @@index([startDate, endDate])
 }

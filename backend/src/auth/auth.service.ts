@@ -25,15 +25,15 @@ export class AuthService {
    * @returns Access token and user info
    */
   async signup(signupDto: SignupDto) {
-    const { email, password, name } = signupDto;
+    const { username, password, email } = signupDto;
 
     // Check if user already exists
     const existingUser = await this.prisma.user.findUnique({
-      where: { email },
+      where: { username },
     });
 
     if (existingUser) {
-      throw new ConflictException('User with this email already exists');
+      throw new ConflictException('User with this username already exists');
     }
 
     // Hash password
@@ -42,22 +42,22 @@ export class AuthService {
     // Create user
     const user = await this.prisma.user.create({
       data: {
-        email,
+        username,
         password: hashedPassword,
-        name,
+        email,
       },
     });
 
     // Generate JWT token
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    const payload = { sub: user.id, username: user.username, role: user.role };
     const accessToken = this.jwtService.sign(payload);
 
     return {
       accessToken,
       user: {
         id: user.id,
+        username: user.username,
         email: user.email,
-        name: user.name,
         role: user.role,
       },
     };
@@ -69,11 +69,11 @@ export class AuthService {
    * @returns Access token and user info
    */
   async login(loginDto: LoginDto) {
-    const { email, password } = loginDto;
+    const { username, password } = loginDto;
 
-    // Find user by email
+    // Find user by username
     const user = await this.prisma.user.findUnique({
-      where: { email },
+      where: { username },
     });
 
     if (!user) {
@@ -88,15 +88,15 @@ export class AuthService {
     }
 
     // Generate JWT token
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    const payload = { sub: user.id, username: user.username, role: user.role };
     const accessToken = this.jwtService.sign(payload);
 
     return {
       accessToken,
       user: {
         id: user.id,
+        username: user.username,
         email: user.email,
-        name: user.name,
         role: user.role,
       },
     };
@@ -112,8 +112,8 @@ export class AuthService {
       where: { id: userId },
       select: {
         id: true,
+        username: true,
         email: true,
-        name: true,
         role: true,
         createdAt: true,
       },
