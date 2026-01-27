@@ -5,7 +5,7 @@ import { CompanyIdParamDto, CategoryIdParamDto, CategorySlugParamDto } from './d
 /**
  * Controller handling company-related HTTP endpoints
  */
-@Controller('api/companies')
+@Controller('companies')
 export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 

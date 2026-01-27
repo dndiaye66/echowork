@@ -18,7 +18,7 @@ import { UpdateCompanyDto } from './dto/update-company.dto';
 import { CreateJobOfferDto } from './dto/create-job-offer.dto';
 import { CreateAdvertisementDto } from './dto/create-advertisement.dto';
 
-@Controller('api/admin')
+@Controller('admin')
 @UseGuards(JwtAuthGuard, AdminGuard)
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
