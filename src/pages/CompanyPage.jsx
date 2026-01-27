@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ToutesEntreprises from "../data/ToutesEntreprises";
 import { Star, ThumbsUp, ThumbsDown, MapPin, ChartNetwork, Phone } from "lucide-react";
 import Navbar from "../components/navbar";
@@ -7,36 +7,74 @@ import Foot from "../components/Foot";
 import imageBack2 from "../assets/image/imgback2.jpg";
 import { useCompanyReviews } from "../hooks/useReviews";
 import { reviewService } from "../services/reviewService";
+import { useVoting } from "../hooks/useVoting";
+import { useAuth } from "../contexts/AuthContext";
 
 const CompanyPage = () => {
-  const { entrepriseSlug } = useParams();
+  const { slug } = useParams();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [entreprise, setEntreprise] = useState(null);
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(0);
 
+  // Hook pour les votes
+  const { upvote, downvote, votingStates } = useVoting();
+
   // On trouve l'entreprise
   useEffect(() => {
-    const found = ToutesEntreprises.find((e) => e.slug === entrepriseSlug);
+    const found = ToutesEntreprises.find((e) => e.slug === slug);
     setEntreprise(found);
-  }, [entrepriseSlug]);
+  }, [slug]);
 
   // Hook pour récupérer les avis dynamiques
   const { reviews, loading, refresh } = useCompanyReviews(entreprise?.id);
 
   // Soumission de l'avis
   const handleSubmitReview = async () => {
+    if (!isAuthenticated) {
+      alert("Vous devez être connecté pour publier un avis.");
+      navigate("/login");
+      return;
+    }
+
     if (!comment || rating === 0) {
       alert("Veuillez remplir tous les champs");
       return;
     }
 
     try {
-      await reviewService.createReview(entreprise.id, { comment, rating });
+      await reviewService.createReview({ 
+        companyId: entreprise.id, 
+        comment, 
+        rating 
+      });
       setComment("");
       setRating(0);
       refresh(); // Recharge les avis
-    } catch {
-      alert("Erreur lors de la publication de l'avis.");
+      alert("Avis publié avec succès!");
+    } catch (error) {
+      console.error("Erreur lors de la publication de l'avis:", error);
+      if (error.response?.status === 401) {
+        alert("Vous devez être connecté pour publier un avis.");
+        navigate("/login");
+      } else {
+        alert("Erreur lors de la publication de l'avis.");
+      }
+    }
+  };
+
+  // Gestion des votes
+  const handleVote = async (reviewId, voteType) => {
+    try {
+      if (voteType === 'upvote') {
+        await upvote(reviewId);
+      } else {
+        await downvote(reviewId);
+      }
+      refresh(); // Recharge les avis pour afficher les nouveaux scores
+    } catch (error) {
+      console.error("Erreur lors du vote:", error);
     }
   };
 
@@ -117,7 +155,7 @@ const CompanyPage = () => {
           ) : reviews && reviews.length > 0 ? (
             reviews.map((avis) => (
               <div key={avis.id} className="bg-white max-w-3xl p-6">
-                <p className="font-semibold">{avis.user || "Anonyme"}</p>
+                <p className="font-semibold">{avis.user?.email || "Anonyme"}</p>
                 <div className="flex items-center my-2">
                   {[...Array(5)].map((_, i) => (
                     <Star
@@ -127,9 +165,23 @@ const CompanyPage = () => {
                   ))}
                 </div>
                 <p>{avis.comment}</p>
-                <div className="flex gap-2 mt-2">
-                  <ThumbsUp className="text-white bg-red-600 p-1 rounded-full" size={32} />
-                  <ThumbsDown className="text-white bg-red-600 p-1 rounded-full" size={32} />
+                <div className="flex gap-2 mt-2 items-center">
+                  <button
+                    onClick={() => handleVote(avis.id, 'upvote')}
+                    disabled={votingStates[avis.id]}
+                    className="flex items-center gap-1 disabled:opacity-50"
+                  >
+                    <ThumbsUp className="text-white bg-red-600 p-1 rounded-full hover:bg-red-700" size={32} />
+                    <span className="text-sm font-semibold">{avis.upvotes || 0}</span>
+                  </button>
+                  <button
+                    onClick={() => handleVote(avis.id, 'downvote')}
+                    disabled={votingStates[avis.id]}
+                    className="flex items-center gap-1 disabled:opacity-50"
+                  >
+                    <ThumbsDown className="text-white bg-red-600 p-1 rounded-full hover:bg-red-700" size={32} />
+                    <span className="text-sm font-semibold">{avis.downvotes || 0}</span>
+                  </button>
                 </div>
               </div>
             ))
@@ -141,12 +193,18 @@ const CompanyPage = () => {
         {/* FORMULAIRE D’AVIS */}
         <div className="bg-white p-6 rounded-xl shadow-md mx-auto py-4 px-4 md:px-20 max-w-7xl">
           <h3 className="text-xl font-bold mb-4">Laissez votre avis</h3>
+          {!isAuthenticated && (
+            <p className="text-red-600 mb-4">
+              Vous devez être <a href="/login" className="underline font-semibold">connecté</a> pour publier un avis.
+            </p>
+          )}
           <textarea
             rows={5}
             className="w-full border-2 border-gray-300 p-3 rounded mb-2 focus:outline-none focus:ring-2 focus:ring-red-600"
             placeholder="Écrivez ici votre avis..."
             value={comment}
             onChange={(e) => setComment(e.target.value)}
+            disabled={!isAuthenticated}
           />
           <div className="flex items-center gap-2 mb-4">
             {[1, 2, 3, 4, 5].map((num) => (
@@ -154,14 +212,15 @@ const CompanyPage = () => {
                 key={num}
                 size={24}
                 className={num <= rating ? "text-red-600 cursor-pointer" : "text-gray-300 cursor-pointer"}
-                onClick={() => setRating(num)}
+                onClick={() => isAuthenticated && setRating(num)}
               />
             ))}
           </div>
           <p className="text-sm text-gray-500 mb-4">Maximum 85 caractères</p>
           <button
             onClick={handleSubmitReview}
-            className="bg-red-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-red-700"
+            disabled={!isAuthenticated}
+            className="bg-red-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Publier votre avis
           </button>
