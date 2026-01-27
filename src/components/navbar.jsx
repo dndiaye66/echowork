@@ -2,9 +2,11 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, ArrowDown } from "lucide-react";
 import  categoriesEntreprises from "../data/CategoriesEntreprises"; // tableau de catégories
+import { useAuth } from "../contexts/AuthContext";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const [search, setSearch] = React.useState("");
 
@@ -63,6 +65,37 @@ const Navbar = () => {
               ))}
             </ul>
           </div>
+
+          {isAuthenticated ? (
+            <div className="dropdown dropdown-end">
+              <label tabIndex={0} className="text-lg font-medium flex items-center gap-1 cursor-pointer">
+                {user?.username || 'User'}
+                <ArrowDown className="text-black" size={24} />
+              </label>
+              <ul
+                tabIndex={0}
+                className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-48"
+              >
+                {user?.role === 'ADMIN' && (
+                  <li>
+                    <Link to="/admin">Admin Dashboard</Link>
+                  </li>
+                )}
+                <li>
+                  <button onClick={logout}>Logout</button>
+                </li>
+              </ul>
+            </div>
+          ) : (
+            <>
+              <Link to="/login" className="text-lg font-medium">
+                Login
+              </Link>
+              <Link to="/signup" className="text-lg font-medium">
+                Sign Up
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
