@@ -147,7 +147,7 @@ const CategoryPage = () => {
                     key={e.slug}
                     className="card bg-white p-4 rounded-lg pl-8 max-w-[90%] mx-10 hover:bg-gray-300 transition block"
                   >
-                    <Link to={`/entreprise/${e.slug}`} className="block hover:underline">
+                    <Link to={`/companies/${e.slug}`} className="block hover:underline">
                       <div className="flex gap-3 items-center mb-2">
                         {e.imageUrl && (
                           <img src={e.imageUrl} alt={`Logo de ${e.name}`} className="w-36 object-contain" />
