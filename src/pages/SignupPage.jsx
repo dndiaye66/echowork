@@ -4,9 +4,9 @@ import { useAuth } from '../contexts/AuthContext';
 import axios from '../api/Config';
 
 function SignupPage() {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -17,6 +17,12 @@ function SignupPage() {
     setError('');
     setLoading(true);
 
+    if (!username || username.length < 3) {
+      setError('Username must be at least 3 characters long');
+      setLoading(false);
+      return;
+    }
+
     if (password.length < 6) {
       setError('Password must be at least 6 characters long');
       setLoading(false);
@@ -24,7 +30,7 @@ function SignupPage() {
     }
 
     try {
-      const response = await axios.post('/auth/signup', { email, password, name });
+      const response = await axios.post('/auth/signup', { username, email: email || undefined, password });
       login(response.data.user, response.data.accessToken);
       navigate('/');
     } catch (err) {
@@ -49,28 +55,29 @@ function SignupPage() {
           <form onSubmit={handleSubmit}>
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Name</span>
+                <span className="label-text">Pseudo (Username) *</span>
               </label>
               <input
                 type="text"
-                placeholder="Your name"
+                placeholder="Your username"
                 className="input input-bordered"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                minLength={3}
               />
             </div>
 
             <div className="form-control mt-4">
               <label className="label">
-                <span className="label-text">Email</span>
+                <span className="label-text">Email (optional)</span>
               </label>
               <input
                 type="email"
-                placeholder="email@example.com"
+                placeholder="email@example.com (optional)"
                 className="input input-bordered"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
               />
             </div>
 

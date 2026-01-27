@@ -155,7 +155,7 @@ const CompanyPage = () => {
           ) : reviews && reviews.length > 0 ? (
             reviews.map((avis) => (
               <div key={avis.id} className="bg-white max-w-3xl p-6">
-                <p className="font-semibold">{avis.user?.email || "Anonyme"}</p>
+                <p className="font-semibold">{avis.user?.username || "Anonyme"}</p>
                 <div className="flex items-center my-2">
                   {[...Array(5)].map((_, i) => (
                     <Star
