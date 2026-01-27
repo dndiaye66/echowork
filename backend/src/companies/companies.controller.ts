@@ -1,6 +1,6 @@
 import { Controller, Get, Param, NotFoundException, Query } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
-import { CompanyIdParamDto, CategoryIdParamDto, CategorySlugParamDto } from './dto/param.dto';
+import { CompanyIdParamDto, CategoryIdParamDto, CategorySlugParamDto, CompanySlugParamDto } from './dto/param.dto';
 
 /**
  * Controller handling company-related HTTP endpoints
@@ -21,22 +21,14 @@ export class CompaniesController {
   }
 
   /**
-   * GET /api/companies/:id
-   * Retrieves a specific company by ID
-   * @param params - Validated DTO containing the company ID
-   * @returns Promise<Company> The requested company
-   * @throws BadRequestException if ID is not a valid positive number (handled by ValidationPipe)
-   * @throws NotFoundException if company doesn't exist
+   * GET /api/companies/best
+   * Retrieves top 10 companies sorted by average rating
+   * NOTE: This route must come before the numeric :id route to avoid conflicts
+   * @returns Promise<Company[]> List of top 10 rated companies
    */
-  @Get(':id')
-  async getById(@Param() params: CompanyIdParamDto) {
-    const company = await this.companiesService.findById(params.id);
-    
-    if (!company) {
-      throw new NotFoundException(`Company with ID ${params.id} not found`);
-    }
-    
-    return company;
+  @Get('best')
+  async getBestCompanies() {
+    return this.companiesService.findBestCompanies();
   }
 
   /**
@@ -62,5 +54,44 @@ export class CompaniesController {
   @Get('category/:categoryId')
   async getByCategory(@Param() params: CategoryIdParamDto) {
     return this.companiesService.findByCategory(params.categoryId);
+  }
+
+  /**
+   * GET /api/companies/slug/:slug
+   * Retrieves a specific company by slug
+   * NOTE: This route must come before the numeric :id route to avoid conflicts
+   * @param params - Validated DTO containing the company slug
+   * @returns Promise<Company> The requested company with reviews, job offers, and advertisements
+   * @throws BadRequestException if slug format is invalid (handled by ValidationPipe)
+   * @throws NotFoundException if company doesn't exist
+   */
+  @Get('slug/:slug')
+  async getBySlug(@Param() params: CompanySlugParamDto) {
+    const company = await this.companiesService.findBySlug(params.slug);
+    
+    if (!company) {
+      throw new NotFoundException(`Company with slug ${params.slug} not found`);
+    }
+    
+    return company;
+  }
+
+  /**
+   * GET /api/companies/:id
+   * Retrieves a specific company by ID
+   * @param params - Validated DTO containing the company ID
+   * @returns Promise<Company> The requested company
+   * @throws BadRequestException if ID is not a valid positive number (handled by ValidationPipe)
+   * @throws NotFoundException if company doesn't exist
+   */
+  @Get(':id')
+  async getById(@Param() params: CompanyIdParamDto) {
+    const company = await this.companiesService.findById(params.id);
+    
+    if (!company) {
+      throw new NotFoundException(`Company with ID ${params.id} not found`);
+    }
+    
+    return company;
   }
 }

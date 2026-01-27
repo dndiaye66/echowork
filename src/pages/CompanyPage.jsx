@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import ToutesEntreprises from "../data/ToutesEntreprises";
 import { Star, ThumbsUp, ThumbsDown, MapPin, ChartNetwork, Phone } from "lucide-react";
 import Navbar from "../components/navbar";
 import Foot from "../components/Foot";
 import imageBack2 from "../assets/image/imgback2.jpg";
-import { useCompanyReviews } from "../hooks/useReviews";
 import { reviewService } from "../services/reviewService";
+import { companyService } from "../services/companyService";
 import { useVoting } from "../hooks/useVoting";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -15,20 +14,48 @@ const CompanyPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [entreprise, setEntreprise] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(0);
 
   // Hook pour les votes
   const { upvote, downvote, votingStates } = useVoting();
 
-  // On trouve l'entreprise
+  // Fetch company data from API
   useEffect(() => {
-    const found = ToutesEntreprises.find((e) => e.slug === slug);
-    setEntreprise(found);
+    const fetchCompanyData = async () => {
+      try {
+        setLoading(true);
+        const companyData = await companyService.getCompanyBySlug(slug);
+        setEntreprise(companyData);
+        setReviews(companyData.reviews || []);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching company:", err);
+        setError("Entreprise non trouvée");
+        setEntreprise(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (slug) {
+      fetchCompanyData();
+    }
   }, [slug]);
 
-  // Hook pour récupérer les avis dynamiques
-  const { reviews, loading, refresh } = useCompanyReviews(entreprise?.id);
+  // Function to refresh reviews
+  const refreshReviews = async () => {
+    if (!entreprise?.id) return;
+    try {
+      const companyData = await companyService.getCompanyBySlug(slug);
+      setReviews(companyData.reviews || []);
+    } catch (err) {
+      console.error("Error refreshing reviews:", err);
+    }
+  };
 
   // Soumission de l'avis
   const handleSubmitReview = async () => {
@@ -51,7 +78,7 @@ const CompanyPage = () => {
       });
       setComment("");
       setRating(0);
-      refresh(); // Recharge les avis
+      await refreshReviews(); // Recharge les avis
       alert("Avis publié avec succès!");
     } catch (error) {
       console.error("Erreur lors de la publication de l'avis:", error);
@@ -72,15 +99,40 @@ const CompanyPage = () => {
       } else {
         await downvote(reviewId);
       }
-      refresh(); // Recharge les avis pour afficher les nouveaux scores
+      await refreshReviews(); // Recharge les avis pour afficher les nouveaux scores
     } catch (error) {
       console.error("Erreur lors du vote:", error);
     }
   };
 
-  if (!entreprise) {
-    return <p>Entreprise non trouvée</p>;
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="flex items-center justify-center min-h-screen">
+          <p className="text-xl">Chargement...</p>
+        </div>
+        <Foot />
+      </>
+    );
   }
+
+  if (error || !entreprise) {
+    return (
+      <>
+        <Navbar />
+        <div className="flex items-center justify-center min-h-screen">
+          <p className="text-xl text-red-600">{error || "Entreprise non trouvée"}</p>
+        </div>
+        <Foot />
+      </>
+    );
+  }
+
+  // Calculate average rating
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+    : 0;
 
   return (
     <>
@@ -104,12 +156,12 @@ const CompanyPage = () => {
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`mr-1 ${i < Math.round(entreprise.stars) ? "text-red-600" : "text-gray-300"}`}
+                    className={`mr-1 ${i < Math.round(averageRating) ? "text-red-600" : "text-gray-300"}`}
                   />
                 ))}
               </div>
               <p className="text-red-600 font-bold text-xl">
-                <strong className="text-white">Catégorie :</strong> {entreprise.categorie}
+                <strong className="text-white">Catégorie :</strong> {entreprise.category?.name || "N/A"}
               </p>
             </div>
             <div>
@@ -118,28 +170,18 @@ const CompanyPage = () => {
             </div>
 
             <div className="flex items-center gap-2 mt-2">
-              <div className="flex items-center gap-2 border-2 border-black p-2 bg-white">
-                <ChartNetwork className="text-black" size={24} />
-                <a
-                  href={entreprise.website}
-                  className="underline text-lg text-black"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Site Web
-                </a>
-              </div>
-              <div className="flex items-center gap-2 border-2 border-black p-2 bg-white">
-                <Phone className="text-black" size={24} />
-                <a
-                  href={`tel:${entreprise.contact}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-black underline"
-                >
-                  Contactez l'entreprise
-                </a>
-              </div>
+              {entreprise.tel && (
+                <div className="flex items-center gap-2 border-2 border-black p-2 bg-white">
+                  <Phone className="text-black" size={24} />
+                  <a
+                    href={`tel:${entreprise.tel}`}
+                    rel="noopener noreferrer"
+                    className="text-black underline"
+                  >
+                    Contactez l'entreprise
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -150,9 +192,7 @@ const CompanyPage = () => {
         <h2 className="text-3xl text-center font-black mb-6">Témoignages</h2>
 
         <div className="divide-y divide-gray-300 mb-4 md:px-20 bg-white py-4 px-4 rounded-2xl shadow max-w-7xl mx-auto">
-          {loading ? (
-            <p>Chargement des avis...</p>
-          ) : reviews && reviews.length > 0 ? (
+          {reviews && reviews.length > 0 ? (
             reviews.map((avis) => (
               <div key={avis.id} className="bg-white max-w-3xl p-6">
                 <p className="font-semibold">{avis.user?.username || "Anonyme"}</p>
