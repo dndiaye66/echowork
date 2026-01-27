@@ -30,6 +30,9 @@ Interface utilisateur de la plateforme **EchoWork** – une application de notat
 - ✅ **API REST complète** - Endpoints pour entreprises, catégories, avis
 - ✅ **Validation des données** - Protection contre les données invalides
 - ✅ **Base de données Prisma** - PostgreSQL avec ORM moderne
+- ✅ **Base de données d'entreprises** - 2,608 entreprises extraites de PDFs avec informations complètes (ville, adresse, téléphone, activité)
+- ✅ **API Catégories avancée** - Affichage des entreprises notées, avis, offres d'emploi, KPIs et publicités par catégorie
+- ✅ **Recherche par catégorie** - Fonction de recherche intégrée dans chaque catégorie
 
 ### Frontend
 - ✅ **Pages d'authentification** - Login et Signup
@@ -175,6 +178,24 @@ npm run start    # Lancer le build de production
 | GET | `/api/companies` | Liste toutes les entreprises | Non |
 | GET | `/api/companies/:id` | Détails d'une entreprise | Non |
 | GET | `/api/companies/category/:categoryId` | Entreprises par catégorie | Non |
+
+**Champs des entreprises:**
+Les entreprises incluent maintenant: `ville` (city), `adresse` (address), `tel` (telephone), `activite` (activity/business type).
+
+### Categories
+| Méthode | Endpoint | Description | Auth |
+|---------|----------|-------------|------|
+| GET | `/api/categories` | Liste toutes les catégories | Non |
+| GET | `/api/categories/:id` | Détails d'une catégorie avec entreprises notées, avis, offres d'emploi, KPIs et publicités | Non |
+| GET | `/api/categories/:id/search?q={query}` | Rechercher des entreprises dans une catégorie | Non |
+
+**Note:** Le endpoint `/api/categories/:id` retourne un ensemble complet d'informations incluant:
+- Les entreprises les mieux notées de la catégorie
+- Les avis et commentaires des entreprises
+- Les offres d'emploi actives dans la catégorie
+- Les KPIs (nombre total d'entreprises, avis, note moyenne, distribution des notes)
+- Les publicités actives
+- Voir [CATEGORY_API.md](CATEGORY_API.md) pour plus de détails
 
 ### Reviews
 | Méthode | Endpoint | Description | Auth |
