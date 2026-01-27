@@ -45,7 +45,7 @@ const CategoryPage = () => {
     // Rating filter
     if (ratingFilter) {
       const minRating = parseInt(ratingFilter);
-      filtered = filtered.filter((company) => Math.round(company.stars) >= minRating);
+      filtered = filtered.filter((company) => Math.round(company.averageRating || 0) >= minRating);
     }
 
     return filtered;
@@ -149,34 +149,15 @@ const CategoryPage = () => {
                   >
                     <Link to={`/entreprise/${e.slug}`} className="block hover:underline">
                       <div className="flex gap-3 items-center mb-2">
-                        <img src={e.logo} alt={`Logo de ${e.name}`} className="w-36 object-contain" />
+                        {e.imageUrl && (
+                          <img src={e.imageUrl} alt={`Logo de ${e.name}`} className="w-36 object-contain" />
+                        )}
                         <h2 className="text-2xl font-bold">{e.name}</h2>
                       </div>
-                      <p>{e.address}</p>
-                      <div className="flex items-center gap-1 mb-2">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            size={20}
-                            className={
-                              i < Math.round(e.stars) ? "text-red-600" : "text-gray-300"
-                            }
-                          />
-                        ))}
-                      </div>
+                      <p>{e.adresse || e.ville}</p>
+                      <p className="text-sm text-gray-600">{e.tel}</p>
+                      {e.description && <p className="text-sm mt-2">{e.description}</p>}
                     </Link>
-
-                    <div className="flex flex-row border-2 border-red-600 p-1 w-fit gap-2 mt-2">
-                      <ChartNetwork className="text-black" />
-                      <a
-                        href={e.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-black underline"
-                      >
-                        Voir le site
-                      </a>
-                    </div>
                   </div>
                 ))}
               </div>

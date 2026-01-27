@@ -90,19 +90,39 @@ export class CompaniesService {
   /**
    * Retrieves all companies belonging to a specific category by slug
    * @param categorySlug - The category slug
-   * @returns Promise<Company[]> List of companies in the category
+   * @returns Promise<Company[]> List of companies in the category with average ratings
    * @throws InternalServerErrorException if database query fails
    */
   async findByCategorySlug(categorySlug: string) {
     try {
-      return await this.prisma.company.findMany({
+      const companies = await this.prisma.company.findMany({
         where: {
           category: {
             slug: categorySlug,
           },
         },
-        include: { category: true },
+        include: { 
+          category: true,
+          reviews: {
+            select: {
+              id: true,
+              rating: true,
+            },
+          },
+        },
         orderBy: { name: 'asc' },
+      });
+
+      // Calculate average rating for each company
+      return companies.map(company => {
+        const totalRating = company.reviews.reduce((sum, review) => sum + review.rating, 0);
+        const averageRating = company.reviews.length > 0 ? totalRating / company.reviews.length : 0;
+        
+        return {
+          ...company,
+          averageRating: parseFloat(averageRating.toFixed(2)),
+          reviewCount: company.reviews.length,
+        };
       });
     } catch (error) {
       this.logger.error(`Failed to fetch companies for category slug ${categorySlug}`, error);
