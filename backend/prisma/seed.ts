@@ -52,7 +52,7 @@ async function main() {
   console.log('Starting database seeding...');
 
   // Load categorized companies data
-  const dataPath = path.join(__dirname, '..', '..', 'scripts', 'companies-categorized.json');
+  const dataPath = path.join(__dirname, 'data', 'companies-categorized.json');
   const fileContent = fs.readFileSync(dataPath, 'utf8');
   const companiesData: CompanyData[] = JSON.parse(fileContent);
 

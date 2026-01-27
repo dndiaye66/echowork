@@ -60,20 +60,10 @@ This will:
 
 ### 5. Seed the Database
 
-⚠️ **Important:** Make sure the extracted company data is available.
+The seed script uses pre-extracted company data located in:
+`backend/prisma/data/companies-categorized.json`
 
-The seed script expects the categorized company data to be in:
-`scripts/companies-categorized.json`
-
-If you haven't run the extraction yet, run:
-
-```bash
-cd ..  # Back to root directory
-node scripts/extract-companies.cjs
-node scripts/categorize-companies.cjs
-```
-
-Then seed the database:
+This data file is included in the repository, so you can directly seed the database:
 
 ```bash
 cd backend

@@ -28,5 +28,6 @@ dist-ssr
 *.sln
 *.sw?
 
-# Scripts and temporary data
-scripts/
+# Extracted data files (keep scripts, ignore generated data)
+scripts/*.json
+scripts/*.cjs

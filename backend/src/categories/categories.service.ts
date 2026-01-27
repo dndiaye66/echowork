@@ -131,7 +131,9 @@ export class CategoriesService {
       const totalCompanies = companies.length;
       const totalReviews = companies.reduce((sum, c) => sum + c.reviews.length, 0);
       const totalJobOffers = jobOffers.length;
-      const averageCategoryRating = companiesWithRatings.reduce((sum, c) => sum + c.averageRating, 0) / (totalCompanies || 1);
+      const averageCategoryRating = totalCompanies > 0 
+        ? companiesWithRatings.reduce((sum, c) => sum + c.averageRating, 0) / totalCompanies 
+        : 0;
 
       // Get review distribution
       const reviewDistribution = {
@@ -175,6 +177,11 @@ export class CategoriesService {
    */
   async searchInCategory(categoryId: number, searchQuery: string) {
     try {
+      // Return empty array if query is too short
+      if (!searchQuery || searchQuery.trim().length < 2) {
+        return [];
+      }
+
       const companies = await this.prisma.company.findMany({
         where: {
           categoryId,
