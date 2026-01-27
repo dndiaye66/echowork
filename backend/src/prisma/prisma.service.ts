@@ -19,7 +19,8 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
    * @param app - The NestJS application instance
    */
   async enableShutdownHooks(app: INestApplication) {
-    this.$on('beforeExit', async () => {
+    // Use process signals for graceful shutdown instead of beforeExit
+    process.on('beforeExit', async () => {
       await app.close();
     });
   }
