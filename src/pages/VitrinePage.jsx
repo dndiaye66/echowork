@@ -186,15 +186,6 @@ const VitrinePage = () => {
                     </p>
                     <p className="text-black text-sm mt-2">{company.description}</p>
 
-                    {company.imageUrl && (
-                      <div className="flex flex-row border-2 border-red-600 p-1 w-fit gap-2">
-                        <ChartNetwork className="text-black" />
-                        <a href={company.imageUrl} target="_blank" rel="noopener noreferrer" className="text-black underline">
-                          Voir le site
-                        </a>
-                      </div>
-                    )}
-
                     <div className="flex">
                       {[...Array(5)].map((_, starIdx) => (
                         <Star

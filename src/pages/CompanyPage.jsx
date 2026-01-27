@@ -170,25 +170,11 @@ const CompanyPage = () => {
             </div>
 
             <div className="flex items-center gap-2 mt-2">
-              {entreprise.imageUrl && (
-                <div className="flex items-center gap-2 border-2 border-black p-2 bg-white">
-                  <ChartNetwork className="text-black" size={24} />
-                  <a
-                    href={entreprise.imageUrl}
-                    className="underline text-lg text-black"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Site Web
-                  </a>
-                </div>
-              )}
               {entreprise.tel && (
                 <div className="flex items-center gap-2 border-2 border-black p-2 bg-white">
                   <Phone className="text-black" size={24} />
                   <a
                     href={`tel:${entreprise.tel}`}
-                    target="_blank"
                     rel="noopener noreferrer"
                     className="text-black underline"
                   >
