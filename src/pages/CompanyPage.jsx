@@ -65,18 +65,13 @@ const CompanyPage = () => {
   };
 
   // Gestion des votes
-  const handleUpvote = async (reviewId) => {
+  const handleVote = async (reviewId, voteType) => {
     try {
-      await upvote(reviewId);
-      refresh(); // Recharge les avis pour afficher les nouveaux scores
-    } catch (error) {
-      console.error("Erreur lors du vote:", error);
-    }
-  };
-
-  const handleDownvote = async (reviewId) => {
-    try {
-      await downvote(reviewId);
+      if (voteType === 'upvote') {
+        await upvote(reviewId);
+      } else {
+        await downvote(reviewId);
+      }
       refresh(); // Recharge les avis pour afficher les nouveaux scores
     } catch (error) {
       console.error("Erreur lors du vote:", error);
@@ -172,19 +167,19 @@ const CompanyPage = () => {
                 <p>{avis.comment}</p>
                 <div className="flex gap-2 mt-2 items-center">
                   <button
-                    onClick={() => handleUpvote(avis.id)}
+                    onClick={() => handleVote(avis.id, 'upvote')}
                     disabled={votingStates[avis.id]}
                     className="flex items-center gap-1 disabled:opacity-50"
                   >
-                    <ThumbsUp className="text-white bg-red-600 p-1 rounded-full cursor-pointer hover:bg-red-700" size={32} />
+                    <ThumbsUp className="text-white bg-red-600 p-1 rounded-full hover:bg-red-700" size={32} />
                     <span className="text-sm font-semibold">{avis.upvotes || 0}</span>
                   </button>
                   <button
-                    onClick={() => handleDownvote(avis.id)}
+                    onClick={() => handleVote(avis.id, 'downvote')}
                     disabled={votingStates[avis.id]}
                     className="flex items-center gap-1 disabled:opacity-50"
                   >
-                    <ThumbsDown className="text-white bg-red-600 p-1 rounded-full cursor-pointer hover:bg-red-700" size={32} />
+                    <ThumbsDown className="text-white bg-red-600 p-1 rounded-full hover:bg-red-700" size={32} />
                     <span className="text-sm font-semibold">{avis.downvotes || 0}</span>
                   </button>
                 </div>
