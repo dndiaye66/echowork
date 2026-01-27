@@ -1,4 +1,4 @@
-import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Param, NotFoundException, Query } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 import { CompanyIdParamDto, CategoryIdParamDto } from './dto/param.dto';
 
@@ -12,11 +12,12 @@ export class CompaniesController {
   /**
    * GET /api/companies
    * Retrieves all companies
+   * @param search - Optional search query
    * @returns Promise<Company[]> List of all companies with their categories
    */
   @Get()
-  async getAll() {
-    return this.companiesService.findAll();
+  async getAll(@Query('search') search?: string) {
+    return this.companiesService.findAll(search);
   }
 
   /**

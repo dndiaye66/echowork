@@ -3,8 +3,10 @@ import { CompaniesModule } from './companies/companies.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { AdminModule } from './admin/admin.module';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
-  imports: [PrismaModule, CompaniesModule, AuthModule, ReviewsModule],
+  imports: [PrismaModule, CompaniesModule, AuthModule, ReviewsModule, AdminModule, CategoriesModule],
 })
 export class AppModule {}

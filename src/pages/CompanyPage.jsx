@@ -155,7 +155,7 @@ const CompanyPage = () => {
           ) : reviews && reviews.length > 0 ? (
             reviews.map((avis) => (
               <div key={avis.id} className="bg-white max-w-3xl p-6">
-                <p className="font-semibold">{avis.user?.email || "Anonyme"}</p>
+                <p className="font-semibold">{avis.user?.username || "Anonyme"}</p>
                 <div className="flex items-center my-2">
                   {[...Array(5)].map((_, i) => (
                     <Star
@@ -226,6 +226,61 @@ const CompanyPage = () => {
           </button>
         </div>
       </div>
+
+      {/* JOB OFFERS SECTION */}
+      {entreprise?.jobOffers && entreprise.jobOffers.length > 0 && (
+        <div className="bg-white py-8 px-4 md:px-20">
+          <h2 className="text-3xl text-center font-black mb-6">Offres d'emploi</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+            {entreprise.jobOffers.map((job) => (
+              <div key={job.id} className="card bg-base-100 shadow-xl">
+                <div className="card-body">
+                  <h3 className="card-title">{job.title}</h3>
+                  <p className="text-sm text-gray-600">{job.description}</p>
+                  {job.location && (
+                    <p className="text-sm">
+                      <strong>Lieu:</strong> {job.location}
+                    </p>
+                  )}
+                  {job.salary && (
+                    <p className="text-sm">
+                      <strong>Salaire:</strong> {job.salary}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ADVERTISEMENTS SECTION */}
+      {entreprise?.advertisements && entreprise.advertisements.length > 0 && (
+        <div className="bg-gray-100 py-8 px-4 md:px-20">
+          <h2 className="text-3xl text-center font-black mb-6">Annonces</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-7xl mx-auto">
+            {entreprise.advertisements.map((ad) => (
+              <div key={ad.id} className="card bg-base-100 shadow-xl">
+                {ad.imageUrl && (
+                  <figure>
+                    <img src={ad.imageUrl} alt={ad.title} className="w-full h-48 object-cover" />
+                  </figure>
+                )}
+                <div className="card-body">
+                  <h3 className="card-title">{ad.title}</h3>
+                  <p>{ad.content}</p>
+                  <div className="text-sm text-gray-500">
+                    <p>
+                      Du {new Date(ad.startDate).toLocaleDateString()} au{' '}
+                      {new Date(ad.endDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <Foot />
     </>

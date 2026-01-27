@@ -23,11 +23,33 @@ const monAvis = [
 const CategoryPage = () => {
   const { slug } = useParams();
   const { companies: filteredEntreprises = [], loading, error } = useCompaniesByCategory(slug);
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [ratingFilter, setRatingFilter] = React.useState("");
 
   // Filtrage des avis
   const avisPourCategorie = monAvis.filter((avis) =>
     filteredEntreprises.some((e) => e.name === avis.entreprise)
   );
+
+  // Filter companies based on search and rating
+  const displayedCompanies = React.useMemo(() => {
+    let filtered = filteredEntreprises;
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter((company) =>
+        company.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Rating filter
+    if (ratingFilter) {
+      const minRating = parseInt(ratingFilter);
+      filtered = filtered.filter((company) => Math.round(company.stars) >= minRating);
+    }
+
+    return filtered;
+  }, [filteredEntreprises, searchTerm, ratingFilter]);
 
   // Gestion du chargement ou d'erreur
   if (loading) return <p className="text-center p-10">Chargement...</p>;
@@ -91,9 +113,36 @@ const CategoryPage = () => {
               Les {slug ? slug.replace("-", " ") : "entreprises"} au Sénégal
             </h1>
 
-            {filteredEntreprises.length > 0 ? (
+            {/* Search and Filter Section */}
+            <div className="px-8 mb-6 flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="Rechercher une entreprise..."
+                  className="input input-bordered w-full"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="w-full md:w-48">
+                <select
+                  className="select select-bordered w-full"
+                  value={ratingFilter}
+                  onChange={(e) => setRatingFilter(e.target.value)}
+                >
+                  <option value="">Toutes les notes</option>
+                  <option value="5">5 étoiles</option>
+                  <option value="4">4+ étoiles</option>
+                  <option value="3">3+ étoiles</option>
+                  <option value="2">2+ étoiles</option>
+                  <option value="1">1+ étoile</option>
+                </select>
+              </div>
+            </div>
+
+            {displayedCompanies.length > 0 ? (
               <div className="flex flex-col divide-y divide-gray-300 gap-6">
-                {filteredEntreprises.map((e) => (
+                {displayedCompanies.map((e) => (
                   <div
                     key={e.slug}
                     className="card bg-white p-4 rounded-lg pl-8 max-w-[90%] mx-10 hover:bg-gray-300 transition block"

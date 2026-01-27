@@ -15,9 +15,22 @@ export class CompaniesService {
    * @returns Promise<Company[]> List of all companies
    * @throws InternalServerErrorException if database query fails
    */
-  async findAll() {
+  async findAll(search?: string) {
     try {
-      return await this.prisma.company.findMany({ include: { category: true } });
+      const where: any = {};
+      
+      if (search) {
+        where.OR = [
+          { name: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } },
+        ];
+      }
+
+      return await this.prisma.company.findMany({ 
+        where,
+        include: { category: true },
+        orderBy: { name: 'asc' },
+      });
     } catch (error) {
       this.logger.error('Failed to fetch companies', error);
       throw new InternalServerErrorException('Failed to fetch companies');
@@ -34,7 +47,21 @@ export class CompaniesService {
     try {
       return await this.prisma.company.findUnique({ 
         where: { id }, 
-        include: { category: true } 
+        include: { 
+          category: true,
+          jobOffers: {
+            where: { isActive: true },
+            orderBy: { createdAt: 'desc' },
+          },
+          advertisements: {
+            where: { 
+              isActive: true,
+              startDate: { lte: new Date() },
+              endDate: { gte: new Date() },
+            },
+            orderBy: { createdAt: 'desc' },
+          },
+        } 
       });
     } catch (error) {
       this.logger.error(`Failed to fetch company with ID ${id}`, error);
