@@ -1,11 +1,11 @@
 import { Controller, Get, Param, NotFoundException, Query } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
-import { CompanyIdParamDto, CategoryIdParamDto } from './dto/param.dto';
+import { CompanyIdParamDto, CategoryIdParamDto, CategorySlugParamDto } from './dto/param.dto';
 
 /**
  * Controller handling company-related HTTP endpoints
  */
-@Controller('api/companies')
+@Controller('companies')
 export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 
@@ -37,6 +37,19 @@ export class CompaniesController {
     }
     
     return company;
+  }
+
+  /**
+   * GET /api/companies/category/slug/:slug
+   * Retrieves all companies in a specific category by slug
+   * NOTE: This route must come before the numeric category/:categoryId route
+   * @param params - Validated DTO containing the category slug
+   * @returns Promise<Company[]> List of companies in the category
+   * @throws BadRequestException if slug format is invalid (handled by ValidationPipe)
+   */
+  @Get('category/slug/:slug')
+  async getByCategorySlug(@Param() params: CategorySlugParamDto) {
+    return this.companiesService.findByCategorySlug(params.slug);
   }
 
   /**
