@@ -1,16 +1,22 @@
 import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const prisma = new PrismaClient();
 
 /**
  * Seed script to populate database with companies from extracted PDF data
  */
+
+// Define company data interface
+interface CompanyData {
+  ville: string;
+  entreprise: string;
+  activite: string;
+  adresse: string;
+  tel: string;
+  category: string;
+}
 
 // Helper function to create a slug from a string
 function createSlug(text: string): string {
@@ -47,12 +53,13 @@ async function main() {
 
   // Load categorized companies data
   const dataPath = path.join(__dirname, '..', '..', 'scripts', 'companies-categorized.json');
-  const companiesData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+  const fileContent = fs.readFileSync(dataPath, 'utf8');
+  const companiesData: CompanyData[] = JSON.parse(fileContent);
 
   console.log(`Loaded ${companiesData.length} companies from JSON`);
 
   // Get unique categories
-  const uniqueCategories = [...new Set(companiesData.map((c: any) => c.category))];
+  const uniqueCategories = [...new Set(companiesData.map((c) => c.category))];
   console.log(`Found ${uniqueCategories.length} unique categories`);
 
   // Create categories
