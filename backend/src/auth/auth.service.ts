@@ -29,22 +29,31 @@ export class AuthService {
   async signup(signupDto: SignupDto) {
     const { username, password, email } = signupDto;
 
-    // Check if user already exists with this username
-    const existingUser = await this.prisma.user.findUnique({
-      where: { username },
+    // Check if user already exists with this username or email in a single query
+    const existingUsers = await this.prisma.user.findMany({
+      where: {
+        OR: [
+          { username },
+          { email },
+        ],
+      },
+      select: {
+        username: true,
+        email: true,
+      },
     });
 
-    if (existingUser) {
-      throw new ConflictException('User with this username already exists');
-    }
-
-    // Check if user already exists with this email
-    const existingEmail = await this.prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (existingEmail) {
-      throw new ConflictException('User with this email already exists');
+    // Check for conflicts
+    if (existingUsers.length > 0) {
+      const existingUsernames = existingUsers.filter(u => u.username === username);
+      const existingEmails = existingUsers.filter(u => u.email === email);
+      
+      if (existingUsernames.length > 0) {
+        throw new ConflictException('User with this username already exists');
+      }
+      if (existingEmails.length > 0) {
+        throw new ConflictException('User with this email already exists');
+      }
     }
 
     // Hash password

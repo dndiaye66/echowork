@@ -19,6 +19,29 @@ export class EmailService {
         pass: process.env.SMTP_PASS,
       },
     });
+
+    // Log if SMTP credentials are not configured (except for default Ethereal)
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      this.logger.warn(
+        'SMTP credentials not configured. Email sending may fail. Please set SMTP_USER and SMTP_PASS environment variables.',
+      );
+    }
+  }
+
+  /**
+   * Escape HTML special characters to prevent XSS
+   * @param text - Text to escape
+   * @returns HTML-safe text
+   */
+  private escapeHtml(text: string): string {
+    const map: { [key: string]: string } = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;',
+    };
+    return text.replace(/[&<>"']/g, (m) => map[m]);
   }
 
   /**
@@ -28,6 +51,8 @@ export class EmailService {
    */
   async sendWelcomeEmail(email: string, username: string): Promise<void> {
     try {
+      const safeUsername = this.escapeHtml(username);
+      
       const mailOptions = {
         from: process.env.EMAIL_FROM || '"EchoWork" <noreply@echowork.com>',
         to: email,
@@ -35,7 +60,7 @@ export class EmailService {
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #dc2626;">Bienvenue sur EchoWork!</h1>
-            <p>Bonjour <strong>${username}</strong>,</p>
+            <p>Bonjour <strong>${safeUsername}</strong>,</p>
             <p>Nous sommes ravis de vous accueillir sur EchoWork, votre plateforme d'avis sur les entreprises.</p>
             <p>Vous pouvez maintenant:</p>
             <ul>
@@ -87,7 +112,10 @@ Cet email a été envoyé par EchoWork. Si vous n'avez pas créé de compte, veu
         this.logger.log(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
       }
     } catch (error) {
-      this.logger.error(`Failed to send welcome email to ${email}`, error);
+      this.logger.error(
+        `Failed to send welcome email to ${email}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       // We don't throw the error to avoid blocking user registration
       // Email sending failure should not prevent user from signing up
     }

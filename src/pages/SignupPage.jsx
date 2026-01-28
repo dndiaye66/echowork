@@ -23,7 +23,15 @@ function SignupPage() {
       return;
     }
 
-    if (!email || !email.includes('@')) {
+    if (!email) {
+      setError('Email is required');
+      setLoading(false);
+      return;
+    }
+
+    // Basic email validation regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
       setError('Please enter a valid email address');
       setLoading(false);
       return;

@@ -8,8 +8,5 @@
 -- Make email field required and add unique constraint
 ALTER TABLE "User" ALTER COLUMN "email" SET NOT NULL;
 
--- Create unique index on email (if not exists)
+-- Create unique index on email (also serves for faster lookups)
 CREATE UNIQUE INDEX IF NOT EXISTS "User_email_key" ON "User"("email");
-
--- Create index on email for faster lookups
-CREATE INDEX IF NOT EXISTS "User_email_idx" ON "User"("email");
