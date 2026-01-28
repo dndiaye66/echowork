@@ -6,6 +6,7 @@ import imagePublicite2 from "../assets/image/imgpub2.webp";
 import Foot from "../components/Foot";
 import { Link } from "react-router-dom";
 import { useBestCompanies } from '../hooks/useHomeData';
+import SearchAutocomplete from "../components/SearchAutocomplete";
 
 import {
   Utensils,
@@ -69,16 +70,7 @@ const VitrinePage = () => {
                 entreprises
               </span>
             </h1>
-            <div className="relative w-full max-w-md mb-6">
-              <span className="absolute inset-y-0 right-0 pr-2 flex items-center">
-                <Search className="text-white bg-red-600 rounded-full p-2" size={40} />
-              </span>
-              <input
-                type="text"
-                placeholder="Rechercher une catégorie..."
-                className="text-white border-2 border-white rounded-lg w-full pr-14 bg-transparent focus:outline-none px-4 py-4 text-base sm:text-lg"
-              />
-            </div>
+            <SearchAutocomplete placeholder="Rechercher une catégorie ou entreprise..." />
           </div>
         </div>
 

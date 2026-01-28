@@ -10,6 +10,24 @@ export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 
   /**
+   * GET /api/companies/search/autocomplete
+   * Intelligent search with autocomplete suggestions
+   * Supports direct search (e.g., "Banque") and rating-based search (e.g., "meilleur restaurant")
+   * NOTE: This route must come before the general GET / route
+   * @param query - Search query
+   * @param limit - Maximum number of results (default: 10)
+   * @returns Promise<Company[]> List of matching companies with ratings
+   */
+  @Get('search/autocomplete')
+  async searchAutocomplete(
+    @Query('q') query?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const limitNum = limit ? parseInt(limit, 10) : 10;
+    return this.companiesService.searchWithAutocomplete(query || '', limitNum);
+  }
+
+  /**
    * GET /api/companies
    * Retrieves all companies
    * @param search - Optional search query
