@@ -17,4 +17,14 @@ export class HomeController {
   async getBestCompanies() {
     return this.companiesService.findBestCompanies();
   }
+
+  /**
+   * GET /api/home/worst-companies
+   * Retrieves top 10 companies with lowest ratings
+   * @returns Promise<Company[]> List of worst rated companies
+   */
+  @Get('worst-companies')
+  async getWorstCompanies() {
+    return this.companiesService.findWorstCompanies();
+  }
 }

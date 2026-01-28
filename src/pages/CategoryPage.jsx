@@ -25,6 +25,7 @@ const CategoryPage = () => {
   const { companies: filteredEntreprises = [], loading, error } = useCompaniesByCategory(slug);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [ratingFilter, setRatingFilter] = React.useState("");
+  const [displayCount, setDisplayCount] = React.useState(20);
 
   // Filtrage des avis
   const avisPourCategorie = monAvis.filter((avis) =>
@@ -32,7 +33,7 @@ const CategoryPage = () => {
   );
 
   // Filter companies based on search and rating
-  const displayedCompanies = React.useMemo(() => {
+  const filteredCompanies = React.useMemo(() => {
     let filtered = filteredEntreprises;
 
     // Search filter
@@ -50,6 +51,24 @@ const CategoryPage = () => {
 
     return filtered;
   }, [filteredEntreprises, searchTerm, ratingFilter]);
+
+  // Reset pagination when filters change
+  React.useEffect(() => {
+    setDisplayCount(20);
+  }, [searchTerm, ratingFilter]);
+
+  // Paginated companies for display
+  const displayedCompanies = React.useMemo(() => {
+    return filteredCompanies.slice(0, displayCount);
+  }, [filteredCompanies, displayCount]);
+
+  // Check if there are more companies to show
+  const hasMoreCompanies = filteredCompanies.length > displayCount;
+
+  // Handler to show more companies
+  const handleShowMore = () => {
+    setDisplayCount(prev => prev + 20);
+  };
 
   // Gestion du chargement ou d'erreur
   if (loading) return <p className="text-center p-10">Chargement...</p>;
@@ -141,26 +160,38 @@ const CategoryPage = () => {
             </div>
 
             {displayedCompanies.length > 0 ? (
-              <div className="flex flex-col divide-y divide-gray-300 gap-6">
-                {displayedCompanies.map((e) => (
-                  <div
-                    key={e.slug}
-                    className="card bg-white p-4 rounded-lg pl-8 max-w-[90%] mx-10 hover:bg-gray-300 transition block"
-                  >
-                    <Link to={`/companies/${e.slug}`} className="block hover:underline">
-                      <div className="flex gap-3 items-center mb-2">
-                        {e.imageUrl && (
-                          <img src={e.imageUrl} alt={`Logo de ${e.name}`} className="w-36 object-contain" />
-                        )}
-                        <h2 className="text-2xl font-bold">{e.name}</h2>
-                      </div>
-                      <p>{e.adresse || e.ville}</p>
-                      <p className="text-sm text-gray-600">{e.tel}</p>
-                      {e.description && <p className="text-sm mt-2">{e.description}</p>}
-                    </Link>
+              <>
+                <div className="flex flex-col divide-y divide-gray-300 gap-6">
+                  {displayedCompanies.map((e) => (
+                    <div
+                      key={e.slug}
+                      className="card bg-white p-4 rounded-lg pl-8 max-w-[90%] mx-10 hover:bg-gray-300 transition block"
+                    >
+                      <Link to={`/companies/${e.slug}`} className="block hover:underline">
+                        <div className="flex gap-3 items-center mb-2">
+                          {e.imageUrl && (
+                            <img src={e.imageUrl} alt={`Logo de ${e.name}`} className="w-36 object-contain" />
+                          )}
+                          <h2 className="text-2xl font-bold">{e.name}</h2>
+                        </div>
+                        <p>{e.adresse || e.ville}</p>
+                        <p className="text-sm text-gray-600">{e.tel}</p>
+                        {e.description && <p className="text-sm mt-2">{e.description}</p>}
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+                {hasMoreCompanies && (
+                  <div className="flex justify-center py-8">
+                    <button
+                      onClick={handleShowMore}
+                      className="btn btn-primary bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700 transition"
+                    >
+                      Afficher plus
+                    </button>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             ) : (
               <p className="text-gray-600 px-8">Aucune entreprise trouvée pour cette catégorie.</p>
             )}

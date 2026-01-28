@@ -1,11 +1,9 @@
 import React from "react";
 import backgroundImage from '../assets/image/imgbackground.jpg';
 import imageEmploi from "../assets/image/imgrmploie.jpg";
-import imagePublicite1 from "../assets/image/imgpub1.webp";
-import imagePublicite2 from "../assets/image/imgpub2.webp";
 import Foot from "../components/Foot";
 import { Link } from "react-router-dom";
-import { useBestCompanies } from '../hooks/useHomeData';
+import { useBestCompanies, useWorstCompanies } from '../hooks/useHomeData';
 import SearchAutocomplete from "../components/SearchAutocomplete";
 
 import {
@@ -31,17 +29,9 @@ const categories = [
   { name: "VENTES AU DETAIL", icon: ShoppingCart, slug: "ventes-aux-details" },
 ];
 
-const entreprisesEnBaisse = [
-  { name: "Entreprise Alpha", likes: "1.1k", rating: 2 },
-  { name: "Entreprise Beta", likes: "2.5k", rating: 1 },
-  { name: "Entreprise Gamma", likes: "1k", rating: 2 },
-  { name: "Entreprise Delta", likes: 900, rating: 1 },
-  { name: "Entreprise Epsilon", likes: "1.2k", rating: 2 },
-  { name: "Entreprise Zeta", likes: "2k", rating: 1 },
-];
-
 const VitrinePage = () => {
   const { data: companies, loading, error } = useBestCompanies();
+  const { data: worstCompanies, loading: worstLoading, error: worstError } = useWorstCompanies();
 
   return (
     <>
@@ -78,11 +68,10 @@ const VitrinePage = () => {
           <h1 className="text-4xl text-center font-black p-4 mb-4">Catégories d’entreprises</h1>
           <div className="flex justify-center">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {categories.map((category, index) => {
+              {categories.map((category) => {
                 const Icon = category.icon;
-                const slug = category.name.toLowerCase().replace(/\s+/g, "-");
                 return (
-                  <Link to={`/categories/${slug}`} key={index}>
+                  <Link to={`/categories/${category.slug}`} key={category.slug}>
                     <div className="gap-4 card w-full px-8 max-w-xs h-40 bg-base-100 card-xl shadow-md hover:scale-105 hover:shadow-[0_0_20px_#ef4444] transition duration-300 ease-in-out rounded-2xl flex-col justify-center items-center text-center">
                       <Icon size={32} className="text-red-400" />
                       <span className="font-bold text-xl">{category.name}</span>
@@ -107,8 +96,8 @@ const VitrinePage = () => {
 
             <section className="rounded-xl p-4 card bg-base-100  shadow-lg">
               <div className="bg-yellow-100 p-4 rounded shadow text-center">
-                <h3 className="text-xl font-bold mb-2">🔔 Promo Orange !</h3>
-                <p>50% de réduction sur les forfaits data jusqu'au 30 juin.</p>
+                <h3 className="text-xl font-bold mb-2">🔔 Annonce Promotionnelle</h3>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.</p>
                 <a href="#" className="text-red-600 underline font-semibold">En savoir plus</a>
               </div>
             </section>
@@ -116,21 +105,21 @@ const VitrinePage = () => {
             <section className="flex flex-row gap-x-14">
               <div className="card bg-base-100 w-60 shadow-lg">
                 <figure>
-                  <img src={imagePublicite1} alt="" className="h-50 w-full object-cover rounded-2xl" />
+                  <img src="https://via.placeholder.com/400x300?text=Annonce+1" alt="Annonce 1" className="h-50 w-full object-cover rounded-2xl" />
                 </figure>
                 <div className="card-body">
                   <h2 className="card-title text-red-600 font-black">Annonce 1</h2>
-                  <p>Promo exclusive à découvrir !</p>
+                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
                 </div>
               </div>
 
               <div className="card bg-base-100 w-60 shadow-lg">
                 <figure>
-                  <img src={imagePublicite2} alt="" className="h-50 w-full object-cover rounded-2xl" />
+                  <img src="https://via.placeholder.com/400x300?text=Annonce+2" alt="Annonce 2" className="h-50 w-full object-cover rounded-2xl" />
                 </figure>
                 <div className="card-body">
                   <h2 className="card-title text-red-600 font-black">Annonce 2</h2>
-                  <p>Ne ratez pas nos nouvelles offres !</p>
+                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
                 </div>
               </div>
             </section>
@@ -138,24 +127,30 @@ const VitrinePage = () => {
             {/* Entreprises en baisse */}
             <section className="mt-8 bg-white rounded-xl shadow p-4">
               <h2 className="text-2xl font-black text-black mb-4">Les entreprises en baisse</h2>
-              <ul className="space-y-4">
-                {entreprisesEnBaisse.map((item, index) => (
-                  <li key={index} className="border-b pb-2">
-                    <p className="font-semibold text-gray-800">
-                      {item.name} <span className="text-sm text-gray-500">({item.likes} j'aime)</span>
-                    </p>
-                    <div className="flex mt-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          size={16}
-                          className={i < item.rating ? "fill-red-500 text-red-500" : "text-gray-300"}
-                        />
-                      ))}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              {worstLoading ? (
+                <p className="text-center text-gray-600">Chargement...</p>
+              ) : worstError ? (
+                <p className="text-center text-red-500">Erreur : {worstError}</p>
+              ) : (
+                <ul className="space-y-4">
+                  {worstCompanies?.map((item) => (
+                    <li key={item.id || item.slug} className="border-b pb-2">
+                      <p className="font-semibold text-gray-800">
+                        {item.name} <span className="text-sm text-gray-500">(0 j'aime)</span>
+                      </p>
+                      <div className="flex mt-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            size={16}
+                            className="text-gray-300"
+                          />
+                        ))}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
           </div>
 
@@ -183,7 +178,7 @@ const VitrinePage = () => {
                         <Star
                           key={starIdx}
                           size={20}
-                          className={starIdx < Math.round(company.averageRating || 0) ? "fill-red-600 text-red-600" : "text-gray-300"}
+                          className="text-gray-300"
                         />
                       ))}
                     </div>
