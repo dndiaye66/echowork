@@ -9,22 +9,69 @@ import re
 import unicodedata
 from datetime import datetime
 
+# Constants
+BATCH_SIZE = 100  # Number of companies per batch in SQL INSERT
+
+# Senegalese cities
+SENEGALESE_CITIES = [
+    'Dakar', 'Thies', 'Thiès', 'Saint-Louis', 'Kaolack', 'Ziguinchor',
+    'Louga', 'Matam', 'Tambacounda', 'Kolda', 'Sedhiou', 'Kaffrine',
+    'Kedougou', 'Kédougou', 'Rufisque', 'Mbour', 'Touba', 'Diourbel',
+    'Fatick', 'Guediaw Aye', 'Richard Toll', 'Linguere', 'Linguère',
+    'Podor', 'Kanel', 'Vélingara', 'Velingara', 'Oussouye', 'Bignona',
+    'Foundiougne', 'Gossas', 'Koungheul', 'Saraya', 'Salémata', 'Salemata',
+    'Nioro', 'Kahone', 'Bambey', 'Tivaouane', 'Mbacké', 'Mbacke',
+    'Kébémer', 'Kebemer', 'Joal-Fadiouth', 'Pout', 'Khombole',
+]
+
+# Address keywords commonly used in Senegalese addresses
+ADDRESS_KEYWORDS = [
+    'Route', 'Rue', 'Avenue', 'Bd', 'Boulevard', 'Place', 'Zone',
+    'Quartier', 'Cite', 'Cité', 'Villa', 'Immeuble', 'Point',
+    'Corniche', 'Rocade', 'Face', 'Angle', 'Carrefour', 'Voie',
+]
+
+# Activity keywords for business type identification
+ACTIVITY_KEYWORDS = [
+    'Vente', 'Commerce', 'Services', 'Service', 'Fabrication',
+    'Distribution', 'Production', 'Travaux', 'Import', 'Export',
+    'Industrie', 'Pharmacie', 'Restaurant', 'Hotel', 'Hôtel',
+    'Banque', 'Assurance', 'Transport', 'Construction',
+    'Grossiste', 'Repartition', 'Répartition', 'Promotion',
+]
+
 def clean_text(text):
-    """Clean and normalize text"""
+    """Clean and normalize text
+    
+    CRITICAL: This function escapes single quotes for SQL safety.
+    All text values MUST pass through this function before being used in SQL statements.
+    The clean_text function is the primary defense against SQL injection.
+    
+    Args:
+        text: Raw text to clean
+        
+    Returns:
+        str: Cleaned and SQL-safe text
+    """
     if not text:
         return ""
     # Normalize unicode characters
     text = unicodedata.normalize('NFKD', text)
     # Remove extra whitespace
     text = ' '.join(text.split())
-    # Escape single quotes for SQL
+    # Escape single quotes for SQL (CRITICAL for SQL safety)
     text = text.replace("'", "''")
     return text.strip()
 
 def create_slug(name):
-    """Create a URL-friendly slug from company name"""
+    """Create a URL-friendly slug from company name
+    
+    Returns:
+        str: URL-friendly slug or 'company-{hash}' if empty after processing
+    """
     if not name:
-        return ""
+        return f"company-{hash(name) % 10000}"
+    
     # Convert to lowercase and normalize
     slug = unicodedata.normalize('NFKD', name.lower())
     slug = slug.encode('ascii', 'ignore').decode('ascii')
@@ -34,7 +81,12 @@ def create_slug(name):
     slug = slug.strip('-')
     # Remove multiple consecutive hyphens
     slug = re.sub(r'-+', '-', slug)
-    # Limit length and ensure uniqueness will be handled
+    
+    # Handle edge case of empty slug (only special chars)
+    if not slug:
+        slug = f"company-{hash(name) % 10000}"
+    
+    # Limit length
     return slug[:100]
 
 def extract_phone_from_end(text):
@@ -70,21 +122,9 @@ def parse_company_line(line):
     if 'Ville' in line and 'Entreprise' in line:
         return None
     
-    # Known cities in Senegal
-    cities = [
-        'Dakar', 'Thies', 'Thiès', 'Saint-Louis', 'Kaolack', 'Ziguinchor',
-        'Louga', 'Matam', 'Tambacounda', 'Kolda', 'Sedhiou', 'Kaffrine',
-        'Kedougou', 'Kédougou', 'Rufisque', 'Mbour', 'Touba', 'Diourbel',
-        'Fatick', 'Guediaw Aye', 'Richard Toll', 'Linguere', 'Linguère',
-        'Podor', 'Kanel', 'Vélingara', 'Velingara', 'Oussouye', 'Bignona',
-        'Foundiougne', 'Gossas', 'Koungheul', 'Saraya', 'Salémata', 'Salemata',
-        'Nioro', 'Kahone', 'Bambey', 'Tivaouane', 'Mbacké', 'Mbacke',
-        'Kébémer', 'Kebemer', 'Joal-Fadiouth', 'Pout', 'Khombole',
-    ]
-    
     # Check if line starts with a city
     ville = None
-    for city in cities:
+    for city in SENEGALESE_CITIES:
         if line.startswith(city + ' '):
             ville = city
             line = line[len(city):].strip()
@@ -102,16 +142,9 @@ def parse_company_line(line):
     # Now we have: "Entreprise Activité Adresse" in remaining
     # Strategy: Split by known address/activity keywords
     
-    # Address keywords (usually appear before phone)
-    address_keywords = [
-        'Route', 'Rue', 'Avenue', 'Bd', 'Boulevard', 'Place', 'Zone',
-        'Quartier', 'Cite', 'Cité', 'Villa', 'Immeuble', 'Point',
-        'Corniche', 'Rocade', 'Face', 'Angle', 'Carrefour', 'Voie',
-    ]
-    
     # Try to find address start
     address_start_idx = -1
-    for keyword in address_keywords:
+    for keyword in ADDRESS_KEYWORDS:
         # Case insensitive search for keyword as a whole word
         pattern = r'\b' + re.escape(keyword) + r'\b'
         match = re.search(pattern, remaining, re.IGNORECASE)
@@ -129,17 +162,8 @@ def parse_company_line(line):
         before_address = remaining[:address_start_idx].strip()
         
         # Now split before_address into company name and activity
-        # Heuristic: Look for activity keywords
-        activity_keywords = [
-            'Vente', 'Commerce', 'Services', 'Service', 'Fabrication',
-            'Distribution', 'Production', 'Travaux', 'Import', 'Export',
-            'Industrie', 'Pharmacie', 'Restaurant', 'Hotel', 'Hôtel',
-            'Banque', 'Assurance', 'Transport', 'Construction',
-            'Grossiste', 'Repartition', 'Répartition', 'Promotion',
-        ]
-        
         activity_start_idx = -1
-        for keyword in activity_keywords:
+        for keyword in ACTIVITY_KEYWORDS:
             pattern = r'\b' + re.escape(keyword) + r'\b'
             match = re.search(pattern, before_address, re.IGNORECASE)
             if match:
@@ -161,16 +185,8 @@ def parse_company_line(line):
                 activite = ""
     else:
         # No address found, split remaining into company and activity
-        activity_keywords = [
-            'Vente', 'Commerce', 'Services', 'Service', 'Fabrication',
-            'Distribution', 'Production', 'Travaux', 'Import', 'Export',
-            'Industrie', 'Pharmacie', 'Restaurant', 'Hotel', 'Hôtel',
-            'Banque', 'Assurance', 'Transport', 'Construction',
-            'Grossiste', 'Repartition', 'Répartition', 'Promotion',
-        ]
-        
         activity_start_idx = -1
-        for keyword in activity_keywords:
+        for keyword in ACTIVITY_KEYWORDS:
             pattern = r'\b' + re.escape(keyword) + r'\b'
             match = re.search(pattern, remaining, re.IGNORECASE)
             if match:
@@ -200,7 +216,14 @@ def parse_company_line(line):
     }
 
 def extract_companies_from_pdf(pdf_file):
-    """Extract company information from a PDF file"""
+    """Extract company information from a PDF file
+    
+    Args:
+        pdf_file: Path to the PDF file to process
+        
+    Returns:
+        list: List of company dictionaries with extracted data
+    """
     companies = []
     try:
         with open(pdf_file, 'rb') as file:
@@ -214,7 +237,10 @@ def extract_companies_from_pdf(pdf_file):
                     if company:
                         companies.append(company)
     except Exception as e:
+        # Log the full error for debugging
+        import traceback
         print(f"Error processing {pdf_file}: {e}")
+        print(traceback.format_exc())
     
     return companies
 
@@ -282,11 +308,10 @@ def generate_sql_file(companies, output_file='companies_from_pdfs.sql'):
     slug_counts = {}
     
     # Generate INSERT statements in batches
-    batch_size = 100
-    for i in range(0, len(unique_companies), batch_size):
-        batch = unique_companies[i:i+batch_size]
+    for i in range(0, len(unique_companies), BATCH_SIZE):
+        batch = unique_companies[i:i+BATCH_SIZE]
         
-        sql_lines.append(f'-- Batch {i//batch_size + 1}: Companies {i+1} to {min(i+batch_size, len(unique_companies))}')
+        sql_lines.append(f'-- Batch {i//BATCH_SIZE + 1}: Companies {i+1} to {min(i+BATCH_SIZE, len(unique_companies))}')
         sql_lines.append('INSERT INTO "Company" (name, slug, description, ville, adresse, tel, activite, "categoryId", "createdAt", "updatedAt") VALUES')
         
         values_lines = []
@@ -308,9 +333,14 @@ def generate_sql_file(companies, output_file='companies_from_pdfs.sql'):
             activite = clean_text(company['activite'])
             
             # Create description from activity
+            # Note: ville is already SQL-escaped by clean_text, which is necessary for SQL safety
+            # The escaped version is used here to maintain consistency in the SQL file
             description = activite if activite else f"Entreprise basée à {ville}"
             
             # Build VALUES line
+            # IMPORTANT: All text values have been processed through clean_text()
+            # which escapes single quotes for SQL safety. Do not modify this without
+            # ensuring proper SQL escaping is maintained.
             values_line = (
                 f"  ('{name}', '{slug}', '{description}', "
                 f"'{ville}', "
@@ -376,9 +406,26 @@ def main():
     print("\nSample companies:")
     for i, company in enumerate(all_companies[:5], 1):
         print(f"{i}. {company['name']} ({company['ville']})")
-        print(f"   Activity: {company['activite'][:60]}...")
-        print(f"   Address: {company['adresse'][:60]}...")
-        print(f"   Phone: {company['tel']}")
+        
+        # Show activity with ellipsis only if truncated
+        activity = company['activite']
+        if len(activity) > 60:
+            print(f"   Activity: {activity[:60]}...")
+        elif activity:
+            print(f"   Activity: {activity}")
+        else:
+            print(f"   Activity: (none)")
+        
+        # Show address with ellipsis only if truncated
+        address = company['adresse']
+        if len(address) > 60:
+            print(f"   Address: {address[:60]}...")
+        elif address:
+            print(f"   Address: {address}")
+        else:
+            print(f"   Address: (none)")
+            
+        print(f"   Phone: {company['tel'] if company['tel'] else '(none)'}")
         print()
     
     # Generate SQL file

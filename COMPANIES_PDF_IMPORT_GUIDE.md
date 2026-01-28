@@ -143,18 +143,23 @@ The import assigns all companies to `categoryId = 1`. You should update this to 
 
 ```sql
 -- Example: Update companies based on activity keywords
+-- IMPORTANT: First verify your Category IDs by running:
+-- SELECT id, name, slug FROM "Category" ORDER BY id;
+-- Then use the actual IDs from your database below.
 
--- Update to Banks category (categoryId = 1)
+-- Example updates (replace categoryId values with your actual Category IDs):
+
+-- Update to Banks category (example: categoryId = 1)
 UPDATE "Company" 
 SET "categoryId" = 1 
 WHERE activite ILIKE '%banque%' OR activite ILIKE '%credit%';
 
--- Update to Restaurants category (categoryId = 2)
+-- Update to Restaurants category (example: categoryId = 2)
 UPDATE "Company" 
 SET "categoryId" = 2 
 WHERE activite ILIKE '%restaurant%' OR activite ILIKE '%bar%';
 
--- Update to Healthcare category (categoryId = 5)
+-- Update to Healthcare category (example: categoryId = 5)
 UPDATE "Company" 
 SET "categoryId" = 5 
 WHERE activite ILIKE '%pharmacie%' 
@@ -163,10 +168,10 @@ WHERE activite ILIKE '%pharmacie%'
    OR activite ILIKE '%sante%'
    OR activite ILIKE '%medical%';
 
--- Update to Hotels category (categoryId = 4)
+-- Update to Hotels/Hôtellerie category (example: categoryId = 4)
 UPDATE "Company" 
 SET "categoryId" = 4 
-WHERE activite ILIKE '%hotel%' OR activite ILIKE '%hotelerie%';
+WHERE activite ILIKE '%hotel%' OR activite ILIKE '%hôtellerie%';
 
 -- Add more UPDATE statements for other categories...
 ```
