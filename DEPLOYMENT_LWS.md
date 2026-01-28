@@ -84,8 +84,10 @@ Assurez-vous que votre API backend:
 Dans `backend/.env`, vérifiez:
 ```bash
 FRONTEND_URL=https://votre-domaine.com
-PORT=3000
+# PORT=3000  # Le port peut être géré par votre hébergeur LWS (reverse proxy)
 ```
+
+**Note**: Sur un serveur partagé LWS, le port est souvent géré automatiquement par un reverse proxy ou la configuration du serveur. Consultez la documentation de votre hébergeur pour les paramètres spécifiques.
 
 ### 6. Tester l'application
 1. Visitez votre site: `https://votre-domaine.com`
@@ -104,7 +106,12 @@ PORT=3000
 ### Erreur 404 sur les routes
 1. Vérifiez que le fichier `.htaccess` est bien présent dans le dossier
 2. Vérifiez que `mod_rewrite` est activé sur votre serveur LWS (généralement activé par défaut)
-3. Vérifiez les permissions du fichier `.htaccess` (644)
+3. Vérifiez les permissions du fichier `.htaccess` (644) et des dossiers (755)
+
+**Permissions recommandées:**
+- Fichiers: `644` (lecture pour tous, écriture pour le propriétaire)
+- Dossiers: `755` (exécution/lecture pour tous, écriture pour le propriétaire)
+- Commande: `chmod 644 .htaccess index.html assets/*` et `chmod 755 assets/`
 
 ### Les images/assets ne se chargent pas
 1. Vérifiez que le dossier `assets/` est bien uploadé

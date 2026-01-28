@@ -170,7 +170,7 @@ Pour déployer l'application sur un serveur LWS ou tout autre serveur Apache, co
 
 ### Autres plateformes
 
-- **Vercel/Netlify**: Détection automatique de React + Vite, configuration minimale requise
+- **Vercel/Netlify**: Configuration automatique - détection de React + Vite sans configuration requise
 - **Docker**: Voir [backend/README.md](backend/README.md) pour le déploiement avec Docker Compose
 
 ## API Endpoints
