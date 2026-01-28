@@ -7,6 +7,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
+import { EmailService } from '../email/email.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 
@@ -17,6 +18,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
   ) {}
 
   /**
@@ -27,13 +29,22 @@ export class AuthService {
   async signup(signupDto: SignupDto) {
     const { username, password, email } = signupDto;
 
-    // Check if user already exists
+    // Check if user already exists with this username
     const existingUser = await this.prisma.user.findUnique({
       where: { username },
     });
 
     if (existingUser) {
       throw new ConflictException('User with this username already exists');
+    }
+
+    // Check if user already exists with this email
+    const existingEmail = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingEmail) {
+      throw new ConflictException('User with this email already exists');
     }
 
     // Hash password
@@ -46,6 +57,11 @@ export class AuthService {
         password: hashedPassword,
         email,
       },
+    });
+
+    // Send welcome email (async, don't wait for it)
+    this.emailService.sendWelcomeEmail(email, username).catch((error) => {
+      this.logger.error('Failed to send welcome email', error);
     });
 
     // Generate JWT token

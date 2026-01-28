@@ -23,6 +23,12 @@ function SignupPage() {
       return;
     }
 
+    if (!email || !email.includes('@')) {
+      setError('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+
     if (password.length < 6) {
       setError('Password must be at least 6 characters long');
       setLoading(false);
@@ -30,7 +36,7 @@ function SignupPage() {
     }
 
     try {
-      const response = await axios.post('/auth/signup', { username, email: email || undefined, password });
+      const response = await axios.post('/auth/signup', { username, email, password });
       login(response.data.user, response.data.accessToken);
       navigate('/');
     } catch (err) {
@@ -70,14 +76,15 @@ function SignupPage() {
 
             <div className="form-control mt-4">
               <label className="label">
-                <span className="label-text">Email (optional)</span>
+                <span className="label-text">Email *</span>
               </label>
               <input
                 type="email"
-                placeholder="email@example.com (optional)"
+                placeholder="email@example.com"
                 className="input input-bordered"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
 
