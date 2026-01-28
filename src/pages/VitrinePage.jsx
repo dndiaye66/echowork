@@ -134,8 +134,8 @@ const VitrinePage = () => {
                 <p className="text-center text-red-500">Erreur : {worstError}</p>
               ) : (
                 <ul className="space-y-4">
-                  {worstCompanies?.map((item, index) => (
-                    <li key={index} className="border-b pb-2">
+                  {worstCompanies?.map((item) => (
+                    <li key={item.id || item.slug} className="border-b pb-2">
                       <p className="font-semibold text-gray-800">
                         {item.name} <span className="text-sm text-gray-500">(0 j'aime)</span>
                       </p>

@@ -298,38 +298,48 @@ export class CompaniesService {
    */
   async findWorstCompanies() {
     try {
-      // Use raw query for efficient aggregation at database level
+      // Use raw query for efficient aggregation at database level with JOIN
       const companies = await this.prisma.$queryRaw`
         SELECT 
           c.id, c.name, c.slug, c.description, c."imageUrl", c.ville, c.adresse, c.tel, c.activite, c."categoryId",
           c."createdAt", c."updatedAt",
           COALESCE(AVG(r.rating), 0) as "averageRating",
-          COUNT(r.id) as "reviewCount"
+          COUNT(r.id) as "reviewCount",
+          cat.id as "category_id", cat.name as "category_name", cat.slug as "category_slug",
+          cat."createdAt" as "category_createdAt", cat."updatedAt" as "category_updatedAt"
         FROM "Company" c
         LEFT JOIN "Review" r ON c.id = r."companyId"
-        GROUP BY c.id
+        LEFT JOIN "Category" cat ON c."categoryId" = cat.id
+        GROUP BY c.id, cat.id
         HAVING COUNT(r.id) > 0
         ORDER BY "averageRating" ASC, "reviewCount" DESC
         LIMIT 10
       ` as any[];
 
-      // Fetch category info for each company
-      const companiesWithCategories = await Promise.all(
-        companies.map(async (company) => {
-          const category = await this.prisma.category.findUnique({
-            where: { id: company.categoryId },
-          });
-          
-          return {
-            ...company,
-            category,
-            averageRating: parseFloat(Number(company.averageRating).toFixed(2)),
-            reviewCount: Number(company.reviewCount),
-          };
-        })
-      );
-
-      return companiesWithCategories;
+      // Map category data into nested structure
+      return companies.map((company) => ({
+        id: company.id,
+        name: company.name,
+        slug: company.slug,
+        description: company.description,
+        imageUrl: company.imageUrl,
+        ville: company.ville,
+        adresse: company.adresse,
+        tel: company.tel,
+        activite: company.activite,
+        categoryId: company.categoryId,
+        createdAt: company.createdAt,
+        updatedAt: company.updatedAt,
+        averageRating: parseFloat(Number(company.averageRating).toFixed(2)),
+        reviewCount: Number(company.reviewCount),
+        category: company.category_id ? {
+          id: company.category_id,
+          name: company.category_name,
+          slug: company.category_slug,
+          createdAt: company.category_createdAt,
+          updatedAt: company.category_updatedAt,
+        } : null,
+      }));
     } catch (error) {
       this.logger.error('Failed to fetch worst companies', error);
       throw new InternalServerErrorException('Failed to fetch worst companies');

@@ -52,6 +52,11 @@ const CategoryPage = () => {
     return filtered;
   }, [filteredEntreprises, searchTerm, ratingFilter]);
 
+  // Reset pagination when filters change
+  React.useEffect(() => {
+    setDisplayCount(20);
+  }, [searchTerm, ratingFilter]);
+
   // Paginated companies for display
   const displayedCompanies = React.useMemo(() => {
     return filteredCompanies.slice(0, displayCount);
