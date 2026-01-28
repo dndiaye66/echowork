@@ -15,7 +15,7 @@ export class CompaniesController {
    * Supports direct search (e.g., "Banque") and rating-based search (e.g., "meilleur restaurant")
    * NOTE: This route must come before the general GET / route
    * @param query - Search query
-   * @param limit - Maximum number of results (default: 10)
+   * @param limit - Maximum number of results (default: 10, max: 50)
    * @returns Promise<Company[]> List of matching companies with ratings
    */
   @Get('search/autocomplete')
@@ -23,7 +23,14 @@ export class CompaniesController {
     @Query('q') query?: string,
     @Query('limit') limit?: string,
   ) {
-    const limitNum = limit ? parseInt(limit, 10) : 10;
+    // Validate and sanitize limit parameter
+    let limitNum = 10;
+    if (limit) {
+      const parsedLimit = parseInt(limit, 10);
+      if (!isNaN(parsedLimit) && parsedLimit > 0 && parsedLimit <= 50) {
+        limitNum = parsedLimit;
+      }
+    }
     return this.companiesService.searchWithAutocomplete(query || '', limitNum);
   }
 

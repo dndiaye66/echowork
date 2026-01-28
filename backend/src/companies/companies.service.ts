@@ -57,20 +57,26 @@ export class CompaniesService {
       const ratingKeywords = ['meilleur', 'meilleurs', 'meilleures', 'top', 'best'];
       const hasRatingKeyword = ratingKeywords.some(keyword => searchQuery.includes(keyword));
       
-      // Extract category from query by removing rating keywords
-      let categoryQuery = searchQuery;
+      // Extract search term from query by removing rating keywords
+      let cleanedQuery = searchQuery;
       ratingKeywords.forEach(keyword => {
-        categoryQuery = categoryQuery.replace(new RegExp(`\\b${keyword}\\b`, 'g'), '').trim();
+        const regex = new RegExp(`\\b${keyword}\\b`, 'g');
+        cleanedQuery = cleanedQuery.replace(regex, '').trim();
       });
+
+      // If after removing keywords, query is too short, return empty
+      if (cleanedQuery.length < 2) {
+        return [];
+      }
 
       // Build where clause
       const where: any = {
         OR: [
-          { name: { contains: categoryQuery, mode: 'insensitive' } },
-          { description: { contains: categoryQuery, mode: 'insensitive' } },
-          { ville: { contains: categoryQuery, mode: 'insensitive' } },
-          { activite: { contains: categoryQuery, mode: 'insensitive' } },
-          { category: { name: { contains: categoryQuery, mode: 'insensitive' } } },
+          { name: { contains: cleanedQuery, mode: 'insensitive' } },
+          { description: { contains: cleanedQuery, mode: 'insensitive' } },
+          { ville: { contains: cleanedQuery, mode: 'insensitive' } },
+          { activite: { contains: cleanedQuery, mode: 'insensitive' } },
+          { category: { name: { contains: cleanedQuery, mode: 'insensitive' } } },
         ],
       };
 
@@ -112,6 +118,8 @@ export class CompaniesService {
         return companiesWithRatings.slice(0, limit);
       }
 
+      // Sort alphabetically by name for standard search
+      companiesWithRatings.sort((a, b) => a.name.localeCompare(b.name));
       return companiesWithRatings;
     } catch (error) {
       this.logger.error('Failed to search companies with autocomplete', error);
