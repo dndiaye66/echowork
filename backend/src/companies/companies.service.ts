@@ -38,6 +38,88 @@ export class CompaniesService {
   }
 
   /**
+   * Search companies with intelligent matching and rating support
+   * Supports both direct search (e.g., "Banque") and rating-based search (e.g., "meilleur restaurant")
+   * @param query - Search query
+   * @param limit - Maximum number of results (default: 10)
+   * @returns Promise<Company[]> List of matching companies with ratings
+   * @throws InternalServerErrorException if database query fails
+   */
+  async searchWithAutocomplete(query: string, limit: number = 10) {
+    try {
+      if (!query || query.trim().length < 2) {
+        return [];
+      }
+
+      const searchQuery = query.trim().toLowerCase();
+      
+      // Check if query contains rating keywords
+      const ratingKeywords = ['meilleur', 'meilleurs', 'meilleures', 'top', 'best'];
+      const hasRatingKeyword = ratingKeywords.some(keyword => searchQuery.includes(keyword));
+      
+      // Extract category from query by removing rating keywords
+      let categoryQuery = searchQuery;
+      ratingKeywords.forEach(keyword => {
+        categoryQuery = categoryQuery.replace(new RegExp(`\\b${keyword}\\b`, 'g'), '').trim();
+      });
+
+      // Build where clause
+      const where: any = {
+        OR: [
+          { name: { contains: categoryQuery, mode: 'insensitive' } },
+          { description: { contains: categoryQuery, mode: 'insensitive' } },
+          { ville: { contains: categoryQuery, mode: 'insensitive' } },
+          { activite: { contains: categoryQuery, mode: 'insensitive' } },
+          { category: { name: { contains: categoryQuery, mode: 'insensitive' } } },
+        ],
+      };
+
+      // Fetch companies with reviews
+      const companies = await this.prisma.company.findMany({
+        where,
+        include: {
+          category: true,
+          reviews: {
+            select: {
+              id: true,
+              rating: true,
+            },
+          },
+        },
+        take: hasRatingKeyword ? 100 : limit, // Get more if sorting by rating
+      });
+
+      // Calculate average ratings
+      const companiesWithRatings = companies.map(company => {
+        const totalRating = company.reviews.reduce((sum, review) => sum + review.rating, 0);
+        const averageRating = company.reviews.length > 0 ? totalRating / company.reviews.length : 0;
+        
+        return {
+          ...company,
+          averageRating: parseFloat(averageRating.toFixed(2)),
+          reviewCount: company.reviews.length,
+        };
+      });
+
+      // Sort by rating if rating keyword is present, otherwise by name
+      if (hasRatingKeyword) {
+        companiesWithRatings.sort((a, b) => {
+          if (b.averageRating !== a.averageRating) {
+            return b.averageRating - a.averageRating;
+          }
+          return b.reviewCount - a.reviewCount;
+        });
+        return companiesWithRatings.slice(0, limit);
+      }
+
+      return companiesWithRatings;
+    } catch (error) {
+      this.logger.error('Failed to search companies with autocomplete', error);
+      throw new InternalServerErrorException('Failed to search companies');
+    }
+  }
+
+  /**
    * Retrieves a single company by its ID
    * @param id - The company ID
    * @returns Promise<Company | null> The company if found, null otherwise
