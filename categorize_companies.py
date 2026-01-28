@@ -20,9 +20,9 @@ CATEGORIES = {
     },
     2: {  # Restaurants
         'keywords': [
-            'restaurant', 'bar', 'cafe', 'café', 'patisserie', 'pâtisserie',
+            'restaurant', ' bar ', ' bar,', ' bar-', 'cafe ', 'café ', 'patisserie', 'pâtisserie',
             'boulangerie', 'fast food', 'traiteur', 'alimentation', 'snack',
-            'pizzeria', 'bistro', 'brasserie', 'cantine'
+            'pizzeria', 'bistro', 'brasserie', 'cantine', ' bar)', 'bar et'
         ]
     },
     4: {  # Hôtels
