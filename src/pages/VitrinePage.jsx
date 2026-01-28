@@ -70,9 +70,8 @@ const VitrinePage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {categories.map((category, index) => {
                 const Icon = category.icon;
-                const slug = category.name.toLowerCase().replace(/\s+/g, "-");
                 return (
-                  <Link to={`/categories/${slug}`} key={index}>
+                  <Link to={`/categories/${category.slug}`} key={index}>
                     <div className="gap-4 card w-full px-8 max-w-xs h-40 bg-base-100 card-xl shadow-md hover:scale-105 hover:shadow-[0_0_20px_#ef4444] transition duration-300 ease-in-out rounded-2xl flex-col justify-center items-center text-center">
                       <Icon size={32} className="text-red-400" />
                       <span className="font-bold text-xl">{category.name}</span>
