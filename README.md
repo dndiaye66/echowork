@@ -9,6 +9,7 @@ Interface utilisateur de la plateforme **EchoWork** – une application de notat
 - [Structure du projet](#structure-du-projet)
 - [Installation](#installation)
 - [Configuration](#configuration)
+- [Déploiement](#déploiement)
 - [API Endpoints](#api-endpoints)
 - [Sécurité](#sécurité)
 
@@ -154,6 +155,23 @@ cd backend
 npm run build
 npm run start    # Lancer le build de production
 ```
+
+## Déploiement
+
+### Déploiement sur serveur LWS (Apache)
+
+Pour déployer l'application sur un serveur LWS ou tout autre serveur Apache, consultez le guide complet: [DEPLOYMENT_LWS.md](DEPLOYMENT_LWS.md)
+
+**Points clés:**
+- Le fichier `.htaccess` est inclus dans `public/` et sera automatiquement copié dans `dist/` lors du build
+- Configurez `VITE_API_URL` dans `.env` avant de builder pour pointer vers votre API de production
+- Uploadez le contenu du dossier `dist/` sur votre serveur (pas le dossier lui-même)
+- Vérifiez que votre backend est configuré avec les bonnes URL CORS
+
+### Autres plateformes
+
+- **Vercel/Netlify**: Détection automatique de React + Vite, configuration minimale requise
+- **Docker**: Voir [backend/README.md](backend/README.md) pour le déploiement avec Docker Compose
 
 ## API Endpoints
 
