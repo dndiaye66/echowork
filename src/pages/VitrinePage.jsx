@@ -1,8 +1,6 @@
 import React from "react";
 import backgroundImage from '../assets/image/imgbackground.jpg';
 import imageEmploi from "../assets/image/imgrmploie.jpg";
-import imagePublicite1 from "../assets/image/imgpub1.webp";
-import imagePublicite2 from "../assets/image/imgpub2.webp";
 import Foot from "../components/Foot";
 import { Link } from "react-router-dom";
 import { useBestCompanies, useWorstCompanies } from '../hooks/useHomeData';
