@@ -7,6 +7,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
+import { EmailService } from '../email/email.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 
@@ -17,6 +18,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
   ) {}
 
   /**
@@ -27,13 +29,31 @@ export class AuthService {
   async signup(signupDto: SignupDto) {
     const { username, password, email } = signupDto;
 
-    // Check if user already exists
-    const existingUser = await this.prisma.user.findUnique({
-      where: { username },
+    // Check if user already exists with this username or email in a single query
+    const existingUsers = await this.prisma.user.findMany({
+      where: {
+        OR: [
+          { username },
+          { email },
+        ],
+      },
+      select: {
+        username: true,
+        email: true,
+      },
     });
 
-    if (existingUser) {
-      throw new ConflictException('User with this username already exists');
+    // Check for conflicts
+    if (existingUsers.length > 0) {
+      const existingUsernames = existingUsers.filter(u => u.username === username);
+      const existingEmails = existingUsers.filter(u => u.email === email);
+      
+      if (existingUsernames.length > 0) {
+        throw new ConflictException('User with this username already exists');
+      }
+      if (existingEmails.length > 0) {
+        throw new ConflictException('User with this email already exists');
+      }
     }
 
     // Hash password
@@ -46,6 +66,11 @@ export class AuthService {
         password: hashedPassword,
         email,
       },
+    });
+
+    // Send welcome email (async, don't wait for it)
+    this.emailService.sendWelcomeEmail(email, username).catch((error) => {
+      this.logger.error('Failed to send welcome email', error);
     });
 
     // Generate JWT token
