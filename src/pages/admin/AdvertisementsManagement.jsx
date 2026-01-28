@@ -16,7 +16,7 @@ function AdvertisementsManagement() {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    imageUrl: '',
+    imageUrl: 'https://via.placeholder.com/400x300?text=Annonce',
     companyId: '',
     startDate: '',
     endDate: '',
@@ -66,7 +66,7 @@ function AdvertisementsManagement() {
 
       setShowForm(false);
       setEditingId(null);
-      setFormData({ title: '', content: '', imageUrl: '', companyId: '', startDate: '', endDate: '', isActive: true });
+      setFormData({ title: '', content: '', imageUrl: 'https://via.placeholder.com/400x300?text=Annonce', companyId: '', startDate: '', endDate: '', isActive: true });
       fetchData();
     } catch (error) {
       console.error('Failed to save advertisement:', error);
@@ -78,7 +78,7 @@ function AdvertisementsManagement() {
     setFormData({
       title: ad.title,
       content: ad.content,
-      imageUrl: ad.imageUrl || '',
+      imageUrl: ad.imageUrl || 'https://via.placeholder.com/400x300?text=Annonce',
       companyId: ad.companyId ? ad.companyId.toString() : '',
       startDate: new Date(ad.startDate).toISOString().split('T')[0],
       endDate: new Date(ad.endDate).toISOString().split('T')[0],
@@ -117,7 +117,7 @@ function AdvertisementsManagement() {
               onClick={() => {
                 setShowForm(true);
                 setEditingId(null);
-                setFormData({ title: '', content: '', imageUrl: '', companyId: '', startDate: '', endDate: '', isActive: true });
+                setFormData({ title: '', content: '', imageUrl: 'https://via.placeholder.com/400x300?text=Annonce', companyId: '', startDate: '', endDate: '', isActive: true });
               }}
             >
               Add New Advertisement
@@ -151,19 +151,21 @@ function AdvertisementsManagement() {
                       value={formData.content}
                       onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                       rows={4}
+                      placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit..."
                       required
                     />
                   </div>
 
                   <div className="form-control mb-4">
                     <label className="label">
-                      <span className="label-text">Image URL</span>
+                      <span className="label-text">Image URL (default: placeholder)</span>
                     </label>
                     <input
                       type="text"
                       className="input input-bordered"
                       value={formData.imageUrl}
                       onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                      placeholder="https://via.placeholder.com/400x300?text=Annonce"
                     />
                   </div>
 

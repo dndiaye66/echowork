@@ -291,6 +291,52 @@ export class CompaniesService {
   }
 
   /**
+   * Retrieves top 10 companies with lowest ratings
+   * Uses database aggregation for better performance
+   * @returns Promise<Company[]> List of worst rated companies
+   * @throws InternalServerErrorException if database query fails
+   */
+  async findWorstCompanies() {
+    try {
+      // Use raw query for efficient aggregation at database level
+      const companies = await this.prisma.$queryRaw`
+        SELECT 
+          c.id, c.name, c.slug, c.description, c."imageUrl", c.ville, c.adresse, c.tel, c.activite, c."categoryId",
+          c."createdAt", c."updatedAt",
+          COALESCE(AVG(r.rating), 0) as "averageRating",
+          COUNT(r.id) as "reviewCount"
+        FROM "Company" c
+        LEFT JOIN "Review" r ON c.id = r."companyId"
+        GROUP BY c.id
+        HAVING COUNT(r.id) > 0
+        ORDER BY "averageRating" ASC, "reviewCount" DESC
+        LIMIT 10
+      ` as any[];
+
+      // Fetch category info for each company
+      const companiesWithCategories = await Promise.all(
+        companies.map(async (company) => {
+          const category = await this.prisma.category.findUnique({
+            where: { id: company.categoryId },
+          });
+          
+          return {
+            ...company,
+            category,
+            averageRating: parseFloat(Number(company.averageRating).toFixed(2)),
+            reviewCount: Number(company.reviewCount),
+          };
+        })
+      );
+
+      return companiesWithCategories;
+    } catch (error) {
+      this.logger.error('Failed to fetch worst companies', error);
+      throw new InternalServerErrorException('Failed to fetch worst companies');
+    }
+  }
+
+  /**
    * Helper method to calculate average ratings for companies
    * @param companies - Array of companies with reviews
    * @returns Array of companies with averageRating and reviewCount
