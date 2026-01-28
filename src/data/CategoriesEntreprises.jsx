@@ -22,7 +22,7 @@ const CategoriesEntreprises = [
     icon: "🏨",
   },
   {
-    name: "Healthcare",
+    name: "Santé",
     slug: "healthcare",
     icon: "🏥",
   },

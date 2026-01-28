@@ -28,6 +28,13 @@ dist-ssr
 *.sln
 *.sw?
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
 # Extracted data files (keep scripts, ignore generated data)
 scripts/*.json
 scripts/*.cjs

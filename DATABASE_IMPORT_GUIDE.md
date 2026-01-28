@@ -14,7 +14,7 @@ The SQL file contains comprehensive sample data for testing the EchoWork applica
   - 5 Restaurants
   - 4 Public Services (Services publics)
   - 5 Hotels
-  - 5 Healthcare facilities
+  - 5 Santé (Healthcare) facilities
   - 5 Retail stores (Vente au détail)
 - **30 Reviews** - Reviews with ratings and comments across all companies
 - **12 Job Offers** - Active job postings from various companies
@@ -140,7 +140,7 @@ After importing the data, you can test:
 
 1. **Browse Companies by Category:**
    - Visit the homepage and click on any category
-   - Try the "Healthcare" category to verify the slug fix
+   - Try the "Santé" (Healthcare) category to verify the slug fix
    - Search for specific companies
 
 2. **View Company Details:**
@@ -159,7 +159,7 @@ After importing the data, you can test:
    - Add a review with rating and comment
    - Test upvote/downvote functionality
 
-5. **Test Healthcare Category Specifically:**
+5. **Test Santé (Healthcare) Category Specifically:**
    - Go to `/categories/healthcare`
    - Verify the page loads correctly without the slug validation error
    - Browse the 5 healthcare facilities included in the sample data
