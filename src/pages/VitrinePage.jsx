@@ -27,7 +27,7 @@ const categories = [
   { name: "RESTAURANTS", icon: Utensils, slug: "restaurants" },
   { name: "SERVICE PUBLICS", icon: Users, slug: "service-publics" },
   { name: "Hotels", icon: Hotel, slug: "hotels" },
-  { name: "Healthcare", icon: Hospital, slug: "healthcare" },
+  { name: "Santé", icon: Hospital, slug: "healthcare" },
   { name: "VENTES AU DETAIL", icon: ShoppingCart, slug: "ventes-aux-details" },
 ];
 

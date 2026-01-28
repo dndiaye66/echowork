@@ -159,7 +159,7 @@ UPDATE "Company"
 SET "categoryId" = 2 
 WHERE activite ILIKE '%restaurant%' OR activite ILIKE '%bar%';
 
--- Update to Healthcare category (example: categoryId = 5)
+-- Update to Santé category (example: categoryId = 5)
 UPDATE "Company" 
 SET "categoryId" = 5 
 WHERE activite ILIKE '%pharmacie%' 

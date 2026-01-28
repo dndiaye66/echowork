@@ -53,7 +53,7 @@ INSERT INTO "Category" (id, name, slug) VALUES
 (2, 'Restaurants', 'restaurants'),
 (3, 'Services publics', 'services-publics'),
 (4, 'Hôtels', 'hotels'),
-(5, 'Healthcare', 'healthcare'),
+(5, 'Santé', 'healthcare'),
 (6, 'Vente au détail', 'vente-detail')
 ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name;
 
