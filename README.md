@@ -158,6 +158,25 @@ npm run start    # Lancer le build de production
 
 ## Déploiement
 
+### Déploiement avec Nginx sur Ubuntu 24.04 (Recommandé)
+
+Pour déployer l'application sur un serveur Ubuntu 24.04 avec Nginx, consultez les guides:
+
+- **[DEPLOYMENT_QUICKSTART.md](DEPLOYMENT_QUICKSTART.md)** - Guide de démarrage rapide (10-15 minutes)
+- **[DEPLOYMENT_NGINX.md](DEPLOYMENT_NGINX.md)** - Guide détaillé avec toutes les commandes
+
+**Méthodes de déploiement:**
+1. **Script automatisé**: `sudo bash deploy.sh` (recommandé)
+2. **Docker Compose**: `bash deploy-docker.sh` avec nginx inclus
+3. **Manuel**: Installation pas à pas avec configuration complète
+
+**Fonctionnalités:**
+- Configuration Nginx complète avec reverse proxy
+- Service systemd pour le backend
+- Support SSL avec Let's Encrypt
+- Optimisations de performance et sécurité
+- Scripts de déploiement automatisés
+
 ### Déploiement sur serveur LWS (Apache)
 
 Pour déployer l'application sur un serveur LWS ou tout autre serveur Apache, consultez le guide complet: [DEPLOYMENT_LWS.md](DEPLOYMENT_LWS.md)
