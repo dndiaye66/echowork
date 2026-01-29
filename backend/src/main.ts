@@ -34,10 +34,10 @@ async function bootstrap() {
         return callback(null, true);
       }
       
-      // Allow requests with no origin only in development
-      // In production, require origin for security (prevents server-to-server abuse)
+      // In production, reject requests with no origin for security
+      // (prevents server-to-server abuse)
       if (!origin) {
-        return callback(null, isDevelopment);
+        return callback(null, false);
       }
       
       // Check if origin matches any allowed pattern
@@ -48,12 +48,8 @@ async function bootstrap() {
         return pattern.value === origin;
       });
       
-      if (isAllowed) {
-        return callback(null, true);
-      }
-      
-      // Reject origin
-      callback(null, false);
+      // Allow or reject based on whether origin is in allowed list
+      callback(null, isAllowed);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
