@@ -13,29 +13,47 @@ async function bootstrap() {
     ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
     : [process.env.FRONTEND_URL || 'http://localhost:5173'];
   
+  // Pre-compile regex patterns for performance
+  const allowedPatterns = allowedOrigins.map(allowed => {
+    if (allowed.includes('*')) {
+      // Escape special regex characters except *
+      const escaped = allowed.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
+      // Replace * with .*
+      const pattern = '^' + escaped.replace(/\*/g, '.*') + '$';
+      return { type: 'pattern', regex: new RegExp(pattern) };
+    }
+    return { type: 'exact', value: allowed };
+  });
+  
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
   app.enableCors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, postman)
-      if (!origin) return callback(null, true);
+      // In development mode, allow all origins
+      if (isDevelopment) {
+        return callback(null, true);
+      }
       
-      // Check if origin is in allowed list
-      if (allowedOrigins.some(allowed => {
-        // Support wildcard matching for subdomains
-        if (allowed.includes('*')) {
-          const regex = new RegExp('^' + allowed.replace(/\*/g, '.*') + '$');
-          return regex.test(origin);
+      // Allow requests with no origin only in development
+      // In production, require origin for security (prevents server-to-server abuse)
+      if (!origin) {
+        return callback(null, isDevelopment);
+      }
+      
+      // Check if origin matches any allowed pattern
+      const isAllowed = allowedPatterns.some(pattern => {
+        if (pattern.type === 'pattern' && pattern.regex) {
+          return pattern.regex.test(origin);
         }
-        return allowed === origin;
-      })) {
+        return pattern.value === origin;
+      });
+      
+      if (isAllowed) {
         return callback(null, true);
       }
       
-      // In development, allow all origins
-      if (process.env.NODE_ENV === 'development') {
-        return callback(null, true);
-      }
-      
-      callback(new Error('Not allowed by CORS'));
+      // Reject origin
+      callback(null, false);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

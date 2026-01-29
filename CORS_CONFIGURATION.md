@@ -99,6 +99,8 @@ curl -H "Origin: http://185.98.136.93" \
 2. **List specific origins** instead of allowing all origins
 3. **Never set `origin: true`** in enableCors as it allows all origins
 4. **Keep the list minimal** - only add origins that actually need API access
+5. **Production Origin Policy**: In production, requests without an origin header are rejected for security. This prevents unauthorized server-to-server requests. If you need to allow no-origin requests (e.g., for mobile apps or API clients), consider implementing API key authentication instead.
+6. **Development Mode**: In development (`NODE_ENV=development`), all origins are automatically allowed for easier testing
 
 ## Deployment Steps
 
