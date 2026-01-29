@@ -1,0 +1,30 @@
+# Systemd service file for EchoWork Backend
+# Place this file in /etc/systemd/system/echowork-backend.service
+
+[Unit]
+Description=EchoWork Backend API Service
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/echowork/backend
+Environment=NODE_ENV=production
+EnvironmentFile=/var/www/echowork/backend/.env
+ExecStart=/usr/bin/node /var/www/echowork/backend/dist/main.js
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:/var/log/echowork/backend.log
+StandardError=append:/var/log/echowork/backend-error.log
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/echowork/backend
+ReadOnlyPaths=/var/www/echowork/backend
+
+[Install]
+WantedBy=multi-user.target
