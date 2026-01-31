@@ -292,4 +292,222 @@ export class AdminService {
       throw new InternalServerErrorException('Failed to delete advertisement');
     }
   }
+
+  // ===== DASHBOARD STATISTICS =====
+
+  async getDashboardStats() {
+    try {
+      const [
+        totalUsers,
+        totalCompanies,
+        totalReviews,
+        approvedReviews,
+        pendingReviews,
+        totalJobOffers,
+        totalAdvertisements,
+        activeAdvertisements,
+      ] = await Promise.all([
+        this.prisma.user.count(),
+        this.prisma.company.count(),
+        this.prisma.review.count(),
+        this.prisma.review.count({ where: { status: 'APPROVED' } }),
+        this.prisma.review.count({ where: { status: 'PENDING' } }),
+        this.prisma.jobOffer.count(),
+        this.prisma.advertisement.count(),
+        this.prisma.advertisement.count({ where: { isActive: true } }),
+      ]);
+
+      // Get average rating across all companies
+      const reviews = await this.prisma.review.findMany({
+        where: { status: 'APPROVED' },
+        select: { rating: true },
+      });
+      const averageRating = reviews.length > 0
+        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+        : 0;
+
+      // Get recent activities
+      const recentReviews = await this.prisma.review.findMany({
+        take: 5,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: { select: { username: true } },
+          company: { select: { name: true } },
+        },
+      });
+
+      const recentUsers = await this.prisma.user.findMany({
+        take: 5,
+        orderBy: { createdAt: 'desc' },
+        select: { id: true, username: true, email: true, role: true, createdAt: true },
+      });
+
+      return {
+        stats: {
+          totalUsers,
+          totalCompanies,
+          totalReviews,
+          approvedReviews,
+          pendingReviews,
+          totalJobOffers,
+          totalAdvertisements,
+          activeAdvertisements,
+          averageRating: parseFloat(averageRating.toFixed(2)),
+        },
+        recentReviews,
+        recentUsers,
+      };
+    } catch (error) {
+      this.logger.error('Failed to fetch dashboard stats', error);
+      throw new InternalServerErrorException('Failed to fetch dashboard stats');
+    }
+  }
+
+  // ===== USERS MANAGEMENT =====
+
+  async getUsers() {
+    try {
+      return await this.prisma.user.findMany({
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          phone: true,
+          role: true,
+          isVerified: true,
+          createdAt: true,
+          updatedAt: true,
+          _count: {
+            select: {
+              reviews: true,
+              claimedCompanies: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+    } catch (error) {
+      this.logger.error('Failed to fetch users', error);
+      throw new InternalServerErrorException('Failed to fetch users');
+    }
+  }
+
+  async updateUserRole(id: number, role: string) {
+    try {
+      const user = await this.prisma.user.findUnique({ where: { id } });
+
+      if (!user) {
+        throw new NotFoundException(`User with ID ${id} not found`);
+      }
+
+      if (!['USER', 'ADMIN', 'MODERATOR'].includes(role)) {
+        throw new ConflictException('Invalid role. Must be USER, ADMIN, or MODERATOR');
+      }
+
+      return await this.prisma.user.update({
+        where: { id },
+        data: { role: role as any },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          role: true,
+        },
+      });
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof ConflictException) {
+        throw error;
+      }
+      this.logger.error(`Failed to update user role ${id}`, error);
+      throw new InternalServerErrorException('Failed to update user role');
+    }
+  }
+
+  async deleteUser(id: number) {
+    try {
+      const user = await this.prisma.user.findUnique({ where: { id } });
+
+      if (!user) {
+        throw new NotFoundException(`User with ID ${id} not found`);
+      }
+
+      await this.prisma.user.delete({ where: { id } });
+
+      return { message: 'User deleted successfully' };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(`Failed to delete user ${id}`, error);
+      throw new InternalServerErrorException('Failed to delete user');
+    }
+  }
+
+  // ===== REVIEWS MODERATION =====
+
+  async getPendingReviews() {
+    try {
+      return await this.prisma.review.findMany({
+        where: { status: 'PENDING' },
+        include: {
+          user: { select: { id: true, username: true, email: true } },
+          company: { select: { id: true, name: true, slug: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+    } catch (error) {
+      this.logger.error('Failed to fetch pending reviews', error);
+      throw new InternalServerErrorException('Failed to fetch pending reviews');
+    }
+  }
+
+  async approveReview(id: number) {
+    try {
+      const review = await this.prisma.review.findUnique({ where: { id } });
+
+      if (!review) {
+        throw new NotFoundException(`Review with ID ${id} not found`);
+      }
+
+      return await this.prisma.review.update({
+        where: { id },
+        data: { status: 'APPROVED' },
+        include: {
+          user: { select: { username: true } },
+          company: { select: { name: true } },
+        },
+      });
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(`Failed to approve review ${id}`, error);
+      throw new InternalServerErrorException('Failed to approve review');
+    }
+  }
+
+  async rejectReview(id: number) {
+    try {
+      const review = await this.prisma.review.findUnique({ where: { id } });
+
+      if (!review) {
+        throw new NotFoundException(`Review with ID ${id} not found`);
+      }
+
+      return await this.prisma.review.update({
+        where: { id },
+        data: { status: 'REJECTED' },
+        include: {
+          user: { select: { username: true } },
+          company: { select: { name: true } },
+        },
+      });
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(`Failed to reject review ${id}`, error);
+      throw new InternalServerErrorException('Failed to reject review');
+    }
+  }
 }
