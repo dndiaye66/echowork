@@ -306,7 +306,7 @@ export class CompaniesService {
           COALESCE(AVG(r.rating), 0) as "averageRating",
           COUNT(r.id) as "reviewCount",
           cat.id as "category_id", cat.name as "category_name", cat.slug as "category_slug",
-          cat."createdAt" as "category_createdAt", cat."updatedAt" as "category_updatedAt"
+          cat."parentId" as "category_parentId"
         FROM "Company" c
         LEFT JOIN "Review" r ON c.id = r."companyId"
         LEFT JOIN "Category" cat ON c."categoryId" = cat.id
@@ -336,8 +336,7 @@ export class CompaniesService {
           id: company.category_id,
           name: company.category_name,
           slug: company.category_slug,
-          createdAt: company.category_createdAt,
-          updatedAt: company.category_updatedAt,
+          parentId: company.category_parentId,
         } : null,
       }));
     } catch (error) {
