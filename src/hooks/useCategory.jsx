@@ -1,5 +1,5 @@
 // src/hooks/useCategory.jsx
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useApi } from './useApi';
 import { categoryService } from '../services/categoryService';
 
@@ -10,14 +10,19 @@ import { categoryService } from '../services/categoryService';
 export const useCategories = () => {
   const { data, loading, error, execute } = useApi(categoryService.getAllCategories);
 
-  useEffect(() => {
+  // Use useCallback to memoize the fetch function
+  const fetchCategories = useCallback(() => {
     execute();
   }, [execute]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []); // Empty dependency array - only fetch once on mount
 
   return { 
     categories: data || [], 
     loading, 
     error, 
-    refetch: execute 
+    refetch: fetchCategories 
   };
 };
