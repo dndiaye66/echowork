@@ -2,34 +2,54 @@
 
 const CategoriesEntreprises = [
   {
-    name: "Banques",
-    slug: "banques",
-    icon: "🏦",
+    name: "Agriculture",
+    slug: "agriculture",
+    icon: "🌾",
   },
   {
-    name: "Restaurants",
-    slug: "restaurants",
+    name: "Alimentation et Boissons",
+    slug: "alimentation-et-boissons",
     icon: "🍽️",
   },
   {
-    name: "Services publics",
-    slug: "services-publics",
-    icon: "🏛️",
+    name: "Automobile",
+    slug: "automobile",
+    icon: "🚗",
   },
   {
-    name: "Hôtels",
-    slug: "hotels",
-    icon: "🏨",
+    name: "Commerce et Distribution",
+    slug: "commerce-et-distribution",
+    icon: "🛍️",
   },
   {
-    name: "Santé",
-    slug: "healthcare",
+    name: "Construction et BTP",
+    slug: "construction-et-btp",
+    icon: "🏗️",
+  },
+  {
+    name: "Industrie",
+    slug: "industrie",
+    icon: "🏭",
+  },
+  {
+    name: "Santé et Pharmacie",
+    slug: "sante-et-pharmacie",
     icon: "🏥",
   },
   {
-    name: "Vente au détail",
-    slug: "vente-detail",
-    icon: "🛍️",
+    name: "Services",
+    slug: "services",
+    icon: "💼",
+  },
+  {
+    name: "Télécommunications",
+    slug: "telecommunications",
+    icon: "📱",
+  },
+  {
+    name: "Énergie et Pétrole",
+    slug: "energie-et-petrole",
+    icon: "⚡",
   },
 ];
 
