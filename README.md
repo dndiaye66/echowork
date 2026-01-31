@@ -14,6 +14,8 @@ La base de données ECHOWORK a été **complètement restructurée** pour deveni
 - 💻 **[BACKEND_IMPLEMENTATION_GUIDE.md](BACKEND_IMPLEMENTATION_GUIDE.md)** - Guide backend
 - 🎨 **[FRONTEND_INTEGRATION_GUIDE.md](FRONTEND_INTEGRATION_GUIDE.md)** - Guide frontend
 - ✅ **[TESTING_VALIDATION_GUIDE.md](TESTING_VALIDATION_GUIDE.md)** - Tests et validation
+- 🔐 **[ADMIN_BACKOFFICE_GUIDE.md](ADMIN_BACKOFFICE_GUIDE.md)** - Guide admin & backoffice
+- 📝 **[ADMIN_CREDENTIALS.md](ADMIN_CREDENTIALS.md)** - Identifiants super-admin
 
 **✨ Nouvelles fonctionnalités principales:**
 - Vérification NINEA/RCCM des entreprises sénégalaises
@@ -23,6 +25,7 @@ La base de données ECHOWORK a été **complètement restructurée** pour deveni
 - Support multi-localisations avec GPS
 - Système d'abonnements (FREE/PRO/PREMIUM)
 - Contexte des avis (CLIENT/EMPLOYÉ/FOURNISSEUR)
+- **🔐 Backoffice super-admin complet** - Gestion complète de la plateforme
 
 ## 📋 Table des matières
 
@@ -49,19 +52,21 @@ La base de données ECHOWORK a été **complètement restructurée** pour deveni
 ### Backend
 - ✅ **Authentification JWT** - Inscription et connexion sécurisées
 - ✅ **Gestion des avis** - Création, lecture, vote (upvote/downvote)
-- ✅ **Contrôle d'accès** - Rôles utilisateur (USER, ADMIN)
+- ✅ **Contrôle d'accès** - Rôles utilisateur (USER, ADMIN, MODERATOR)
 - ✅ **API REST complète** - Endpoints pour entreprises, catégories, avis
 - ✅ **Validation des données** - Protection contre les données invalides
 - ✅ **Base de données Prisma** - PostgreSQL avec ORM moderne
 - ✅ **Base de données d'entreprises** - 2,608 entreprises extraites de PDFs avec informations complètes (ville, adresse, téléphone, activité)
 - ✅ **API Catégories avancée** - Affichage des entreprises notées, avis, offres d'emploi, KPIs et publicités par catégorie
 - ✅ **Recherche par catégorie** - Fonction de recherche intégrée dans chaque catégorie
+- ✅ **Backoffice Admin** - Dashboard avec statistiques, gestion utilisateurs, modération des avis
 
 ### Frontend
 - ✅ **Pages d'authentification** - Login et Signup
 - ✅ **Gestion de l'état** - Context API pour l'authentification
 - ✅ **Routage amélioré** - Navigation entre les pages
 - ✅ **Interface moderne** - Design avec TailwindCSS et DaisyUI
+- ✅ **Backoffice Admin** - Dashboard avec statistiques, gestion complète de la plateforme
 
 ---
 
@@ -72,11 +77,13 @@ La base de données ECHOWORK a été **complètement restructurée** pour deveni
 ├── backend/                # Backend NestJS + Prisma
 │   ├── src/
 │   │   ├── auth/          # Module d'authentification
+│   │   ├── admin/         # Module backoffice admin
 │   │   ├── companies/     # Module des entreprises
 │   │   ├── reviews/       # Module des avis
 │   │   └── prisma/        # Service Prisma
 │   ├── prisma/
-│   │   └── schema.prisma  # Schéma de base de données
+│   │   ├── schema.prisma  # Schéma de base de données
+│   │   └── create-admin.ts # Script de création du super-admin
 │   ├── Dockerfile         # Image Docker pour le backend
 │   └── docker-compose.yml # Services Docker (PostgreSQL, backend, Adminer)
 ├── src/
@@ -86,6 +93,7 @@ La base de données ECHOWORK a été **complètement restructurée** pour deveni
 │   ├── data/              # Données des catégories d'entreprise
 │   ├── hooks/             # Hooks personnalisés (useApi, useHomeData, etc.)
 │   ├── pages/             # Pages principales (VitrinePage, LoginPage, etc.)
+│   │   └── admin/         # Pages du backoffice admin
 │   ├── services/          # Services API
 │   └── api/
 │       └── config.js      # Configuration Axios
@@ -145,6 +153,41 @@ La base de données ECHOWORK a été **complètement restructurée** pour deveni
    - Frontend: [http://localhost:5173](http://localhost:5173)
    - Backend API: [http://localhost:3000/api](http://localhost:3000/api)
    - Adminer (DB GUI): [http://localhost:8080](http://localhost:8080)
+
+5. **Créer un super-admin (optionnel):**
+   ```bash
+   cd backend
+   npm run create:admin
+   ```
+   
+   Cela crée un compte super-admin avec les identifiants suivants:
+   - Email: admin@echowork.com
+   - Password: Admin@2024!Echowork
+   
+   **⚠️ Important:** Changez le mot de passe après la première connexion!
+   
+   Pour plus d'informations, consultez [ADMIN_CREDENTIALS.md](ADMIN_CREDENTIALS.md)
+
+## Backoffice Admin
+
+L'application inclut un backoffice complet pour les super-admins permettant de gérer l'ensemble de la plateforme.
+
+### Accès au Backoffice
+
+1. Créer un compte super-admin (voir ci-dessus)
+2. Se connecter sur `/login` avec les identifiants admin
+3. Accéder au dashboard admin sur `/admin`
+
+### Fonctionnalités du Backoffice
+
+- **📊 Dashboard avec statistiques** - Métriques en temps réel (utilisateurs, entreprises, avis, etc.)
+- **👥 Gestion des utilisateurs** - Créer, modifier rôles, supprimer utilisateurs
+- **✅ Modération des avis** - Approuver ou rejeter les avis en attente
+- **🏢 Gestion des entreprises** - CRUD complet sur les entreprises
+- **💼 Gestion des offres d'emploi** - Créer et gérer les offres d'emploi
+- **📢 Gestion des publicités** - Gérer les campagnes publicitaires
+
+Pour plus de détails, consultez le guide complet: [ADMIN_BACKOFFICE_GUIDE.md](ADMIN_BACKOFFICE_GUIDE.md)
 
 ## Configuration
 
