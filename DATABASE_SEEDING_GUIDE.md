@@ -2,6 +2,8 @@
 
 This guide will help you set up and seed the ECHOWORK database with companies and categories.
 
+⚠️ **IMPORTANT SECURITY NOTICE**: This guide is intended for **local development environments only**. The default credentials and configurations provided here are for development convenience and **must never be used in production**. Always use strong, unique passwords and proper security measures in production environments.
+
 ## Prerequisites
 
 - Node.js 18+ and npm
@@ -24,6 +26,8 @@ This will start PostgreSQL on port 5432 with the following credentials:
 - Database: `echowork_db`
 - User: `postgres`
 - Password: `password`
+
+⚠️ **Security Warning**: These are default development credentials. **Never use these in production!** For production environments, change the password in `backend/.env` and `backend/docker-compose.yml` to a strong, unique password.
 
 #### Option B: Using Local PostgreSQL
 If you prefer to use a local PostgreSQL installation, make sure it's running and update the `DATABASE_URL` in `backend/.env`:
@@ -102,7 +106,11 @@ This creates a super-admin account with:
 - **Password**: Admin@2024!Echowork
 - **Role**: ADMIN
 
-⚠️ **Important**: Change the password after first login!
+⚠️ **Security Warning**: These are default development credentials for **local development only**. 
+- **NEVER use these credentials in production environments**
+- Change the password immediately after first login
+- For production, create admin users with strong, unique passwords
+- Consider using environment variables to set admin credentials
 
 ### 7. Start the Backend Server
 
