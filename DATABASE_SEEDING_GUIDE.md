@@ -168,7 +168,7 @@ This error occurs if the `prisma` section is missing from `backend/package.json`
 ```json
 {
   "prisma": {
-    "seed": "ts-node-dev prisma/seed.ts"
+    "seed": "npx ts-node prisma/seed.ts"
   }
 }
 ```

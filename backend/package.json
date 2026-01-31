@@ -9,8 +9,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:studio": "prisma studio",
-    "prisma:seed": "ts-node-dev prisma/seed.ts",
-    "create:admin": "ts-node-dev prisma/create-admin.ts"
+    "prisma:seed": "npx ts-node prisma/seed.ts",
+    "create:admin": "npx ts-node prisma/create-admin.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -40,6 +40,6 @@
     "typescript": "^5.1.0"
   },
   "prisma": {
-    "seed": "ts-node-dev prisma/seed.ts"
+    "seed": "npx ts-node prisma/seed.ts"
   }
 }
