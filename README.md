@@ -2,6 +2,28 @@
 
 Interface utilisateur de la plateforme **EchoWork** – une application de notation et de classement des entreprises et services publics au Sénégal.
 
+## 🆕 MISE À JOUR MAJEURE - Base de données restructurée
+
+La base de données ECHOWORK a été **complètement restructurée** pour devenir une plateforme de notation crédible inspirée de Trustpilot/Glassdoor. 
+
+**📚 Documentation complète disponible:**
+- 🚀 **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - Démarrage rapide
+- 📊 **[RESTRUCTURATION_SUMMARY.md](RESTRUCTURATION_SUMMARY.md)** - Résumé exécutif
+- 🏗️ **[DATABASE_RESTRUCTURATION.md](DATABASE_RESTRUCTURATION.md)** - Architecture détaillée
+- 📐 **[DATABASE_ARCHITECTURE_DIAGRAM.md](DATABASE_ARCHITECTURE_DIAGRAM.md)** - Diagrammes visuels
+- 💻 **[BACKEND_IMPLEMENTATION_GUIDE.md](BACKEND_IMPLEMENTATION_GUIDE.md)** - Guide backend
+- 🎨 **[FRONTEND_INTEGRATION_GUIDE.md](FRONTEND_INTEGRATION_GUIDE.md)** - Guide frontend
+- ✅ **[TESTING_VALIDATION_GUIDE.md](TESTING_VALIDATION_GUIDE.md)** - Tests et validation
+
+**✨ Nouvelles fonctionnalités principales:**
+- Vérification NINEA/RCCM des entreprises sénégalaises
+- Notation multi-dimensionnelle (5 critères pondérés)
+- Système de modération des avis (PENDING/APPROVED/REJECTED)
+- Trust score pour utilisateurs et entreprises
+- Support multi-localisations avec GPS
+- Système d'abonnements (FREE/PRO/PREMIUM)
+- Contexte des avis (CLIENT/EMPLOYÉ/FOURNISSEUR)
+
 ## 📋 Table des matières
 
 - [Technologies](#technologies)
