@@ -9,6 +9,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import CompaniesManagement from "./pages/admin/CompaniesManagement";
 import JobOffersManagement from "./pages/admin/JobOffersManagement";
 import AdvertisementsManagement from "./pages/admin/AdvertisementsManagement";
+import UsersManagement from "./pages/admin/UsersManagement";
+import ReviewsModeration from "./pages/admin/ReviewsModeration";
 
 function App() {
   return (
@@ -24,6 +26,8 @@ function App() {
           <Route path="/admin/companies" element={<CompaniesManagement />} />
           <Route path="/admin/job-offers" element={<JobOffersManagement />} />
           <Route path="/admin/advertisements" element={<AdvertisementsManagement />} />
+          <Route path="/admin/users" element={<UsersManagement />} />
+          <Route path="/admin/reviews" element={<ReviewsModeration />} />
         </Routes>
       </Router>
     </AuthProvider>

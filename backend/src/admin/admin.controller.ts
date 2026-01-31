@@ -98,4 +98,48 @@ export class AdminController {
   async deleteAdvertisement(@Param('id', ParseIntPipe) id: number) {
     return this.adminService.deleteAdvertisement(id);
   }
+
+  // ===== DASHBOARD STATISTICS =====
+
+  @Get('dashboard/stats')
+  async getDashboardStats() {
+    return this.adminService.getDashboardStats();
+  }
+
+  // ===== USERS MANAGEMENT =====
+
+  @Get('users')
+  async getUsers() {
+    return this.adminService.getUsers();
+  }
+
+  @Put('users/:id/role')
+  async updateUserRole(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('role') role: string,
+  ) {
+    return this.adminService.updateUserRole(id, role);
+  }
+
+  @Delete('users/:id')
+  async deleteUser(@Param('id', ParseIntPipe) id: number) {
+    return this.adminService.deleteUser(id);
+  }
+
+  // ===== REVIEWS MODERATION =====
+
+  @Get('reviews/pending')
+  async getPendingReviews() {
+    return this.adminService.getPendingReviews();
+  }
+
+  @Put('reviews/:id/approve')
+  async approveReview(@Param('id', ParseIntPipe) id: number) {
+    return this.adminService.approveReview(id);
+  }
+
+  @Put('reviews/:id/reject')
+  async rejectReview(@Param('id', ParseIntPipe) id: number) {
+    return this.adminService.rejectReview(id);
+  }
 }
