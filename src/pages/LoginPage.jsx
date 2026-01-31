@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import axios from '../api/Config';
 
 function LoginPage() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,7 +17,7 @@ function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await axios.post('/auth/login', { email, password });
+      const response = await axios.post('/auth/login', { username, password });
       login(response.data.user, response.data.accessToken);
       navigate('/');
     } catch (err) {
@@ -42,14 +42,14 @@ function LoginPage() {
           <form onSubmit={handleSubmit}>
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Email</span>
+                <span className="label-text">Username</span>
               </label>
               <input
-                type="email"
-                placeholder="email@example.com"
+                type="text"
+                placeholder="Enter your username"
                 className="input input-bordered"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </div>
