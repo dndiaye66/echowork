@@ -325,6 +325,10 @@ export class AdminService {
       const averageRating = reviews.length > 0
         ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
         : 0;
+      
+      const formattedAvgRating = isNaN(averageRating) || averageRating === null 
+        ? 0 
+        : parseFloat(averageRating.toFixed(2));
 
       // Get recent activities
       const recentReviews = await this.prisma.review.findMany({
@@ -352,7 +356,7 @@ export class AdminService {
           totalJobOffers,
           totalAdvertisements,
           activeAdvertisements,
-          averageRating: parseFloat(averageRating.toFixed(2)),
+          averageRating: formattedAvgRating,
         },
         recentReviews,
         recentUsers,
