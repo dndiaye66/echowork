@@ -73,13 +73,13 @@ install_nginx() {
 }
 
 # Function to setup firewall
-setup_firewall() {
-    print_info "Configuring firewall..."
-    ufw --force enable
-    ufw allow OpenSSH
-    ufw allow 'Nginx Full'
-    print_info "Firewall configured"
-}
+# setup_firewall() {
+#     print_info "Configuring firewall..."
+#     ufw --force enable
+#     ufw allow OpenSSH
+#     ufw allow 'Nginx Full'
+#     print_info "Firewall configured"
+# }
 
 # Function to create database
 setup_database() {

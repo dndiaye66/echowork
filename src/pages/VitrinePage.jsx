@@ -115,7 +115,7 @@ const VitrinePage = () => {
 
               <div className="card bg-base-100 w-60 shadow-lg">
                 <figure>
-                  <img src="https://via.placeholder.com/400x300?text=Annonce+2" alt="Annonce 2" className="h-50 w-full object-cover rounded-2xl" />
+                  <img src="https://placehold.co/600x400/png" alt="Annonce 2" className="h-50 w-full object-cover rounded-2xl" />
                 </figure>
                 <div className="card-body">
                   <h2 className="card-title text-red-600 font-black">Annonce 2</h2>
