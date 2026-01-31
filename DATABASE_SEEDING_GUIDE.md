@@ -131,7 +131,9 @@ This opens a web interface at http://localhost:5555 where you can browse your da
 
 ### Check with SQL Queries
 ```bash
-PGPASSWORD=password psql -h localhost -U postgres -d echowork_db
+# Connect to PostgreSQL (you'll be prompted for password)
+psql -h localhost -U postgres -d echowork_db
+# Password: password (for development)
 ```
 
 Then run:
@@ -148,6 +150,8 @@ SELECT name, ville, activite FROM "Company" LIMIT 10;
 -- View all categories
 SELECT id, name, slug FROM "Category";
 ```
+
+**Note**: For production environments, use a `.pgpass` file or other secure credential management instead of entering passwords in the command line.
 
 ## Test API Endpoints
 
