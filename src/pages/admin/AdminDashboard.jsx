@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import axios from '../../api/Config';
 import Navbar from '../../components/navbar';
 import Foot from '../../components/Foot';
-import { Users, Building2, MessageSquare, Briefcase, TrendingUp, CheckCircle, Clock, Star } from 'lucide-react';
+import { Users, Building2, MessageSquare, Briefcase, TrendingUp, CheckCircle, Clock, Star, FolderTree, BarChart3 } from 'lucide-react';
 
 function AdminDashboard() {
   const { user, isAuthenticated } = useAuth();
@@ -146,6 +146,22 @@ function AdminDashboard() {
 
             <div 
               className="card bg-base-100 shadow-xl cursor-pointer hover:shadow-2xl transition-shadow"
+              onClick={() => navigate('/admin/categories')}
+            >
+              <div className="card-body">
+                <h2 className="card-title text-2xl">
+                  <FolderTree className="inline mr-2" />
+                  Categories
+                </h2>
+                <p>Manage categories, create hierarchies, organize</p>
+                <div className="card-actions justify-end">
+                  <button className="btn btn-primary">Manage</button>
+                </div>
+              </div>
+            </div>
+
+            <div 
+              className="card bg-base-100 shadow-xl cursor-pointer hover:shadow-2xl transition-shadow"
               onClick={() => navigate('/admin/users')}
             >
               <div className="card-body">
@@ -209,6 +225,22 @@ function AdminDashboard() {
                 <p>Manage advertisements and promotions</p>
                 <div className="card-actions justify-end">
                   <button className="btn btn-primary">Manage</button>
+                </div>
+              </div>
+            </div>
+
+            <div 
+              className="card bg-base-100 shadow-xl cursor-pointer hover:shadow-2xl transition-shadow"
+              onClick={() => navigate('/admin/analytics')}
+            >
+              <div className="card-body">
+                <h2 className="card-title text-2xl">
+                  <BarChart3 className="inline mr-2" />
+                  Analytics & Reports
+                </h2>
+                <p>View analytics, export data, and generate reports</p>
+                <div className="card-actions justify-end">
+                  <button className="btn btn-primary">View</button>
                 </div>
               </div>
             </div>
