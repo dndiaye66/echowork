@@ -3,11 +3,11 @@ import { IsString, IsNotEmpty, IsOptional, IsInt } from 'class-validator';
 export class CreateCategoryDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
   @IsString()
   @IsNotEmpty()
-  slug: string;
+  slug!: string;
 
   @IsInt()
   @IsOptional()
