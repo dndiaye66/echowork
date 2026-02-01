@@ -9,6 +9,7 @@ import {
   Query,
   UseGuards,
   ParseIntPipe,
+  Patch,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -17,6 +18,9 @@ import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { CreateJobOfferDto } from './dto/create-job-offer.dto';
 import { CreateAdvertisementDto } from './dto/create-advertisement.dto';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, AdminGuard)
@@ -141,5 +145,101 @@ export class AdminController {
   @Put('reviews/:id/reject')
   async rejectReview(@Param('id', ParseIntPipe) id: number) {
     return this.adminService.rejectReview(id);
+  }
+
+  // ===== CATEGORIES MANAGEMENT =====
+
+  @Get('categories')
+  async getCategories() {
+    return this.adminService.getCategories();
+  }
+
+  @Post('categories')
+  async createCategory(@Body() createCategoryDto: CreateCategoryDto) {
+    return this.adminService.createCategory(createCategoryDto);
+  }
+
+  @Put('categories/:id')
+  async updateCategory(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+  ) {
+    return this.adminService.updateCategory(id, updateCategoryDto);
+  }
+
+  @Delete('categories/:id')
+  async deleteCategory(@Param('id', ParseIntPipe) id: number) {
+    return this.adminService.deleteCategory(id);
+  }
+
+  // ===== ADVANCED USER MANAGEMENT =====
+
+  @Patch('users/:id')
+  async updateUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.adminService.updateUser(id, updateUserDto);
+  }
+
+  @Post('users/:id/activate')
+  async activateUser(@Param('id', ParseIntPipe) id: number) {
+    return this.adminService.activateUser(id);
+  }
+
+  @Post('users/:id/deactivate')
+  async deactivateUser(@Param('id', ParseIntPipe) id: number) {
+    return this.adminService.deactivateUser(id);
+  }
+
+  @Post('users/:id/reset-password')
+  async resetUserPassword(@Param('id', ParseIntPipe) id: number) {
+    return this.adminService.resetUserPassword(id);
+  }
+
+  // ===== ANALYTICS AND REPORTS =====
+
+  @Get('analytics/users')
+  async getUserAnalytics(@Query('period') period?: string) {
+    return this.adminService.getUserAnalytics(period);
+  }
+
+  @Get('analytics/companies')
+  async getCompanyAnalytics() {
+    return this.adminService.getCompanyAnalytics();
+  }
+
+  @Get('analytics/reviews')
+  async getReviewAnalytics() {
+    return this.adminService.getReviewAnalytics();
+  }
+
+  @Get('analytics/top-companies')
+  async getTopCompanies(@Query('limit') limit?: string) {
+    const limitNum = limit ? parseInt(limit, 10) : 10;
+    return this.adminService.getTopCompanies(limitNum);
+  }
+
+  @Get('analytics/top-categories')
+  async getTopCategories(@Query('limit') limit?: string) {
+    const limitNum = limit ? parseInt(limit, 10) : 10;
+    return this.adminService.getTopCategories(limitNum);
+  }
+
+  // ===== DATA EXPORT =====
+
+  @Get('export/users')
+  async exportUsers() {
+    return this.adminService.exportUsers();
+  }
+
+  @Get('export/companies')
+  async exportCompanies() {
+    return this.adminService.exportCompanies();
+  }
+
+  @Get('export/reviews')
+  async exportReviews() {
+    return this.adminService.exportReviews();
   }
 }

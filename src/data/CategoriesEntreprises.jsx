@@ -51,6 +51,11 @@ const CategoriesEntreprises = [
     slug: "energie-et-petrole",
     icon: "⚡",
   },
+  {
+    name: "Banques et Institutions Financières",
+    slug: "banques-et-institutions-financieres",
+    icon: "🏦",
+  },
 ];
 
 export default CategoriesEntreprises
