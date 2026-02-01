@@ -11,6 +11,8 @@ import JobOffersManagement from "./pages/admin/JobOffersManagement";
 import AdvertisementsManagement from "./pages/admin/AdvertisementsManagement";
 import UsersManagement from "./pages/admin/UsersManagement";
 import ReviewsModeration from "./pages/admin/ReviewsModeration";
+import CategoriesManagement from "./pages/admin/CategoriesManagement";
+import AnalyticsPage from "./pages/admin/AnalyticsPage";
 
 function App() {
   return (
@@ -28,6 +30,8 @@ function App() {
           <Route path="/admin/advertisements" element={<AdvertisementsManagement />} />
           <Route path="/admin/users" element={<UsersManagement />} />
           <Route path="/admin/reviews" element={<ReviewsModeration />} />
+          <Route path="/admin/categories" element={<CategoriesManagement />} />
+          <Route path="/admin/analytics" element={<AnalyticsPage />} />
         </Routes>
       </Router>
     </AuthProvider>
