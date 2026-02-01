@@ -1,4 +1,4 @@
-// src/services/homeService.js
+// src/hooks/homeServices.jsx
 import apiClient from '../api/Config';
 
 export const homeService = {
