@@ -36,8 +36,9 @@ async function bootstrap() {
       }
       
       // In production, allow requests with no origin (e.g., mobile apps, Postman)
-      // but verify the origin if present
+      // but log them for monitoring
       if (!origin) {
+        console.log('CORS: Allowing request with no origin header');
         return callback(null, true);
       }
       
@@ -52,8 +53,8 @@ async function bootstrap() {
       if (isAllowed) {
         callback(null, true);
       } else {
-        console.warn(`CORS blocked request from origin: ${origin}`);
-        callback(new Error('Not allowed by CORS'));
+        console.warn(`CORS blocked request from origin: ${origin}. Allowed origins: ${allowedOrigins.join(', ')}`);
+        callback(new Error(`Not allowed by CORS. Allowed origins: ${allowedOrigins.join(', ')}`));
       }
     },
     credentials: true,
