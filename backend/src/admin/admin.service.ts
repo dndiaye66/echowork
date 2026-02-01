@@ -15,6 +15,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AdminService {
@@ -844,7 +845,6 @@ export class AdminService {
       }
 
       // Generate a secure temporary password using crypto
-      const crypto = require('crypto');
       const tempPassword = crypto.randomBytes(8).toString('base64').slice(0, 12);
       const hashedPassword = await bcrypt.hash(tempPassword, 10);
 

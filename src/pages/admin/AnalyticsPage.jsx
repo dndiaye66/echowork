@@ -14,6 +14,11 @@ import {
   Download,
 } from 'lucide-react';
 
+// Chart display constants
+const BAR_WIDTH_MULTIPLIER = 20;
+const MAX_BAR_WIDTH = 200;
+const CATEGORY_BAR_MULTIPLIER = 10;
+
 function AnalyticsPage() {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -246,7 +251,7 @@ function AnalyticsPage() {
                                 <div
                                   className="bg-secondary h-4 rounded"
                                   style={{
-                                    width: `${Math.min(cat._count.companies * 10, 200)}px`,
+                                    width: `${Math.min(cat._count.companies * CATEGORY_BAR_MULTIPLIER, MAX_BAR_WIDTH)}px`,
                                   }}
                                 ></div>
                                 <span className="font-semibold">{cat._count.companies}</span>
