@@ -8,12 +8,12 @@ async function bootstrap() {
   // Set global prefix for all routes
   app.setGlobalPrefix('api');
   
-  // Enable CORS with multiple origins support
+  // Enable CORS with proper configuration for echowork.net
   const allowedOrigins = process.env.ALLOWED_ORIGINS 
     ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
     : [process.env.FRONTEND_URL || 'http://localhost:5173'];
   
-  // Pre-compile regex patterns for performance
+  // Pre-compile regex patterns for wildcard support
   const allowedPatterns = allowedOrigins.map(allowed => {
     if (allowed.includes('*')) {
       // Escape special regex characters except *
@@ -27,6 +27,7 @@ async function bootstrap() {
   
   const isDevelopment = process.env.NODE_ENV === 'development';
   
+  // Configure CORS to prevent duplicate headers and ensure proper origin handling
   app.enableCors({
     origin: (origin, callback) => {
       // In development mode, allow all origins
@@ -34,10 +35,10 @@ async function bootstrap() {
         return callback(null, true);
       }
       
-      // In production, reject requests with no origin for security
-      // (prevents server-to-server abuse)
+      // In production, allow requests with no origin (e.g., mobile apps, Postman)
+      // but verify the origin if present
       if (!origin) {
-        return callback(null, false);
+        return callback(null, true);
       }
       
       // Check if origin matches any allowed pattern
@@ -48,12 +49,18 @@ async function bootstrap() {
         return pattern.value === origin;
       });
       
-      // Allow or reject based on whether origin is in allowed list
-      callback(null, isAllowed);
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        console.warn(`CORS blocked request from origin: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
+      }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    // Prevent duplicate headers by not setting exposedHeaders if not needed
+    exposedHeaders: [],
   });
   
   // Enable global validation pipe
@@ -68,5 +75,6 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
   await app.listen(port);
   console.log(`Server listening on http://localhost:${port}`);
+  console.log(`CORS enabled for origins: ${allowedOrigins.join(', ')}`);
 }
 bootstrap();
