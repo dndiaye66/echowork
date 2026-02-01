@@ -630,9 +630,24 @@ export class AdminService {
           );
         }
 
-        // Prevent circular references
+        // Prevent circular references - check entire parent chain
         if (updateCategoryDto.parentId === id) {
           throw new BadRequestException('A category cannot be its own parent');
+        }
+
+        // Check for circular reference in parent chain
+        let currentParent = parent;
+        while (currentParent.parentId !== null) {
+          if (currentParent.parentId === id) {
+            throw new BadRequestException(
+              'This would create a circular reference in the category hierarchy',
+            );
+          }
+          const nextParent = await this.prisma.category.findUnique({
+            where: { id: currentParent.parentId },
+          });
+          if (!nextParent) break;
+          currentParent = nextParent;
         }
       }
 
@@ -828,8 +843,9 @@ export class AdminService {
         throw new NotFoundException(`User with ID ${id} not found`);
       }
 
-      // Generate a temporary password
-      const tempPassword = Math.random().toString(36).slice(-8);
+      // Generate a secure temporary password using crypto
+      const crypto = require('crypto');
+      const tempPassword = crypto.randomBytes(8).toString('base64').slice(0, 12);
       const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
       await this.prisma.user.update({

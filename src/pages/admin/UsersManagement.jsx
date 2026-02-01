@@ -18,6 +18,8 @@ function UsersManagement() {
   });
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [temporaryPassword, setTemporaryPassword] = useState('');
   const [editFormData, setEditFormData] = useState({
     username: '',
     email: '',
@@ -119,11 +121,17 @@ function UsersManagement() {
     
     try {
       const response = await axios.post(`/admin/users/${userId}/reset-password`);
-      alert(`Password reset successfully. Temporary password: ${response.data.temporaryPassword}\nPlease save this and share it with the user securely.`);
+      setTemporaryPassword(response.data.temporaryPassword);
+      setShowPasswordModal(true);
     } catch (error) {
       console.error('Failed to reset password:', error);
       alert(error.response?.data?.message || 'Failed to reset password');
     }
+  };
+
+  const handleCopyPassword = () => {
+    navigator.clipboard.writeText(temporaryPassword);
+    alert('Password copied to clipboard!');
   };
 
   const handleEdit = (userItem) => {
@@ -473,6 +481,60 @@ function UsersManagement() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Password Reset Modal */}
+      {showPasswordModal && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg mb-4 text-warning">⚠️ Password Reset</h3>
+            <div className="alert alert-warning mb-4">
+              <div>
+                <span className="text-sm">
+                  This is the only time this password will be shown. Please copy it and share it with the user securely.
+                </span>
+              </div>
+            </div>
+            <div className="form-control mb-4">
+              <label className="label">
+                <span className="label-text font-semibold">Temporary Password</span>
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={temporaryPassword}
+                  className="input input-bordered flex-1 font-mono"
+                  readOnly
+                />
+                <button
+                  type="button"
+                  onClick={handleCopyPassword}
+                  className="btn btn-primary"
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+            <div className="alert alert-info">
+              <div>
+                <span className="text-sm">
+                  The user should change this password immediately after logging in.
+                </span>
+              </div>
+            </div>
+            <div className="modal-action">
+              <button
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setTemporaryPassword('');
+                }}
+                className="btn btn-primary"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
