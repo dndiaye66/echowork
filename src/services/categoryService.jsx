@@ -7,8 +7,20 @@ export const categoryService = {
    * @returns {Promise} Promise resolving to array of categories
    */
   getAllCategories: async () => {
-    const response = await axios.get('/categories');
-    return response.data;
+    try {
+      const response = await axios.get('/categories');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching categories:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        url: error.config?.url,
+        method: error.config?.method
+      });
+      throw error;
+    }
   },
 
   /**

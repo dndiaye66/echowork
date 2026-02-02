@@ -1,5 +1,5 @@
-// src/services/homeService.js
-import apiClient from './config';
+// src/hooks/homeServices.jsx
+import apiClient from '../api/Config';
 
 export const homeService = {
   // Données de la page d'accueil
@@ -10,14 +10,38 @@ export const homeService = {
   
   // Meilleures entreprises
   getBestCompanies: async () => {
-    const response = await apiClient.get('/home/best-companies');
-    return response.data;
+    try {
+      const response = await apiClient.get('/home/best-companies');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching best companies:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        url: error.config?.url,
+        method: error.config?.method
+      });
+      throw error;
+    }
   },
   
   // Entreprises en baisse
   getWorstCompanies: async () => {
-    const response = await apiClient.get('/home/worst-companies');
-    return response.data;
+    try {
+      const response = await apiClient.get('/home/worst-companies');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching worst companies:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        url: error.config?.url,
+        method: error.config?.method
+      });
+      throw error;
+    }
   },
   
   // Publicités
