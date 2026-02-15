@@ -10,7 +10,9 @@
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:studio": "prisma studio",
     "prisma:seed": "npx ts-node prisma/seed.ts",
-    "create:admin": "npx ts-node prisma/create-admin.ts"
+    "create:admin": "npx ts-node prisma/create-admin.ts",
+    "add:education-category": "npx ts-node prisma/add-education-category.ts",
+    "verify:categories": "npx ts-node prisma/verify-category.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

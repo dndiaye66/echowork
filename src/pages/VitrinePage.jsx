@@ -27,6 +27,7 @@ import {
   Truck,
   Building2,
   Wheat,
+  GraduationCap,
 } from "lucide-react";
 
 // Icon mapping for categories based on their names
@@ -41,6 +42,7 @@ const categoryIconMap = {
   "services": Briefcase,
   "telecommunications": Phone,
   "energie-et-petrole": Zap,
+  "etablissements-d-enseignement-superieur": GraduationCap,
 };
 
 const VitrinePage = () => {

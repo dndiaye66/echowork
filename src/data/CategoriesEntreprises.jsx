@@ -56,6 +56,11 @@ const CategoriesEntreprises = [
     slug: "banques-et-institutions-financieres",
     icon: "🏦",
   },
+  {
+    name: "Établissements d'Enseignement Supérieur",
+    slug: "etablissements-d-enseignement-superieur",
+    icon: "🎓",
+  },
 ];
 
 export default CategoriesEntreprises
