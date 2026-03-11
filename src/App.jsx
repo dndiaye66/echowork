@@ -20,6 +20,7 @@ import AuthCallback from "./pages/AuthCallback";
 import ConfirmEmailPage from "./pages/ConfirmEmailPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import OtpVerifyPage from "./pages/OtpVerifyPage";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
           <Route path="/confirm-email" element={<ConfirmEmailPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/verify-otp" element={<OtpVerifyPage />} />
 
           {/* ── Admin (ADMIN role only) ── */}
           <Route

@@ -48,6 +48,48 @@ export class EmailService {
     return text.replace(/[&<>"']/g, (m) => map[m]);
   }
 
+  async sendOtpEmail(email: string, username: string, otp: string): Promise<void> {
+    try {
+      const safeUsername = this.escapeHtml(username);
+      const digits = otp.split('').map(d =>
+        `<span style="display:inline-block;width:44px;height:54px;line-height:54px;text-align:center;font-size:28px;font-weight:bold;background:#f9fafb;border:2px solid #e5e7eb;border-radius:10px;margin:0 4px;color:#111827;">${d}</span>`
+      ).join('');
+
+      const info = await this.transporter.sendMail({
+        from: process.env.EMAIL_FROM || '"EchoWork" <noreply@echowork.com>',
+        to: email,
+        subject: 'Votre code de confirmation EchoWork',
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb;">
+            <div style="background:#dc2626;padding:32px 24px;text-align:center;">
+              <h1 style="color:#fff;margin:0;font-size:24px;font-weight:800;letter-spacing:-0.5px;">EchoWork</h1>
+              <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:14px;">Confirmation de votre compte</p>
+            </div>
+            <div style="padding:32px 24px;">
+              <p style="margin:0 0 8px;font-size:16px;color:#111827;">Bonjour <strong>${safeUsername}</strong>,</p>
+              <p style="margin:0 0 28px;font-size:14px;color:#6b7280;line-height:1.6;">
+                Voici votre code de confirmation à 6 chiffres. Il est valable <strong>15 minutes</strong>.
+              </p>
+              <div style="text-align:center;margin:0 0 28px;">${digits}</div>
+              <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:14px 16px;margin-bottom:24px;">
+                <p style="margin:0;font-size:13px;color:#b91c1c;">
+                  ⚠️ Ne partagez jamais ce code. EchoWork ne vous demandera jamais ce code par téléphone ou chat.
+                </p>
+              </div>
+              <p style="margin:0;font-size:12px;color:#9ca3af;">Si vous n'avez pas créé de compte, ignorez cet email.</p>
+            </div>
+          </div>`,
+        text: `Bonjour ${username},\n\nVotre code de confirmation EchoWork : ${otp}\n\nCe code expire dans 15 minutes. Ne le partagez pas.`,
+      });
+      this.logger.log(`OTP email sent to ${email}. ID: ${info.messageId}`);
+      if (!process.env.SMTP_HOST || process.env.SMTP_HOST === 'smtp.ethereal.email') {
+        this.logger.log(`Preview: ${nodemailer.getTestMessageUrl(info)}`);
+      }
+    } catch (error) {
+      this.logger.error(`Failed to send OTP email to ${email}: ${error instanceof Error ? error.message : error}`);
+    }
+  }
+
   async sendConfirmationEmail(email: string, username: string, token: string, frontendUrl: string): Promise<void> {
     try {
       const safeUsername = this.escapeHtml(username);

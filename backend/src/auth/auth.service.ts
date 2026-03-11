@@ -69,9 +69,9 @@ export class AuthService {
     // Build user data
     const fullName = isCompany ? `${firstName!.trim()} ${lastName!.trim()}` : undefined;
 
-    // Generate email confirmation token
-    const emailToken = crypto.randomBytes(32).toString('hex');
-    const emailTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+    // Generate 6-digit OTP
+    const emailToken = Math.floor(100000 + Math.random() * 900000).toString();
+    const emailTokenExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 min
 
     const user = await this.prisma.user.create({
       data: {
@@ -85,10 +85,9 @@ export class AuthService {
       },
     });
 
-    // Send confirmation email (async)
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-    this.emailService.sendConfirmationEmail(email, username!, emailToken, frontendUrl).catch((error) => {
-      this.logger.error('Failed to send confirmation email', error);
+    // Send OTP email (async)
+    this.emailService.sendOtpEmail(email, username!, emailToken).catch((error) => {
+      this.logger.error('Failed to send OTP email', error);
     });
 
     // Generate JWT token
@@ -249,6 +248,43 @@ export class AuthService {
       data: { isVerified: true, emailToken: null, emailTokenExpiry: null },
     });
     return { message: 'Email confirmé avec succès. Vous pouvez maintenant publier des avis.' };
+  }
+
+  async verifyOtp(email: string, otp: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) throw new BadRequestException('Email introuvable.');
+    if (user.isVerified) return { message: 'Email déjà confirmé.' };
+    if (!user.emailToken || user.emailToken !== otp.trim()) {
+      throw new BadRequestException('Code OTP invalide.');
+    }
+    if (user.emailTokenExpiry && user.emailTokenExpiry < new Date()) {
+      throw new BadRequestException('Code OTP expiré. Veuillez demander un nouveau code.');
+    }
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { isVerified: true, emailToken: null, emailTokenExpiry: null },
+    });
+    return { message: 'Email confirmé avec succès !' };
+  }
+
+  async resendOtp(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) throw new BadRequestException('Email introuvable.');
+    if (user.isVerified) return { message: 'Email déjà confirmé.' };
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { emailToken: otp, emailTokenExpiry: otpExpiry },
+    });
+
+    this.emailService.sendOtpEmail(user.email, user.username, otp).catch((err) => {
+      this.logger.error('Failed to resend OTP', err);
+    });
+
+    return { message: 'Nouveau code envoyé.' };
   }
 
   async forgotPassword(email: string) {

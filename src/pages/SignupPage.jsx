@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import axios from '../api/Config';
 import {
   Eye, EyeOff, User, Mail, Lock, CheckCircle2, ArrowRight,
-  Star, Building2, Phone, Sparkles,
+  Star, Building2, Phone,
 } from 'lucide-react';
 
 /* ── Welcome modal shown after successful signup ── */
@@ -143,7 +143,6 @@ function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [welcomeUser, setWelcomeUser] = useState(null);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -185,7 +184,7 @@ function SignupPage() {
 
       const response = await axios.post('/auth/signup', payload);
       login(response.data.user, response.data.accessToken);
-      setWelcomeUser(response.data.user.username);
+      navigate('/verify-otp', { state: { email } });
     } catch (err) {
       setError(err.response?.data?.message || 'Inscription échouée. Veuillez réessayer.');
     } finally {
@@ -216,9 +215,6 @@ function SignupPage() {
 
   return (
     <>
-    {welcomeUser && (
-      <WelcomeModal username={welcomeUser} onClose={() => navigate('/')} />
-    )}
     <div className="min-h-screen flex">
 
       {/* ── Left panel (branding) ── */}

@@ -67,6 +67,20 @@ export class AuthController {
     return this.authService.confirmEmail(token);
   }
 
+  /** POST /api/auth/verify-otp */
+  @Post('verify-otp')
+  @HttpCode(HttpStatus.OK)
+  async verifyOtp(@Body() body: { email: string; otp: string }) {
+    return this.authService.verifyOtp(body.email, body.otp);
+  }
+
+  /** POST /api/auth/resend-otp */
+  @Post('resend-otp')
+  @HttpCode(HttpStatus.OK)
+  async resendOtp(@Body() body: { email: string }) {
+    return this.authService.resendOtp(body.email);
+  }
+
   /** POST /api/auth/forgot-password */
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
