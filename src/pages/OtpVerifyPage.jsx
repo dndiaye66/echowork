@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Mail, CheckCircle2, Star, Sparkles, ArrowRight } from 'lucide-react';
 import axios from '../api/Config';
+import { useAuth } from '../contexts/AuthContext';
 
 /* ── Success modal ── */
 function SuccessModal({ onContinue }) {
@@ -73,7 +74,10 @@ function maskEmail(email) {
 export default function OtpVerifyPage() {
   const { state } = useLocation();
   const navigate = useNavigate();
+  const { login } = useAuth();
   const email = state?.email || '';
+  const pendingToken = state?.accessToken;
+  const pendingUser = state?.user;
 
   const [digits, setDigits] = useState(Array(6).fill(''));
   const [error, setError] = useState('');
@@ -137,6 +141,9 @@ export default function OtpVerifyPage() {
     setError('');
     try {
       await axios.post('/auth/verify-otp', { email, otp });
+      if (pendingUser && pendingToken) {
+        login(pendingUser, pendingToken);
+      }
       setSuccess(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Code invalide. Vérifiez et réessayez.');

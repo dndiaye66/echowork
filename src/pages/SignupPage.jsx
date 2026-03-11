@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import axios from '../api/Config';
 import {
   Eye, EyeOff, User, Mail, Lock, CheckCircle2, ArrowRight,
@@ -144,7 +143,6 @@ function SignupPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const isCompany = accountType === 'company';
 
@@ -183,8 +181,13 @@ function SignupPage() {
         : { username, email, password };
 
       const response = await axios.post('/auth/signup', payload);
-      login(response.data.user, response.data.accessToken);
-      navigate('/verify-otp', { state: { email } });
+      navigate('/verify-otp', {
+        state: {
+          email,
+          accessToken: response.data.accessToken,
+          user: response.data.user,
+        },
+      });
     } catch (err) {
       setError(err.response?.data?.message || 'Inscription échouée. Veuillez réessayer.');
     } finally {
