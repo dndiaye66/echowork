@@ -21,6 +21,7 @@ import ConfirmEmailPage from "./pages/ConfirmEmailPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import OtpVerifyPage from "./pages/OtpVerifyPage";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   return (
@@ -38,6 +39,16 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/verify-otp" element={<OtpVerifyPage />} />
+
+          {/* ── Protected user routes ── */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* ── Admin (ADMIN role only) ── */}
           <Route

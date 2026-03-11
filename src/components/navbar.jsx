@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ChevronDown, Menu, X, LogOut, LayoutDashboard,
+  ChevronDown, Menu, X, LogOut, LayoutDashboard, User,
   Utensils, Landmark, ShoppingCart, Hospital, Briefcase,
   Factory, Phone, Zap, Truck, Building2, Wheat, GraduationCap,
   Home, UtensilsCrossed, Monitor,
@@ -116,6 +116,12 @@ export default function Navbar() {
                   <ChevronDown size={13} className="text-gray-500" />
                 </label>
                 <ul tabIndex={0} className="dropdown-content menu shadow-xl bg-white border border-gray-100 rounded-2xl w-48 p-1.5 mt-1">
+                  <li>
+                    <Link to="/profile" className="flex items-center gap-2 text-sm rounded-xl">
+                      <User size={14} />
+                      Mon profil
+                    </Link>
+                  </li>
                   {user?.role === 'ADMIN' && (
                     <li>
                       <Link to="/admin" className="flex items-center gap-2 text-sm rounded-xl">
@@ -217,6 +223,14 @@ export default function Navbar() {
                     </div>
                     <span className="text-sm font-medium">{user?.username}</span>
                   </div>
+                  <Link
+                    to="/profile"
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-100 transition-colors"
+                    onClick={closeMobile}
+                  >
+                    <User size={15} />
+                    Mon profil
+                  </Link>
                   {user?.role === 'ADMIN' && (
                     <Link
                       to="/admin"

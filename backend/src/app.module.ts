@@ -6,8 +6,9 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { AdminModule } from './admin/admin.module';
 import { CategoriesModule } from './categories/categories.module';
 import { HomeModule } from './home/home.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
-  imports: [PrismaModule, CompaniesModule, AuthModule, ReviewsModule, AdminModule, CategoriesModule, HomeModule],
+  imports: [PrismaModule, CompaniesModule, AuthModule, ReviewsModule, AdminModule, CategoriesModule, HomeModule, UsersModule],
 })
 export class AppModule {}
