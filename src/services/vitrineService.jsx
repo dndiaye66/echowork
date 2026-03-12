@@ -49,4 +49,13 @@ export const vitrineService = {
       return { companyCount: 3500, categoryCount: 15, reviewCount: 500 };
     }
   },
+
+  getJobOffers: async () => {
+    try {
+      const res = await apiClient.get('/home/job-offers');
+      return res.data;
+    } catch {
+      return [];
+    }
+  },
 };

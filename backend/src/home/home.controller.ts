@@ -45,4 +45,14 @@ export class HomeController {
     ]);
     return { companyCount, categoryCount, reviewCount };
   }
+
+  @Get('job-offers')
+  async getJobOffers() {
+    return this.prisma.jobOffer.findMany({
+      where: { isActive: true },
+      include: { company: { select: { id: true, name: true, imageUrl: true } } },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+    });
+  }
 }

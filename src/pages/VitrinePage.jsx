@@ -10,7 +10,7 @@ import {
 import Navbar from '../components/navbar';
 import Foot from '../components/Foot';
 import SearchAutocomplete from '../components/SearchAutocomplete';
-import { useBestCompanies, useWorstCompanies, useStats } from '../hooks/useHomeData';
+import { useBestCompanies, useWorstCompanies, useStats, useJobOffers } from '../hooks/useHomeData';
 import { useCategories } from '../hooks/useCategory';
 import backgroundImage from '../assets/image/imgbackground.jpg';
 
@@ -208,8 +208,9 @@ export default function VitrinePage() {
   const { data: worstCompanies, loading: worstLoading } = useWorstCompanies();
   const { categories, loading: catLoading } = useCategories();
   const { data: stats } = useStats();
-  const jobs = [];
-  const hasJobs = false;
+  const { data: jobsData } = useJobOffers();
+  const jobs = jobsData || [];
+  const hasJobs = jobs.length > 0;
 
   function formatCount(n) {
     if (!n) return '—';
