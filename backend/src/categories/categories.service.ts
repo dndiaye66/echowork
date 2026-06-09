@@ -11,6 +11,7 @@ export class CategoriesService {
     try {
       return await this.prisma.category.findMany({
         orderBy: { name: 'asc' },
+        include: { _count: { select: { companies: true } } },
       });
     } catch (error) {
       this.logger.error('Failed to fetch categories', error);
