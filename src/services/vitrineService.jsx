@@ -58,4 +58,22 @@ export const vitrineService = {
       return [];
     }
   },
+
+  getRecentReviews: async () => {
+    try {
+      const res = await apiClient.get('/home/recent-reviews');
+      return res.data;
+    } catch {
+      return [];
+    }
+  },
+
+  getBarometer: async () => {
+    try {
+      const res = await apiClient.get('/home/barometer');
+      return res.data;
+    } catch {
+      return [];
+    }
+  },
 };

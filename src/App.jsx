@@ -22,6 +22,15 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import OtpVerifyPage from "./pages/OtpVerifyPage";
 import ProfilePage from "./pages/ProfilePage";
+import LandingEntreprise from "./pages/entreprise/LandingEntreprise";
+import RejoindreEntreprise from "./pages/entreprise/RejoindreEntreprise";
+import TableauDeBord from "./pages/entreprise/TableauDeBord";
+import ProfilEntreprise from "./pages/entreprise/ProfilEntreprise";
+import AvisEntreprise from "./pages/entreprise/AvisEntreprise";
+import StatistiquesEntreprise from "./pages/entreprise/StatistiquesEntreprise";
+import AnalyseIA from "./pages/entreprise/AnalyseIA";
+import ClassementsPage from "./pages/ClassementsPage";
+import SignalementsModeration from "./pages/admin/SignalementsModeration";
 
 function App() {
   return (
@@ -46,6 +55,60 @@ function App() {
             element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ── Public Phase 2 ── */}
+          <Route path="/classements" element={<ClassementsPage />} />
+
+          {/* ── Espace Entreprise ── */}
+          <Route path="/espace-entreprise" element={<LandingEntreprise />} />
+          <Route
+            path="/espace-entreprise/rejoindre"
+            element={
+              <ProtectedRoute>
+                <RejoindreEntreprise />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/espace-entreprise/tableau-de-bord"
+            element={
+              <ProtectedRoute>
+                <TableauDeBord />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/espace-entreprise/tableau-de-bord/profil"
+            element={
+              <ProtectedRoute>
+                <ProfilEntreprise />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/espace-entreprise/tableau-de-bord/avis"
+            element={
+              <ProtectedRoute>
+                <AvisEntreprise />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/espace-entreprise/tableau-de-bord/statistiques"
+            element={
+              <ProtectedRoute>
+                <StatistiquesEntreprise />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/espace-entreprise/tableau-de-bord/analyse-ia"
+            element={
+              <ProtectedRoute>
+                <AnalyseIA />
               </ProtectedRoute>
             }
           />
@@ -112,6 +175,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
                 <AnalyticsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/signalements"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <SignalementsModeration />
               </ProtectedRoute>
             }
           />

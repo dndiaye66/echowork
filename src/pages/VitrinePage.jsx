@@ -1,68 +1,118 @@
 import { Link } from 'react-router-dom';
 import {
-  Star, ArrowRight, ChevronRight, TrendingDown, Award,
-  Search, Shield, Users, MessageSquare, Building2,
+  Star, ArrowRight, ChevronRight, Building2,
   Utensils, Landmark, ShoppingCart, Hospital, Briefcase,
   Factory, Phone, Zap, Truck, Wheat, GraduationCap,
-  Briefcase as JobIcon, Rocket, Globe, TrendingUp,
-  MapPin, Banknote, Clock, Home, UtensilsCrossed, Monitor, Package,
+  MapPin, Home, UtensilsCrossed, Monitor, Smartphone,
+  TrendingUp, TrendingDown, MessageSquare, Shield,
 } from 'lucide-react';
 import Navbar from '../components/navbar';
 import Foot from '../components/Foot';
 import SearchAutocomplete from '../components/SearchAutocomplete';
-import { useBestCompanies, useWorstCompanies, useStats, useJobOffers } from '../hooks/useHomeData';
+import { useBestCompanies, useStats, useRecentReviews, useBarometer } from '../hooks/useHomeData';
 import { useCategories } from '../hooks/useCategory';
-import backgroundImage from '../assets/image/imgbackground.jpg';
 
-const categoryIconMap = {
-  'agriculture': { Icon: Wheat, bg: 'bg-green-100', color: 'text-green-700' },
-  'agriculture-et-alimentation': { Icon: Wheat, bg: 'bg-green-100', color: 'text-green-700' },
-  'alimentation-et-boissons': { Icon: Utensils, bg: 'bg-orange-100', color: 'text-orange-700' },
-  'automobile': { Icon: Truck, bg: 'bg-blue-100', color: 'text-blue-700' },
-  'commerce-et-distribution': { Icon: ShoppingCart, bg: 'bg-purple-100', color: 'text-purple-700' },
-  'construction-et-btp': { Icon: Building2, bg: 'bg-yellow-100', color: 'text-yellow-800' },
-  'industrie': { Icon: Factory, bg: 'bg-gray-100', color: 'text-gray-700' },
-  'sante-et-pharmacie': { Icon: Hospital, bg: 'bg-red-100', color: 'text-red-700' },
-  'services': { Icon: Briefcase, bg: 'bg-indigo-100', color: 'text-indigo-700' },
-  'telecommunications': { Icon: Phone, bg: 'bg-cyan-100', color: 'text-cyan-700' },
-  'energie-et-petrole': { Icon: Zap, bg: 'bg-amber-100', color: 'text-amber-700' },
-  'banques-et-institutions-financieres': { Icon: Landmark, bg: 'bg-emerald-100', color: 'text-emerald-700' },
-  'etablissements-d-enseignement-superieur': { Icon: GraduationCap, bg: 'bg-violet-100', color: 'text-violet-700' },
-  'ecole-et-enseignement-superieure': { Icon: GraduationCap, bg: 'bg-violet-100', color: 'text-violet-700' },
-  'transport-et-logistique': { Icon: Truck, bg: 'bg-sky-100', color: 'text-sky-700' },
-  'immobilier': { Icon: Home, bg: 'bg-rose-100', color: 'text-rose-700' },
-  'restauration-et-hotellerie': { Icon: UtensilsCrossed, bg: 'bg-orange-100', color: 'text-orange-700' },
-  'informatique-et-numerique': { Icon: Monitor, bg: 'bg-blue-100', color: 'text-blue-700' },
+// ── Category icon map ──────────────────────────────────────────────────────
+const catMap = {
+  'agriculture':                              { Icon: Wheat,          bg: 'bg-green-100',   color: 'text-green-700'   },
+  'agriculture-et-alimentation':              { Icon: Wheat,          bg: 'bg-green-100',   color: 'text-green-700'   },
+  'alimentation-et-boissons':                 { Icon: Utensils,       bg: 'bg-orange-100',  color: 'text-orange-700'  },
+  'automobile':                               { Icon: Truck,          bg: 'bg-blue-100',    color: 'text-blue-700'    },
+  'commerce-et-distribution':                 { Icon: ShoppingCart,   bg: 'bg-purple-100',  color: 'text-purple-700'  },
+  'construction-et-btp':                      { Icon: Building2,      bg: 'bg-yellow-100',  color: 'text-yellow-800'  },
+  'industrie':                                { Icon: Factory,        bg: 'bg-gray-100',    color: 'text-gray-700'    },
+  'sante-et-pharmacie':                       { Icon: Hospital,       bg: 'bg-red-100',     color: 'text-red-700'     },
+  'services':                                 { Icon: Briefcase,      bg: 'bg-indigo-100',  color: 'text-indigo-700'  },
+  'telecommunications':                       { Icon: Phone,          bg: 'bg-cyan-100',    color: 'text-cyan-700'    },
+  'energie-et-petrole':                       { Icon: Zap,            bg: 'bg-amber-100',   color: 'text-amber-700'   },
+  'banques-et-institutions-financieres':      { Icon: Landmark,       bg: 'bg-emerald-100', color: 'text-emerald-700' },
+  'etablissements-d-enseignement-superieur':  { Icon: GraduationCap,  bg: 'bg-violet-100',  color: 'text-violet-700'  },
+  'ecole-et-enseignement-superieure':         { Icon: GraduationCap,  bg: 'bg-violet-100',  color: 'text-violet-700'  },
+  'transport-et-logistique':                  { Icon: Truck,          bg: 'bg-sky-100',     color: 'text-sky-700'     },
+  'immobilier':                               { Icon: Home,           bg: 'bg-rose-100',    color: 'text-rose-700'    },
+  'restauration-et-hotellerie':               { Icon: UtensilsCrossed,bg: 'bg-orange-100',  color: 'text-orange-700'  },
+  'informatique-et-numerique':                { Icon: Monitor,        bg: 'bg-blue-100',    color: 'text-blue-700'    },
 };
 
-/* ── Rating utilities ── */
-function roundToHalf(val) {
-  return Math.round(val * 2) / 2;
+const baroIcons = {
+  'banques-et-institutions-financieres': { Icon: Landmark,  bg: 'bg-emerald-50', color: 'text-emerald-600', border: 'border-emerald-100' },
+  'telecommunications':                  { Icon: Phone,     bg: 'bg-cyan-50',    color: 'text-cyan-600',    border: 'border-cyan-100'    },
+  'services':                            { Icon: Briefcase, bg: 'bg-violet-50',  color: 'text-violet-600',  border: 'border-violet-100'  },
+  'sante-et-pharmacie':                  { Icon: Hospital,  bg: 'bg-red-50',     color: 'text-red-600',     border: 'border-red-100'     },
+};
+
+// ── Static fallbacks ───────────────────────────────────────────────────────
+const STATIC_REVIEWS = [
+  {
+    id: -1, rating: 5,
+    comment: "Très bon accueil et service rapide. Le personnel est très professionnel et attentionné.",
+    user: { username: 'Djibril N.' },
+    company: { name: 'Orange Sénégal', slug: 'orange-senegal', imageUrl: null },
+    createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: -2, rating: 3,
+    comment: "Délai d'intervention assez long mais le technicien était professionnel une fois arrivé.",
+    user: { username: 'Fatou K.' },
+    company: { name: 'Senelec', slug: 'senelec', imageUrl: null },
+    createdAt: new Date(Date.now() - 4 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: -3, rating: 4,
+    comment: "Bon rapport qualité/prix. J'adore leur menu poulet braisé, toujours frais et bien préparé.",
+    user: { username: 'Moustapha C.' },
+    company: { name: 'YUM-YUM Nord Foire', slug: 'yum-yum-nord-foire', imageUrl: null },
+    createdAt: new Date(Date.now() - 6 * 3600 * 1000).toISOString(),
+  },
+];
+
+const STATIC_BAROMETER = [
+  { slug: 'banques-et-institutions-financieres', label: 'Banques',         avg: 4.3, trend: 0.2,  count: 0 },
+  { slug: 'telecommunications',                  label: 'Télécoms',        avg: 4.1, trend: -0.1, count: 0 },
+  { slug: 'services',                            label: 'Services publics', avg: 3.2, trend: 0.3,  count: 0 },
+  { slug: 'sante-et-pharmacie',                  label: 'Santé',           avg: 4.0, trend: 0.1,  count: 0 },
+];
+
+// ── Utilities ──────────────────────────────────────────────────────────────
+function roundToHalf(v) { return Math.round((v || 0) * 2) / 2; }
+
+function timeAgo(dateStr) {
+  const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+  if (diff < 60)       return "À l'instant";
+  if (diff < 3600)     return `Il y a ${Math.floor(diff / 60)} min`;
+  if (diff < 86400)    return `Il y a ${Math.floor(diff / 3600)} h`;
+  if (diff < 2592000)  return `Il y a ${Math.floor(diff / 86400)} j`;
+  return `Il y a ${Math.floor(diff / 2592000)} mois`;
 }
 
-function getRatingInfo(avg) {
-  if (!avg || avg === 0) return null;
-  if (avg < 1.5)  return { label: 'Mauvais',    color: 'bg-red-100 text-red-700' };
-  if (avg < 2.5)  return { label: 'Médiocre',   color: 'bg-orange-100 text-orange-700' };
-  if (avg < 3.5)  return { label: 'Moyen',      color: 'bg-yellow-100 text-yellow-700' };
-  if (avg < 4.5)  return { label: 'Bon',        color: 'bg-green-100 text-green-700' };
-  return           { label: 'Excellent',  color: 'bg-emerald-100 text-emerald-700' };
+function formatCount(n) {
+  if (!n) return '—';
+  if (n >= 1000) return `${(Math.floor(n / 100) * 100).toLocaleString('fr')}+`;
+  if (n >= 100)  return `${Math.floor(n / 10) * 10}+`;
+  return `${n}`;
 }
 
+function ratingLabel(avg) {
+  if (!avg) return null;
+  if (avg < 1.5) return { t: 'Mauvais',   c: 'bg-red-100 text-red-700' };
+  if (avg < 2.5) return { t: 'Médiocre',  c: 'bg-orange-100 text-orange-700' };
+  if (avg < 3.5) return { t: 'Moyen',     c: 'bg-yellow-100 text-yellow-700' };
+  if (avg < 4.5) return { t: 'Bon',       c: 'bg-green-100 text-green-700' };
+  return               { t: 'Excellent',  c: 'bg-emerald-100 text-emerald-700' };
+}
+
+// ── Sub-components ─────────────────────────────────────────────────────────
 function StarRating({ rating, size = 14 }) {
-  const rounded = roundToHalf(rating);
+  const r = roundToHalf(rating);
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((i) => {
-        const full = i <= Math.floor(rounded);
-        const half = !full && i - 0.5 === rounded;
+        const full = i <= Math.floor(r);
+        const half = !full && i - 0.5 === r;
         return (
           <span key={i} className="relative inline-block" style={{ width: size, height: size }}>
-            {/* Empty star base */}
             <Star size={size} className="fill-gray-200 text-gray-200 absolute inset-0" />
-            {/* Full star */}
             {full && <Star size={size} className="fill-red-500 text-red-500 absolute inset-0" />}
-            {/* Half star */}
             {half && (
               <span className="absolute inset-0 overflow-hidden" style={{ width: '50%' }}>
                 <Star size={size} className="fill-red-500 text-red-500" />
@@ -75,531 +125,511 @@ function StarRating({ rating, size = 14 }) {
   );
 }
 
-function CompanyRankCard({ company, rank }) {
-  const avg = company.averageRating || company.scores?.globalScore || 0;
-  const info = getRatingInfo(avg);
+function CompanyCard({ company }) {
+  const avg = parseFloat(company.averageRating || 0);
+  const info = ratingLabel(avg);
   return (
     <Link
       to={`/companies/${company.slug}`}
-      className="flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors group"
+      className="group shrink-0 w-44 md:w-auto bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-red-200 hover:-translate-y-0.5 transition-all duration-200 p-4"
     >
-      <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black shrink-0 ${
-        rank === 1 ? 'bg-yellow-400 text-yellow-900' :
-        rank === 2 ? 'bg-gray-300 text-gray-700' :
-        rank === 3 ? 'bg-amber-600/80 text-white' :
-        'bg-gray-100 text-gray-400'
-      }`}>
-        {rank}
-      </div>
-
-      {company.imageUrl ? (
-        <img src={company.imageUrl} alt={company.name} className="w-10 h-10 rounded-xl object-cover bg-gray-100 shrink-0" />
-      ) : (
-        <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
-          <Building2 size={16} className="text-red-400" />
-        </div>
-      )}
-
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-gray-900 truncate text-sm group-hover:text-red-600 transition-colors">
+      <div className="flex items-center gap-3 mb-3">
+        {company.imageUrl ? (
+          <img src={company.imageUrl} alt={company.name} className="w-10 h-10 rounded-xl object-cover shrink-0" />
+        ) : (
+          <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0 text-red-400 font-bold text-base">
+            {company.name?.[0]?.toUpperCase()}
+          </div>
+        )}
+        <p className="font-semibold text-gray-900 text-sm leading-tight line-clamp-2 group-hover:text-red-600 transition-colors">
           {company.name}
         </p>
-        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-          <StarRating rating={avg} size={12} />
-          {avg > 0 ? (
-            <>
-              <span className="text-xs font-bold text-gray-700">{Number(avg).toFixed(1)}</span>
-              {info && (
-                <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${info.color}`}>
-                  {info.label}
-                </span>
-              )}
-            </>
-          ) : (
-            <span className="text-xs text-gray-400 italic">Pas encore noté</span>
-          )}
-        </div>
-        {company.reviewCount > 0 && (
-          <p className="text-xs text-gray-400 mt-0.5">{company.reviewCount} avis</p>
+      </div>
+      <div className="flex items-center gap-1.5 mb-2">
+        <StarRating rating={avg} size={13} />
+        <span className="text-sm font-bold text-gray-800">{avg.toFixed(1)}</span>
+        {info && <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${info.c}`}>{info.t}</span>}
+      </div>
+      <div className="flex items-center gap-3 text-xs text-gray-400">
+        {company.ville && <span className="flex items-center gap-1"><MapPin size={10} />{company.ville}</span>}
+        {+company.reviewCount > 0 && (
+          <span className="flex items-center gap-1"><MessageSquare size={10} />{company.reviewCount} avis</span>
         )}
       </div>
-
-      <ChevronRight size={15} className="text-gray-300 group-hover:text-red-400 transition-colors shrink-0" />
     </Link>
   );
 }
 
-/* ── Job offer card ── */
-function JobCard({ job }) {
+function ReviewCard({ review }) {
+  const co = review.company;
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:border-red-200 transition-all duration-200 group">
-      <div className="flex items-start gap-4">
-        {job.company?.imageUrl ? (
-          <img src={job.company.imageUrl} alt={job.company.name} className="w-12 h-12 rounded-xl object-cover shrink-0" />
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition-shadow">
+      <div className="flex items-start gap-3">
+        {co?.imageUrl ? (
+          <img src={co.imageUrl} alt={co.name} className="w-9 h-9 rounded-xl object-cover shrink-0" />
         ) : (
-          <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
-            <Building2 size={20} className="text-red-400" />
+          <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center shrink-0 text-red-500 font-bold text-sm">
+            {co?.name?.[0]?.toUpperCase() || '?'}
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-gray-900 text-base group-hover:text-red-600 transition-colors truncate">
-            {job.title}
-          </h3>
-          <p className="text-sm text-gray-500 mt-0.5">{job.company?.name || 'Entreprise'}</p>
-
-          <div className="flex flex-wrap items-center gap-3 mt-3">
-            {job.location && (
-              <span className="flex items-center gap-1 text-xs text-gray-400">
-                <MapPin size={11} /> {job.location}
-              </span>
-            )}
-            {job.salary && (
-              <span className="flex items-center gap-1 text-xs text-gray-400">
-                <Banknote size={11} /> {job.salary}
-              </span>
-            )}
+          <Link
+            to={co?.slug ? `/companies/${co.slug}` : '#'}
+            className="font-semibold text-gray-900 text-sm hover:text-red-600 transition-colors block truncate leading-tight"
+          >
+            {co?.name || 'Entreprise'}
+          </Link>
+          <div className="flex items-center gap-1.5 mt-1">
+            <StarRating rating={review.rating} size={12} />
+            <span className="text-xs font-bold text-gray-700">{review.rating}.0</span>
           </div>
-
-          {job.description && (
-            <p className="text-sm text-gray-400 mt-2 line-clamp-2 leading-relaxed">{job.description}</p>
-          )}
         </div>
+      </div>
 
-        <div className="shrink-0">
-          <span className="inline-block text-xs bg-green-100 text-green-700 font-semibold px-2.5 py-1 rounded-full">
-            CDI
-          </span>
+      <p className="text-sm text-gray-600 leading-relaxed line-clamp-3 flex-1">
+        "{review.comment}"
+      </p>
+
+      <div className="flex items-center gap-2 pt-2 border-t border-gray-50">
+        <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 shrink-0">
+          {review.user?.username?.[0]?.toUpperCase() || '?'}
         </div>
+        <span className="text-xs font-medium text-gray-600 flex-1 truncate">{review.user?.username}</span>
+        <span className="text-xs text-gray-400 shrink-0">{timeAgo(review.createdAt)}</span>
       </div>
     </div>
   );
 }
 
-/* ── Placeholder job card shown when no jobs from API ── */
-function JobPlaceholder({ title, company, location, type, salary }) {
-  return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-      <div className="flex items-start gap-4">
-        <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
-          <Building2 size={20} className="text-gray-300" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-gray-900 text-base">{title}</h3>
-          <p className="text-sm text-gray-400 mt-0.5">{company}</p>
-          <div className="flex flex-wrap items-center gap-3 mt-2">
-            <span className="flex items-center gap-1 text-xs text-gray-300"><MapPin size={11} />{location}</span>
-            {salary && <span className="flex items-center gap-1 text-xs text-gray-300"><Banknote size={11} />{salary}</span>}
-          </div>
-        </div>
-        <span className="inline-block text-xs bg-blue-100 text-blue-700 font-semibold px-2.5 py-1 rounded-full shrink-0">{type}</span>
-      </div>
-    </div>
-  );
-}
-
-const STATIC_JOBS = [
-  { title: 'Responsable Marketing Digital', company: 'TechSénégal', location: 'Dakar', type: 'CDI', salary: '350k–500k FCFA' },
-  { title: 'Développeur Full Stack', company: 'InnovateSN', location: 'Dakar (Hybride)', type: 'CDI', salary: '400k–700k FCFA' },
-  { title: 'Commercial Terrain', company: 'DistribPlus', location: 'Thiès', type: 'CDD', salary: 'À définir' },
-];
-
+// ── Main page ──────────────────────────────────────────────────────────────
 export default function VitrinePage() {
-  const { data: companies, loading, error } = useBestCompanies();
-  const { data: worstCompanies, loading: worstLoading } = useWorstCompanies();
+  const { data: companies, loading: companiesLoading } = useBestCompanies();
   const { categories, loading: catLoading } = useCategories();
   const { data: stats } = useStats();
-  const { data: jobsData } = useJobOffers();
-  const jobs = jobsData || [];
-  const hasJobs = jobs.length > 0;
+  const { data: reviewsData } = useRecentReviews();
+  const { data: baroData } = useBarometer();
 
-  function formatCount(n) {
-    if (!n) return '—';
-    if (n >= 1000) return `${Math.floor(n / 100) * 100}+`;
-    if (n >= 100)  return `${Math.floor(n / 10) * 10}+`;
-    return `${n}`;
-  }
+  const topCompanies   = companies?.slice(0, 6) || [];
+  const rankCompanies  = companies?.slice(0, 5) || [];
+  const visibleCats    = categories?.slice(0, 7) || [];
+  const hasMoreCats    = (categories?.length || 0) > 7;
+  const reviews        = reviewsData?.length > 0 ? reviewsData.slice(0, 3) : STATIC_REVIEWS;
+  const barometer      = (baroData?.filter(b => b.avg !== null).length > 0 ? baroData : STATIC_BAROMETER);
 
   return (
     <>
       <Navbar />
 
-      {/* ─── Hero ─────────────────────────────────────────────────────────────── */}
-      <section
-        className="relative min-h-[55vh] md:min-h-[75vh] flex items-center justify-center text-white"
-        style={{ backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/55 to-black/70" />
-
-        <div className="relative z-10 w-full max-w-3xl mx-auto px-4 py-10 md:py-24 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1 text-xs md:text-sm mb-4 md:mb-7">
-            <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-400 rounded-full animate-pulse" />
-            La plateforme de confiance au Sénégal
+      {/* ── 1. Hero ──────────────────────────────────────────────────────── */}
+      <section className="bg-white border-b border-gray-100">
+        <div className="max-w-4xl mx-auto px-4 pt-14 pb-16 md:pt-24 md:pb-20 text-center">
+          <div className="inline-flex items-center gap-2 bg-red-50 border border-red-100 rounded-full px-4 py-1.5 text-xs font-semibold text-red-600 mb-7">
+            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shrink-0" />
+            La plateforme de confiance des Sénégalais
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-black leading-tight mb-3 md:mb-4">
-            ⭐ Notez les entreprises et{' '}
-            <span className="text-red-400">partagez vos expériences</span>{' '}
-            avec la communauté
+          <h1 className="text-4xl md:text-6xl font-black text-gray-900 leading-[1.05] mb-5">
+            Trouvez les meilleures<br className="hidden sm:block" />
+            {' '}entreprises du{' '}
+            <span className="text-red-600">Sénégal</span>
           </h1>
-          <p className="hidden md:block text-lg md:text-xl text-white/75 mb-10 max-w-xl mx-auto leading-relaxed">
-            Exprimez-vous en toute transparence et responsabilité pour aider les autres à faire les bons choix.
-          </p>
-          <p className="md:hidden text-sm text-white/70 mb-6 max-w-xs mx-auto leading-relaxed">
-            Exprimez-vous et aidez la communauté à faire les bons choix
+          <p className="text-gray-500 text-base md:text-lg max-w-xl mx-auto mb-8 leading-relaxed">
+            Consultez des avis authentiques et partagez votre expérience
+            pour aider la communauté à faire les meilleurs choix.
           </p>
 
-          <div className="max-w-lg mx-auto">
-            <SearchAutocomplete placeholder="Rechercher une entreprise..." />
+          <div className="max-w-2xl mx-auto mb-7">
+            <SearchAutocomplete placeholder="Rechercher une entreprise, un service..." variant="light" />
           </div>
 
-          <div className="flex items-center justify-center gap-6 md:gap-10 mt-8 md:mt-12">
-            <div className="text-center">
-              <p className="text-2xl md:text-3xl font-black">{formatCount(stats?.companyCount)}</p>
-              <p className="text-[10px] md:text-xs text-white/55 uppercase tracking-widest mt-1">Entreprises</p>
-            </div>
-            <div className="w-px h-8 md:h-10 bg-white/20" />
-            <div className="text-center">
-              <p className="text-2xl md:text-3xl font-black">{formatCount(stats?.categoryCount)}</p>
-              <p className="text-[10px] md:text-xs text-white/55 uppercase tracking-widest mt-1">Catégories</p>
-            </div>
-            <div className="w-px h-8 md:h-10 bg-white/20" />
-            <div className="text-center">
-              <p className="text-2xl md:text-3xl font-black">{stats?.reviewCount > 0 ? formatCount(stats.reviewCount) : '0'}</p>
-              <p className="text-[10px] md:text-xs text-white/55 uppercase tracking-widest mt-1">Avis publiés</p>
-            </div>
+          <div className="flex items-center justify-center gap-3 flex-wrap mb-14">
+            <Link
+              to="/signup"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-full font-semibold text-sm hover:bg-red-700 transition-colors shadow-sm"
+            >
+              <Star size={14} fill="currentColor" /> Donner un avis
+            </Link>
+            <a
+              href="#categories"
+              className="inline-flex items-center gap-2 px-6 py-3 border border-gray-300 text-gray-700 rounded-full font-semibold text-sm hover:border-red-300 hover:text-red-600 transition-colors"
+            >
+              Explorer les entreprises <ArrowRight size={14} />
+            </a>
+          </div>
+
+          <div className="flex items-center justify-center gap-8 md:gap-16">
+            {[
+              { n: formatCount(stats?.companyCount), l: 'Entreprises référencées' },
+              { n: formatCount(stats?.categoryCount), l: "Secteurs d'activité" },
+              { n: formatCount(stats?.reviewCount) === '—' ? '0' : formatCount(stats?.reviewCount), l: 'Avis publiés' },
+            ].map(({ n, l }, i, arr) => (
+              <div key={l} className="flex items-center gap-8 md:gap-16">
+                <div className="text-center">
+                  <p className="text-3xl md:text-4xl font-black text-gray-900">{n}</p>
+                  <p className="text-xs text-gray-400 uppercase tracking-wider mt-1">{l}</p>
+                </div>
+                {i < arr.length - 1 && <div className="w-px h-10 bg-gray-200" />}
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ─── Categories ───────────────────────────────────────────────────────── */}
-      <section className="bg-gray-50 py-10 md:py-16">
+      {/* ── 2. Entreprises populaires ─────────────────────────────────────── */}
+      <section className="bg-gray-50 py-12 md:py-16">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-6 md:mb-10 px-4">
-            <h2 className="text-2xl md:text-3xl font-black text-gray-900">Explorez par secteur</h2>
-            <p className="text-gray-500 mt-1.5 text-sm hidden md:block">Trouvez les meilleures entreprises dans chaque domaine d'activité</p>
+          <div className="flex items-center justify-between mb-6 px-4">
+            <div>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Tendances</p>
+              <h2 className="text-xl md:text-2xl font-black text-gray-900">Les entreprises les plus consultées</h2>
+            </div>
+            <Link to="/classements" className="hidden sm:flex items-center gap-1 text-sm font-semibold text-red-600 hover:underline underline-offset-2 shrink-0">
+              Voir tout <ChevronRight size={15} />
+            </Link>
           </div>
 
-          {catLoading ? (
-            <div className="flex md:grid gap-3 md:gap-4 md:grid-cols-4 overflow-x-auto px-4 pb-2 md:pb-0 scrollbar-hide">
-              {[...Array(8)].map((_, i) => <div key={i} className="h-24 w-28 md:w-auto md:h-28 rounded-2xl bg-gray-200 animate-pulse shrink-0" />)}
+          {companiesLoading ? (
+            <div className="flex gap-4 overflow-x-auto px-4 pb-2 md:grid md:grid-cols-3 lg:grid-cols-6 md:overflow-visible scrollbar-hide">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="shrink-0 w-44 md:w-auto h-28 rounded-2xl bg-gray-200 animate-pulse" />
+              ))}
             </div>
           ) : (
             <>
               {/* Mobile: horizontal scroll */}
               <div className="md:hidden flex gap-3 overflow-x-auto px-4 pb-3 scrollbar-hide">
-                {categories?.map((cat) => {
-                  const conf = categoryIconMap[cat.slug] || { Icon: Briefcase, bg: 'bg-gray-100', color: 'text-gray-700' };
-                  return (
-                    <Link
-                      key={cat.slug}
-                      to={`/categories/${cat.slug}`}
-                      className="group flex flex-col items-center gap-2 p-3 rounded-2xl bg-white border border-gray-100 shadow-sm active:scale-95 transition-transform shrink-0 w-24"
-                    >
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${conf.bg}`}>
-                        <conf.Icon size={18} className={conf.color} />
-                      </div>
-                      <span className="text-[10px] font-semibold text-gray-700 text-center leading-tight">
-                        {cat.name}
-                      </span>
-                    </Link>
-                  );
-                })}
+                {topCompanies.map(c => <CompanyCard key={c.id} company={c} />)}
               </div>
               {/* Desktop: grid */}
-              <div className="hidden md:grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 px-4">
-                {categories?.map((cat) => {
-                  const conf = categoryIconMap[cat.slug] || { Icon: Briefcase, bg: 'bg-gray-100', color: 'text-gray-700' };
-                  return (
-                    <Link
-                      key={cat.slug}
-                      to={`/categories/${cat.slug}`}
-                      className="group flex flex-col items-center gap-3 p-5 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md hover:border-red-200 hover:-translate-y-0.5 transition-all duration-200"
-                    >
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${conf.bg}`}>
-                        <conf.Icon size={22} className={conf.color} />
-                      </div>
-                      <span className="text-xs font-semibold text-gray-700 text-center leading-tight group-hover:text-red-600 transition-colors">
-                        {cat.name}
-                      </span>
-                    </Link>
-                  );
-                })}
+              <div className="hidden md:grid grid-cols-3 lg:grid-cols-6 gap-4 px-4">
+                {topCompanies.map(c => <CompanyCard key={c.id} company={c} />)}
               </div>
             </>
           )}
-        </div>
-      </section>
 
-      {/* ─── How it works ─────────────────────────────────────────────────────── */}
-      <section className="py-10 md:py-16 px-4 bg-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-2">Comment ça marche ?</h2>
-          <p className="text-gray-400 mb-8 md:mb-12 text-sm">Simple, rapide et efficace</p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {[
-              { step: '01', title: 'Recherchez', desc: 'Trouvez une entreprise ou un service par catégorie ou par nom grâce à notre recherche intelligente.', Icon: Search, bg: 'bg-blue-100', color: 'text-blue-600' },
-              { step: '02', title: 'Lisez les avis', desc: "Consultez les expériences authentiques de la communauté pour prendre les meilleures décisions.", Icon: MessageSquare, bg: 'bg-green-100', color: 'text-green-600' },
-              { step: '03', title: 'Partagez', desc: "Publiez votre avis et contribuez à rendre les entreprises sénégalaises plus transparentes.", Icon: Users, bg: 'bg-red-100', color: 'text-red-600' },
-            ].map(({ step, title, desc, Icon, bg, color }) => (
-              <div key={step} className="flex flex-col items-center text-center">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${bg}`}>
-                  <Icon size={24} className={color} />
-                </div>
-                <span className="text-xs font-bold text-gray-300 tracking-widest mb-1">ÉTAPE {step}</span>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">{title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-12">
-            <Link to="/signup" className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-full font-semibold text-sm hover:bg-red-700 transition-colors shadow-sm">
-              Commencer maintenant <ArrowRight size={15} />
+          <div className="mt-5 text-center sm:hidden px-4">
+            <Link to="/classements" className="text-sm font-semibold text-red-600">
+              Voir toutes les entreprises →
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ─── Rankings ─────────────────────────────────────────────────────────── */}
-      <section className="bg-white py-10 md:py-16 px-4">
+      {/* ── 3. Catégories ─────────────────────────────────────────────────── */}
+      <section id="categories" className="bg-white py-12 md:py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          <div className="text-center mb-8">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Secteurs</p>
+            <h2 className="text-xl md:text-2xl font-black text-gray-900">Explorez par catégorie</h2>
+          </div>
 
-            {/* Top 10 */}
-            <div className="lg:col-span-3">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-yellow-100 flex items-center justify-center">
-                  <Award size={20} className="text-yellow-600" />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Classement national</p>
-                  <h2 className="text-xl font-black text-gray-900">🏆 Les entreprises les plus appréciées</h2>
-                  <p className="text-xs text-gray-400 mt-0.5">Les entreprises qui offrent les meilleures expériences selon les utilisateurs.</p>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-50">
-                {loading ? (
-                  [...Array(6)].map((_, i) => (
-                    <div key={i} className="flex items-center gap-4 p-4">
-                      <div className="w-9 h-9 rounded-xl bg-gray-100 animate-pulse" />
-                      <div className="w-10 h-10 rounded-xl bg-gray-100 animate-pulse" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-gray-100 rounded animate-pulse w-3/4" />
-                        <div className="h-3 bg-gray-100 rounded animate-pulse w-1/2" />
-                      </div>
+          {catLoading ? (
+            <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
+              {[...Array(8)].map((_, i) => <div key={i} className="h-20 rounded-2xl bg-gray-100 animate-pulse" />)}
+            </div>
+          ) : (
+            <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
+              {visibleCats.map((cat) => {
+                const conf = catMap[cat.slug] || { Icon: Briefcase, bg: 'bg-gray-100', color: 'text-gray-700' };
+                return (
+                  <Link
+                    key={cat.slug}
+                    to={`/categories/${cat.slug}`}
+                    className="group flex flex-col items-center gap-2 p-3 rounded-2xl bg-gray-50 border border-gray-100 hover:bg-red-50 hover:border-red-200 transition-all duration-200"
+                  >
+                    <div className={`w-9 h-9 md:w-11 md:h-11 rounded-xl flex items-center justify-center ${conf.bg}`}>
+                      <conf.Icon size={16} className={`${conf.color} md:hidden`} />
+                      <conf.Icon size={20} className={`${conf.color} hidden md:block`} />
                     </div>
-                  ))
-                ) : error ? (
-                  <p className="p-10 text-center text-gray-400 text-sm">Impossible de charger les entreprises</p>
-                ) : companies?.length === 0 ? (
-                  <p className="p-10 text-center text-gray-400 text-sm">Aucune entreprise pour l'instant</p>
-                ) : (
-                  companies?.slice(0, 10).map((company, i) => (
-                    <CompanyRankCard key={company.id || company.slug} company={company} rank={i + 1} />
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* Right panel */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Worst companies */}
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
-                    <TrendingDown size={20} className="text-red-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Axes d'amélioration</p>
-                    <h2 className="text-lg font-black text-gray-900">📊 Expériences à améliorer</h2>
-                    <p className="text-xs text-gray-400 mt-0.5">Les entreprises pour lesquelles les utilisateurs ont signalé des axes d'amélioration.</p>
-                  </div>
-                </div>
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-50">
-                  {worstLoading ? (
-                    [...Array(4)].map((_, i) => <div key={i} className="flex items-center gap-3 p-3"><div className="flex-1 h-4 bg-gray-100 rounded animate-pulse" /></div>)
-                  ) : worstCompanies?.length === 0 ? (
-                    <p className="p-6 text-center text-gray-400 text-sm">Aucune donnée disponible</p>
-                  ) : (
-                    worstCompanies?.slice(0, 5).map((company) => (
-                      <Link
-                        key={company.id || company.slug}
-                        to={`/companies/${company.slug}`}
-                        className="flex items-center gap-3 p-3.5 hover:bg-gray-50 transition-colors group"
-                      >
-                        <div className="w-7 h-7 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
-                          <Building2 size={13} className="text-red-400" />
-                        </div>
-                        <span className="text-sm font-medium text-gray-700 truncate flex-1 group-hover:text-red-600 transition-colors">
-                          {company.name}
-                        </span>
-                        <StarRating rating={company.averageRating || 0} size={11} />
-                      </Link>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              {/* CTA for businesses */}
-              <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-2xl p-6 text-white">
-                <Shield size={26} className="mb-3 text-white/80" />
-                <h3 className="text-lg font-black mb-2">Vous êtes une entreprise ?</h3>
-                <p className="text-sm text-white/75 mb-5 leading-relaxed">
-                  Rejoignez EchoWork pour renforcer votre visibilité, répondre aux avis
-                  et gagner la confiance de vos clients.
-                </p>
+                    <span className="text-[10px] md:text-xs font-semibold text-gray-700 text-center leading-tight group-hover:text-red-600 transition-colors">
+                      {cat.name}
+                    </span>
+                  </Link>
+                );
+              })}
+              {hasMoreCats && (
                 <Link
-                  to="/signup"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-red-600 rounded-xl text-sm font-bold hover:bg-red-50 transition-colors"
+                  to="/classements"
+                  className="group flex flex-col items-center gap-2 p-3 rounded-2xl bg-gray-50 border border-gray-100 border-dashed hover:bg-red-50 hover:border-red-200 transition-all duration-200"
                 >
-                  Commencer gratuitement <ArrowRight size={14} />
+                  <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm">
+                    +{(categories?.length || 0) - 7}
+                  </div>
+                  <span className="text-[10px] md:text-xs font-semibold text-gray-500 group-hover:text-red-600 transition-colors">
+                    Voir plus
+                  </span>
                 </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── Offres d'emploi ──────────────────────────────────────────────────── */}
-      <section className="py-14 px-4 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                <JobIcon size={20} className="text-blue-600" />
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Carrières & Opportunités</p>
-                <h2 className="text-xl font-black text-gray-900">Offres d'emploi</h2>
-              </div>
-            </div>
-            <Link to="/signup" className="text-sm text-red-600 font-semibold hover:underline underline-offset-2 hidden sm:block">
-              Publier une offre →
-            </Link>
-          </div>
-
-          <div className="space-y-4">
-            {hasJobs
-              ? jobs.slice(0, 5).map((job) => <JobCard key={job.id} job={job} />)
-              : STATIC_JOBS.map((j) => <JobPlaceholder key={j.title} {...j} />)
-            }
-          </div>
-
-          {!hasJobs && (
-            <div className="mt-6 text-center">
-              <p className="text-xs text-gray-300 mb-3">Vous recrutez ? Publiez votre offre gratuitement.</p>
-              <Link to="/signup" className="inline-flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-full text-sm font-semibold hover:bg-blue-700 transition-colors">
-                Déposer une offre <ArrowRight size={14} />
-              </Link>
+              )}
             </div>
           )}
         </div>
       </section>
 
-      {/* ─── Écosystème entrepreneurial ───────────────────────────────────────── */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 bg-red-50 text-red-600 border border-red-100 rounded-full px-4 py-1.5 text-xs font-semibold mb-4">
-              <Rocket size={13} /> Écosystème sénégalais
-            </div>
-            <h2 className="text-3xl font-black text-gray-900">L'entrepreneuriat au Sénégal</h2>
-            <p className="text-gray-500 mt-2 text-sm max-w-xl mx-auto">
-              Rejoignez un écosystème dynamique en pleine croissance. EchoWork vous connecte
-              aux meilleures ressources pour développer votre activité.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            {[
-              {
-                Icon: Globe,
-                bg: 'bg-emerald-100',
-                color: 'text-emerald-700',
-                title: 'Marché en expansion',
-                desc: "Le Sénégal affiche une croissance régulière depuis plus de 10 ans, portée par les secteurs du numérique, de l'énergie et des services.",
-                stat: '+6% PIB/an',
-                statColor: 'text-emerald-600',
-              },
-              {
-                Icon: TrendingUp,
-                bg: 'bg-blue-100',
-                color: 'text-blue-700',
-                title: 'Startups & Innovation',
-                desc: "Dakar s'impose comme hub tech de l'Afrique de l'Ouest. Des centaines de startups se lancent chaque année dans la fintech, l'agritech et l'e-commerce.",
-                stat: '500+ startups',
-                statColor: 'text-blue-600',
-              },
-              {
-                Icon: Users,
-                bg: 'bg-violet-100',
-                color: 'text-violet-700',
-                title: 'Communauté active',
-                desc: "EchoWork connecte consommateurs et entreprises. Rejoignez une communauté de milliers d'utilisateurs qui façonnent la transparence économique.",
-                stat: '10k+ utilisateurs',
-                statColor: 'text-violet-600',
-              },
-            ].map(({ Icon, bg, color, title, desc, stat, statColor }) => (
-              <div key={title} className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${bg}`}>
-                  <Icon size={22} className={color} />
-                </div>
-                <p className={`text-2xl font-black mb-1 ${statColor}`}>{stat}</p>
-                <h3 className="text-base font-bold text-gray-900 mb-2">{title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* CTA band */}
-          <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 text-white">
+      {/* ── 4. Classement national ───────────────────────────────────────── */}
+      <section className="bg-gray-50 py-12 md:py-16 px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-2xl font-black mb-1">Prêt à rejoindre EchoWork ?</h3>
-              <p className="text-white/60 text-sm">
-                Inscription gratuite — pour les particuliers comme pour les entreprises.
-              </p>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Classement national</p>
+              <h2 className="text-xl md:text-2xl font-black text-gray-900">🏆 Top entreprises du Sénégal</h2>
             </div>
-            <div className="flex items-center gap-3 shrink-0">
-              <Link
-                to="/signup"
-                className="px-6 py-3 bg-red-600 text-white rounded-full font-bold text-sm hover:bg-red-700 transition-colors shadow-lg"
-              >
-                S'inscrire gratuitement
-              </Link>
-              <Link
-                to="/login"
-                className="px-6 py-3 border border-white/30 text-white rounded-full font-semibold text-sm hover:bg-white/10 transition-colors"
-              >
-                Se connecter
-              </Link>
+            <Link to="/classements" className="text-sm font-semibold text-red-600 hover:underline underline-offset-2 flex items-center gap-1 shrink-0">
+              Voir le classement complet <ChevronRight size={15} />
+            </Link>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-50">
+            {companiesLoading ? (
+              [...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center gap-4 p-4">
+                  <div className="w-9 h-9 rounded-xl bg-gray-100 animate-pulse shrink-0" />
+                  <div className="w-10 h-10 rounded-xl bg-gray-100 animate-pulse shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-100 rounded animate-pulse w-3/4" />
+                    <div className="h-3 bg-gray-100 rounded animate-pulse w-1/2" />
+                  </div>
+                </div>
+              ))
+            ) : rankCompanies.map((co, i) => {
+              const avg = parseFloat(co.averageRating || 0);
+              const info = ratingLabel(avg);
+              return (
+                <Link
+                  key={co.id}
+                  to={`/companies/${co.slug}`}
+                  className="flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors group"
+                >
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm font-black shrink-0 ${
+                    i === 0 ? 'bg-yellow-400 text-yellow-900' :
+                    i === 1 ? 'bg-gray-300 text-gray-700' :
+                    i === 2 ? 'bg-amber-600/80 text-white' :
+                              'bg-gray-100 text-gray-400'
+                  }`}>
+                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
+                  </div>
+
+                  {co.imageUrl ? (
+                    <img src={co.imageUrl} alt={co.name} className="w-10 h-10 rounded-xl object-cover shrink-0" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0 text-red-400 font-bold">
+                      {co.name?.[0]}
+                    </div>
+                  )}
+
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-sm truncate group-hover:text-red-600 transition-colors">
+                      {co.name}
+                    </p>
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                      <StarRating rating={avg} size={11} />
+                      <span className="text-xs font-bold text-gray-700">{avg.toFixed(1)}</span>
+                      {info && <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${info.c}`}>{info.t}</span>}
+                    </div>
+                  </div>
+
+                  <div className="shrink-0 text-right">
+                    <p className="text-xs text-gray-400">{co.reviewCount} avis</p>
+                    <ChevronRight size={14} className="text-gray-300 group-hover:text-red-400 transition-colors mt-1 ml-auto" />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 5. Avis récents ──────────────────────────────────────────────── */}
+      <section className="bg-white py-12 md:py-16 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Activité récente</p>
+              <h2 className="text-xl md:text-2xl font-black text-gray-900">Derniers avis publiés</h2>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-xs text-gray-400 font-medium">En direct</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {reviews.map(r => <ReviewCard key={r.id} review={r} />)}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 6. Pour les entreprises ──────────────────────────────────────── */}
+      <section className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 py-14 md:py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+
+            {/* Text */}
+            <div>
+              <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-3 py-1.5 text-xs font-semibold text-white/80 mb-5">
+                <Building2 size={12} /> Vous êtes une entreprise ?
+              </div>
+              <h2 className="text-3xl md:text-4xl font-black text-white mb-4 leading-tight">
+                Réclamez votre fiche<br />
+                <span className="text-red-400">Echowork</span>
+              </h2>
+              <p className="text-white/60 text-sm mb-6 leading-relaxed">
+                Répondez aux avis, gagnez en visibilité et renforcez
+                la confiance de vos clients sur la plateforme.
+              </p>
+              <ul className="space-y-2.5 mb-8">
+                {[
+                  'Gérez vos avis et répondez aux clients',
+                  'Analysez votre e-réputation en temps réel',
+                  'Attirez plus de clients avec une fiche complète',
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-2.5 text-white/80 text-sm">
+                    <span className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
+                      <Shield size={10} className="text-red-400" />
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <div className="flex items-center gap-4">
+                <Link
+                  to="/espace-entreprise"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-full font-semibold text-sm hover:bg-red-700 transition-colors shadow-lg"
+                >
+                  Réclamer ma fiche <ArrowRight size={14} />
+                </Link>
+                <span className="text-white/40 text-xs">C'est gratuit et rapide !</span>
+              </div>
+            </div>
+
+            {/* Mini dashboard mockup */}
+            <div className="hidden lg:flex justify-center">
+              <div className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-5 w-72 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-white font-black text-base shrink-0">O</div>
+                  <div>
+                    <p className="text-white font-semibold text-sm">Orange Sénégal</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <StarRating rating={4.5} size={11} />
+                      <span className="text-white/70 text-xs">4.5</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {[['4.5', 'Note'], ['234', 'Avis'], ['12.5k', 'Vues']].map(([v, l]) => (
+                    <div key={l} className="bg-white/10 rounded-xl p-2.5 text-center">
+                      <p className="text-white font-bold text-sm">{v}</p>
+                      <p className="text-white/50 text-[10px] mt-0.5">{l}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-white/5 rounded-xl p-3">
+                  <p className="text-white/40 text-[10px] mb-2">Évolution des avis</p>
+                  <div className="flex items-end gap-1 h-10">
+                    {[3, 4, 5, 4, 6, 5, 7, 6, 8, 7, 9, 8].map((h, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 bg-red-400/50 rounded-sm transition-all"
+                        style={{ height: `${h * 10}%` }}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div className="bg-white/5 rounded-xl p-3">
+                  <p className="text-white/40 text-[10px] mb-2">Répartition des notes</p>
+                  {[['5★', 60], ['4★', 25], ['3★', 10], ['2★', 4], ['1★', 1]].map(([label, pct]) => (
+                    <div key={label} className="flex items-center gap-2 mb-1">
+                      <span className="text-white/50 text-[10px] w-5 shrink-0">{label}</span>
+                      <div className="flex-1 bg-white/10 rounded-full h-1.5">
+                        <div className="bg-red-400 h-1.5 rounded-full" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ─── Trust banner ─────────────────────────────────────────────────────── */}
-      <section className="py-10 px-4 bg-gray-50 border-t border-gray-100">
+      {/* ── 7. Baromètre Echowork ────────────────────────────────────────── */}
+      <section className="bg-gray-50 py-12 md:py-16 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Données nationales</p>
+            <h2 className="text-xl md:text-2xl font-black text-gray-900 mb-2">Le baromètre Echowork</h2>
+            <p className="text-gray-500 text-sm">La satisfaction des Sénégalais en temps réel dans les principaux secteurs</p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {barometer.map((b) => {
+              const conf = baroIcons[b.slug] || { Icon: Briefcase, bg: 'bg-gray-50', color: 'text-gray-600', border: 'border-gray-100' };
+              const Icon = conf.Icon;
+              const trendPositive = b.trend > 0;
+              const trendNeutral  = !b.trend || b.trend === 0;
+              return (
+                <Link
+                  key={b.slug}
+                  to={`/categories/${b.slug}`}
+                  className={`group bg-white rounded-2xl border ${conf.border} shadow-sm hover:shadow-md p-5 transition-all duration-200 hover:-translate-y-0.5`}
+                >
+                  <div className={`w-10 h-10 rounded-xl ${conf.bg} flex items-center justify-center mb-4`}>
+                    <Icon size={18} className={conf.color} />
+                  </div>
+                  <p className="text-xs text-gray-400 font-medium mb-1">Satisfaction</p>
+                  <p className="text-sm font-semibold text-gray-700 mb-3">{b.label}</p>
+                  <p className="text-3xl font-black text-gray-900 mb-1">
+                    {b.avg !== null ? `${b.avg}` : '—'}
+                    <span className="text-base font-semibold text-gray-400">/5</span>
+                  </p>
+                  {b.trend !== null && (
+                    <div className={`flex items-center gap-1 text-xs font-semibold ${
+                      trendNeutral ? 'text-gray-400' : trendPositive ? 'text-green-600' : 'text-red-500'
+                    }`}>
+                      {trendNeutral ? <Briefcase size={11} /> : trendPositive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+                      {!trendNeutral && `${trendPositive ? '+' : ''}${b.trend} ce mois`}
+                      {trendNeutral && 'Stable ce mois'}
+                    </div>
+                  )}
+                  <p className="text-[10px] text-gray-400 mt-2 group-hover:text-red-500 transition-colors">
+                    Voir le détail →
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 8. Application mobile ─────────────────────────────────────────── */}
+      <section className="bg-white py-12 md:py-16 px-4 border-t border-gray-100">
         <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-            {[
-              { value: '100%', label: 'Avis vérifiés par la communauté', Icon: Shield, color: 'text-green-500' },
-              { value: 'Gratuit', label: 'Publication et lecture des avis', Icon: Star, color: 'text-yellow-500' },
-              { value: 'Sénégal', label: "Plateforme dédiée à l'Afrique de l'Ouest", Icon: Building2, color: 'text-red-500' },
-            ].map(({ value, label, Icon, color }) => (
-              <div key={value} className="flex flex-col items-center gap-2">
-                <Icon size={28} className={`${color} mb-1`} />
-                <p className="text-2xl font-black text-gray-900">{value}</p>
-                <p className="text-sm text-gray-500">{label}</p>
+          <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-3xl border border-red-100 px-8 py-10 md:py-12 flex flex-col md:flex-row items-center gap-8">
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-white shadow-md flex items-center justify-center shrink-0">
+              <Smartphone size={32} className="text-red-500" />
+            </div>
+            <div className="flex-1 text-center md:text-left">
+              <h2 className="text-xl md:text-2xl font-black text-gray-900 mb-2">
+                Echowork partout avec vous !
+              </h2>
+              <p className="text-gray-500 text-sm mb-6">
+                Bientôt disponible sur mobile pour consulter et partager des avis où que vous soyez.
+              </p>
+              <div className="flex items-center gap-3 justify-center md:justify-start">
+                <span className="flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded-xl text-xs font-semibold cursor-not-allowed opacity-75">
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.4-.07 2.38.72 3.2.73.96-.12 1.87-.93 3.22-.82 2.44.2 3.68 2.03 3.68 2.03-3.25 1.96-2.72 6.42 1.07 7.67-.73 1.9-1.71 3.63-3.17 4.27zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" /></svg>
+                  App Store
+                </span>
+                <span className="flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded-xl text-xs font-semibold cursor-not-allowed opacity-75">
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M3.18 23.76c.34.19.72.24 1.1.14l12.44-7.18-2.58-2.58L3.18 23.76zm16.46-10.03L16.9 12l2.74-1.73-12.46-7.21C6.8 2.97 6.4 2.93 6.06 3.1L17.05 14.1l2.59-0.37zM2.38 4.04A2 2 0 0 0 2 5v14a2 2 0 0 0 .37.96l.07.07L14.32 12l-11.87-7.96-.07-.07zM19.64 10.27L17 8.8 14.32 12 17 15.2l2.64-1.47c.76-.42.76-1.62 0-2.05l-.01.59z" /></svg>
+                  Google Play
+                </span>
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>
 
       <Foot />
-      {/* Espace pour la barre de navigation mobile */}
       <div className="md:hidden h-16" />
     </>
   );

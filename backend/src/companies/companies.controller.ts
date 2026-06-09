@@ -1,115 +1,157 @@
-import { Controller, Get, Param, NotFoundException, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  Query,
+  Body,
+  NotFoundException,
+  UseGuards,
+  Request,
+  ParseIntPipe,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { CompaniesService } from './companies.service';
 import { CompanyIdParamDto, CategoryIdParamDto, CategorySlugParamDto, CompanySlugParamDto } from './dto/param.dto';
+import { UpdateCompanyProfileDto } from './dto/update-company-profile.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CompanyOwnerGuard } from './company-owner.guard';
 
-/**
- * Controller handling company-related HTTP endpoints
- */
+const photoStorage = diskStorage({
+  destination: './uploads/companies',
+  filename: (_req: Express.Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
+    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, `company-${unique}${extname(file.originalname)}`);
+  },
+});
+
 @Controller('companies')
 export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 
-  /**
-   * GET /api/companies/search/autocomplete
-   * Intelligent search with autocomplete suggestions
-   * Supports direct search (e.g., "Banque") and rating-based search (e.g., "meilleur restaurant")
-   * NOTE: This route must come before the general GET / route
-   * @param query - Search query
-   * @param limit - Maximum number of results (default: 10)
-   * @returns Promise<Company[]> List of matching companies with ratings
-   */
+  // ── Public routes ──────────────────────────────────────────────
+
   @Get('search/autocomplete')
   async searchAutocomplete(
     @Query('q') query?: string,
     @Query('limit') limit?: string,
   ) {
-    const limitNum = limit ? parseInt(limit, 10) : 10;
-    return this.companiesService.searchWithAutocomplete(query || '', limitNum);
+    return this.companiesService.searchWithAutocomplete(query || '', limit ? parseInt(limit, 10) : 10);
   }
 
-  /**
-   * GET /api/companies
-   * Retrieves all companies
-   * @param search - Optional search query
-   * @returns Promise<Company[]> List of all companies with their categories
-   */
-  @Get()
-  async getAll(@Query('search') search?: string) {
-    return this.companiesService.findAll(search);
-  }
-
-  /**
-   * GET /api/companies/best
-   * Retrieves top 10 companies sorted by average rating
-   * NOTE: This route must come before the numeric :id route to avoid conflicts
-   * @returns Promise<Company[]> List of top 10 rated companies
-   */
   @Get('best')
   async getBestCompanies() {
     return this.companiesService.findBestCompanies();
   }
 
-  /**
-   * GET /api/companies/category/slug/:slug
-   * Retrieves all companies in a specific category by slug
-   * NOTE: This route must come before the numeric category/:categoryId route
-   * @param params - Validated DTO containing the category slug
-   * @returns Promise<Company[]> List of companies in the category
-   * @throws BadRequestException if slug format is invalid (handled by ValidationPipe)
-   */
   @Get('category/slug/:slug')
   async getByCategorySlug(@Param() params: CategorySlugParamDto) {
     return this.companiesService.findByCategorySlug(params.slug);
   }
 
-  /**
-   * GET /api/companies/category/:categoryId
-   * Retrieves all companies in a specific category
-   * @param params - Validated DTO containing the category ID
-   * @returns Promise<Company[]> List of companies in the category
-   * @throws BadRequestException if category ID is not a valid positive number (handled by ValidationPipe)
-   */
   @Get('category/:categoryId')
   async getByCategory(@Param() params: CategoryIdParamDto) {
     return this.companiesService.findByCategory(params.categoryId);
   }
 
-  /**
-   * GET /api/companies/slug/:slug
-   * Retrieves a specific company by slug
-   * NOTE: This route must come before the numeric :id route to avoid conflicts
-   * @param params - Validated DTO containing the company slug
-   * @returns Promise<Company> The requested company with reviews, job offers, and advertisements
-   * @throws BadRequestException if slug format is invalid (handled by ValidationPipe)
-   * @throws NotFoundException if company doesn't exist
-   */
   @Get('slug/:slug')
   async getBySlug(@Param() params: CompanySlugParamDto) {
     const company = await this.companiesService.findBySlug(params.slug);
-    
-    if (!company) {
-      throw new NotFoundException(`Company with slug ${params.slug} not found`);
-    }
-    
+    if (!company) throw new NotFoundException(`Company with slug ${params.slug} not found`);
     return company;
   }
 
-  /**
-   * GET /api/companies/:id
-   * Retrieves a specific company by ID
-   * @param params - Validated DTO containing the company ID
-   * @returns Promise<Company> The requested company
-   * @throws BadRequestException if ID is not a valid positive number (handled by ValidationPipe)
-   * @throws NotFoundException if company doesn't exist
-   */
+  @Get()
+  async getAll(@Query('search') search?: string) {
+    return this.companiesService.findAll(search);
+  }
+
+  // ── Authenticated routes ───────────────────────────────────────
+
+  /** GET /api/companies/my — mes entreprises réclamées */
+  @Get('my')
+  @UseGuards(JwtAuthGuard)
+  async getMyCompanies(@Request() req: any) {
+    return this.companiesService.getMyCompanies(req.user.id);
+  }
+
+  /** POST /api/companies/:id/claim — réclamer une fiche */
+  @Post(':id/claim')
+  @UseGuards(JwtAuthGuard)
+  async claim(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
+    return this.companiesService.claimCompany(id, req.user.id);
+  }
+
+  /** DELETE /api/companies/:id/claim — abandonner la réclamation */
+  @Delete(':id/claim')
+  @UseGuards(JwtAuthGuard)
+  async unclaim(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
+    return this.companiesService.unclaimCompany(id, req.user.id);
+  }
+
+  /** GET /api/companies/:id/dashboard — données complètes du tableau de bord */
+  @Get(':id/dashboard')
+  @UseGuards(JwtAuthGuard, CompanyOwnerGuard)
+  async getDashboard(@Param('id', ParseIntPipe) id: number) {
+    return this.companiesService.getCompanyDashboard(id);
+  }
+
+  /** PATCH /api/companies/:id/profile — mettre à jour le profil */
+  @Patch(':id/profile')
+  @UseGuards(JwtAuthGuard, CompanyOwnerGuard)
+  async updateProfile(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateCompanyProfileDto,
+  ) {
+    return this.companiesService.updateProfile(id, dto);
+  }
+
+  /** POST /api/companies/:id/photos — ajouter une photo */
+  @Post(':id/photos')
+  @UseGuards(JwtAuthGuard, CompanyOwnerGuard)
+  @UseInterceptors(FileInterceptor('photo', {
+    storage: photoStorage,
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (_req, file, cb) => {
+      if (!file.mimetype.match(/\/(jpg|jpeg|png|webp)$/)) {
+        return cb(new BadRequestException('Seuls les fichiers JPG, PNG ou WEBP sont acceptés'), false);
+      }
+      cb(null, true);
+    },
+  }))
+  async addPhoto(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file: Express.Multer.File,
+    @Body('caption') caption?: string,
+  ) {
+    if (!file) throw new BadRequestException('Aucun fichier reçu');
+    const url = `/uploads/companies/${file.filename}`;
+    return this.companiesService.addPhoto(id, url, caption);
+  }
+
+  /** DELETE /api/companies/:id/photos/:photoId — supprimer une photo */
+  @Delete(':id/photos/:photoId')
+  @UseGuards(JwtAuthGuard, CompanyOwnerGuard)
+  async deletePhoto(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('photoId', ParseIntPipe) photoId: number,
+  ) {
+    return this.companiesService.deletePhoto(id, photoId);
+  }
+
+  // ── Route par ID (en dernier pour éviter les conflits) ────────
+
   @Get(':id')
   async getById(@Param() params: CompanyIdParamDto) {
     const company = await this.companiesService.findById(params.id);
-    
-    if (!company) {
-      throw new NotFoundException(`Company with ID ${params.id} not found`);
-    }
-    
+    if (!company) throw new NotFoundException(`Company with ID ${params.id} not found`);
     return company;
   }
 }

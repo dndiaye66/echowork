@@ -14,6 +14,7 @@ import {
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
+import { CreateReplyDto } from './dto/create-reply.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('reviews')
@@ -83,5 +84,34 @@ export class ReviewsController {
   @UseGuards(JwtAuthGuard)
   async delete(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
     return this.reviewsService.delete(id, req.user.id, req.user.role);
+  }
+
+  /** POST /api/reviews/:id/reply — répondre à un avis (propriétaire entreprise) */
+  @Post(':id/reply')
+  @UseGuards(JwtAuthGuard)
+  async createReply(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: any,
+    @Body() dto: CreateReplyDto,
+  ) {
+    return this.reviewsService.createReply(id, req.user.id, dto.content);
+  }
+
+  /** PATCH /api/reviews/:id/reply — modifier sa réponse */
+  @Patch(':id/reply')
+  @UseGuards(JwtAuthGuard)
+  async updateReply(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: any,
+    @Body() dto: CreateReplyDto,
+  ) {
+    return this.reviewsService.updateReply(id, req.user.id, dto.content);
+  }
+
+  /** DELETE /api/reviews/:id/reply — supprimer une réponse */
+  @Delete(':id/reply')
+  @UseGuards(JwtAuthGuard)
+  async deleteReply(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
+    return this.reviewsService.deleteReply(id, req.user.id, req.user.role);
   }
 }

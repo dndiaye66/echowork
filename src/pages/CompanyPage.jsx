@@ -2,15 +2,17 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   Star, ThumbsUp, ThumbsDown, MapPin, Phone,
-  Building2, ChevronRight, CheckCircle, AlertCircle, Mail,
+  Building2, ChevronRight, CheckCircle, AlertCircle, Mail, AlertTriangle,
 } from 'lucide-react';
 import Navbar from '../components/navbar';
 import Foot from '../components/Foot';
 import { reviewService } from '../services/reviewService';
 import { companyService } from '../services/companyService';
+import { analyticsService } from '../services/rankingsService';
 import { useVoting } from '../hooks/useVoting';
 import { useAuth } from '../contexts/AuthContext';
 import axios from '../api/Config';
+import SignalementModal from '../components/SignalementModal';
 
 function StarDisplay({ rating, size = 16 }) {
   return (
@@ -82,7 +84,8 @@ export default function CompanyPage() {
   const [existingReview, setExistingReview] = useState(null);
 
   const { upvote, downvote, votingStates } = useVoting();
-  const [userVotes, setUserVotes] = useState({}); // { [reviewId]: 'LIKE' | 'DISLIKE' }
+  const [userVotes, setUserVotes] = useState({});
+  const [showSignalement, setShowSignalement] = useState(false);
 
   const fetchUserVotes = async (companyId) => {
     if (!isAuthenticated) return;
@@ -101,9 +104,9 @@ export default function CompanyPage() {
         const data = await companyService.getCompanyBySlug(slug);
         if (!cancelled) {
           setCompany(data);
+          analyticsService.trackView(data.id, 'direct');
           const reviewList = data.reviews || [];
           setReviews(reviewList);
-          // Check if current user already has a review
           if (user?.id) {
             const mine = reviewList.find((r) => r.user?.id === user.id);
             if (mine) setExistingReview(mine);
@@ -612,6 +615,21 @@ export default function CompanyPage() {
             </div>
           </div>
         </section>
+      )}
+
+      {/* Signalement citoyen */}
+      <div className="max-w-4xl mx-auto px-4 pb-6 text-center">
+        <button
+          onClick={() => setShowSignalement(true)}
+          className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-orange-500 transition-colors"
+        >
+          <AlertTriangle size={12} />
+          Signaler un problème avec cette entreprise
+        </button>
+      </div>
+
+      {showSignalement && (
+        <SignalementModal company={company} onClose={() => setShowSignalement(false)} />
       )}
 
       <div className="md:hidden h-20" />

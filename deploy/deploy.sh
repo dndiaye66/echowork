@@ -7,6 +7,7 @@
 set -e
 
 APP_DIR="/var/www/echowork"
+FRONTEND_DIR="${APP_DIR}"
 BACKEND_DIR="${APP_DIR}/backend"
 NGINX_CONF="/etc/nginx/sites-available/echowork"
 
@@ -14,29 +15,38 @@ echo "======================================"
 echo " EchoWork — Deploying..."
 echo "======================================"
 
+# ── Frontend ──────────────────────────────────────────────────
+echo "[1/7] Installing frontend dependencies..."
+cd ${FRONTEND_DIR}
+npm install
+
+echo "[2/7] Building frontend..."
+npm run build
+echo "       → dist/ generated at ${FRONTEND_DIR}/dist"
+
 # ── Backend ──────────────────────────────────────────────────
-echo "[1/5] Installing backend dependencies..."
+echo "[3/7] Installing backend dependencies..."
 cd ${BACKEND_DIR}
 npm install --omit=dev
 
-echo "[2/5] Running Prisma migrations..."
+echo "[4/7] Running Prisma migrations..."
 npx prisma migrate deploy
 # Uncomment below to re-seed (only on first deploy):
 # npx prisma db seed
 
-echo "[3/5] Building backend..."
+echo "[5/7] Building backend..."
 npm run build
 
-echo "[4/5] (Re)starting backend with PM2..."
+echo "[6/7] (Re)starting backend with PM2..."
 if pm2 list | grep -q "echowork-api"; then
     pm2 reload echowork-api
 else
-    pm2 start ${APP_DIR}/deploy/ecosystem.config.js
+    pm2 start ${APP_DIR}/deploy/ecosystem.config.cjs
 fi
 pm2 save
 
 # ── Nginx (production config) ─────────────────────────────────
-echo "[5/5] Updating Nginx config..."
+echo "[7/7] Updating Nginx config..."
 cp ${APP_DIR}/deploy/nginx-echowork.conf ${NGINX_CONF}
 nginx -t && systemctl reload nginx
 

@@ -25,3 +25,11 @@ export const useStats = () => {
 export const useJobOffers = () => {
   return useApiData(vitrineService.getJobOffers);
 };
+
+export const useRecentReviews = () => {
+  return useApiData(vitrineService.getRecentReviews);
+};
+
+export const useBarometer = () => {
+  return useApiData(vitrineService.getBarometer);
+};

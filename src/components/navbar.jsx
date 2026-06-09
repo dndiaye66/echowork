@@ -71,6 +71,13 @@ export default function Navbar() {
               Accueil
             </Link>
 
+            <Link
+              to="/classements"
+              className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+            >
+              Classements
+            </Link>
+
             {/* Categories dropdown */}
             <div
               className="relative"
@@ -120,6 +127,12 @@ export default function Navbar() {
                     <Link to="/profile" className="flex items-center gap-2 text-sm rounded-xl">
                       <User size={14} />
                       Mon profil
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/espace-entreprise/tableau-de-bord" className="flex items-center gap-2 text-sm rounded-xl">
+                      <Building2 size={14} />
+                      Espace Entreprise
                     </Link>
                   </li>
                   {user?.role === 'ADMIN' && (

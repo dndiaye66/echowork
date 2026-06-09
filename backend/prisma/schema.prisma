@@ -81,6 +81,7 @@ model User {
   votes             ReviewVote[]
   profile           UserProfile?
   claimedCompanies  Company[]
+  citizenReports    CitizenReport[]
 
   @@index([username])
   @@index([email])
@@ -126,31 +127,39 @@ model CategoryKeyword {
 }
 
 model Company {
-  id             Int                @id @default(autoincrement())
-  name           String
-  slug           String             @unique
-  description    String?
-  imageUrl       String?
-  ville          String?            // City (deprecated, use CompanyLocation)
-  adresse        String?            // Address (deprecated, use CompanyLocation)
-  tel            String?            // Telephone
-  activite       String?            // Activity/Business type
-  ninea          String?            @unique // NINEA number (Senegal business ID)
-  rccm           String?            // RCCM number (Commercial registry)
-  size           CompanySize?       // Company size
-  isVerified     Boolean            @default(false)
+  id              Int                @id @default(autoincrement())
+  name            String
+  slug            String             @unique
+  description     String?
+  imageUrl        String?
+  ville           String?
+  adresse         String?
+  tel             String?
+  activite        String?
+  ninea           String?            @unique
+  rccm            String?
+  size            CompanySize?
+  website         String?
+  openingHours    Json?
+  socialLinks     Json?
+  isVerified      Boolean            @default(false)
   claimedByUserId Int?
-  claimedBy      User?              @relation(fields: [claimedByUserId], references: [id], onDelete: SetNull)
-  categoryId     Int
-  category       Category           @relation(fields: [categoryId], references: [id])
-  reviews        Review[]
-  jobOffers      JobOffer[]
-  advertisements Advertisement[]
-  locations      CompanyLocation[]
-  scores         CompanyScore?
-  subscription   Subscription?
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
+  claimedBy       User?              @relation(fields: [claimedByUserId], references: [id], onDelete: SetNull)
+  categoryId      Int
+  category        Category           @relation(fields: [categoryId], references: [id])
+  reviews         Review[]
+  jobOffers       JobOffer[]
+  advertisements  Advertisement[]
+  locations       CompanyLocation[]
+  scores          CompanyScore?
+  subscription    Subscription?
+  photos          CompanyPhoto[]
+  replies         CompanyReply[]
+  views           CompanyView[]
+  analysis        ReviewAnalysis?
+  reports         CitizenReport[]
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
 
   @@index([slug])
   @@index([categoryId])
@@ -193,6 +202,7 @@ model Review {
   downvotes Int           @default(0)
   scores    ReviewScore[]
   votes     ReviewVote[]
+  reply     CompanyReply?
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
@@ -291,6 +301,94 @@ model ReviewVote {
   @@unique([userId, reviewId])
   @@index([userId])
   @@index([reviewId])
+}
+
+model CompanyPhoto {
+  id        Int      @id @default(autoincrement())
+  companyId Int
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  url       String
+  caption   String?
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([companyId])
+}
+
+model CompanyReply {
+  id        Int      @id @default(autoincrement())
+  reviewId  Int      @unique
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  companyId Int
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([reviewId])
+  @@index([companyId])
+}
+
+enum ReportCategory {
+  CORRUPTION
+  MAUVAIS_ACCUEIL
+  RETARD_ADMINISTRATIF
+  NON_RESPECT_ENGAGEMENT
+  AUTRE
+}
+
+enum ReportStatus {
+  PENDING
+  UNDER_REVIEW
+  VALIDATED
+  REJECTED
+}
+
+model CompanyView {
+  id        Int      @id @default(autoincrement())
+  companyId Int
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  viewedAt  DateTime @default(now())
+  source    String?
+
+  @@index([companyId])
+  @@index([viewedAt])
+}
+
+model ReviewAnalysis {
+  id           Int      @id @default(autoincrement())
+  companyId    Int      @unique
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  strengths    Json
+  weaknesses   Json
+  sentimentPos Float
+  sentimentNeu Float
+  sentimentNeg Float
+  reviewCount  Int
+  generatedAt  DateTime @default(now())
+
+  @@index([companyId])
+}
+
+model CitizenReport {
+  id            Int            @id @default(autoincrement())
+  companyId     Int
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  userId        Int?
+  user          User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  category      ReportCategory
+  description   String
+  evidence      String?
+  isAnonymous   Boolean        @default(false)
+  status        ReportStatus   @default(PENDING)
+  moderatorId   Int?
+  moderatorNote String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([companyId])
+  @@index([status])
+  @@index([category])
 }
 
 model Advertisement {

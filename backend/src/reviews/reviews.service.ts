@@ -228,6 +228,60 @@ export class ReviewsService {
     }
   }
 
+  async createReply(reviewId: number, userId: number, content: string) {
+    const review = await this.prisma.review.findUnique({
+      where: { id: reviewId },
+      include: { company: { select: { id: true, claimedByUserId: true } }, reply: true },
+    });
+
+    if (!review) throw new NotFoundException('Avis introuvable');
+    if (review.company.claimedByUserId !== userId) {
+      throw new ForbiddenException('Vous n\'êtes pas autorisé à répondre à cet avis');
+    }
+    if (review.reply) {
+      throw new ConflictException('Une réponse existe déjà pour cet avis');
+    }
+
+    return this.prisma.companyReply.create({
+      data: { reviewId, companyId: review.company.id, content },
+    });
+  }
+
+  async updateReply(reviewId: number, userId: number, content: string) {
+    const reply = await this.prisma.companyReply.findUnique({
+      where: { reviewId },
+      include: { company: { select: { claimedByUserId: true } } },
+    });
+
+    if (!reply) throw new NotFoundException('Réponse introuvable');
+    if (reply.company.claimedByUserId !== userId) {
+      throw new ForbiddenException('Vous n\'êtes pas autorisé à modifier cette réponse');
+    }
+
+    return this.prisma.companyReply.update({
+      where: { reviewId },
+      data: { content },
+    });
+  }
+
+  async deleteReply(reviewId: number, userId: number, userRole: string) {
+    const reply = await this.prisma.companyReply.findUnique({
+      where: { reviewId },
+      include: { company: { select: { claimedByUserId: true } } },
+    });
+
+    if (!reply) throw new NotFoundException('Réponse introuvable');
+
+    const isOwner = reply.company.claimedByUserId === userId;
+    const isAdmin = userRole === 'ADMIN';
+    if (!isOwner && !isAdmin) {
+      throw new ForbiddenException('Vous n\'êtes pas autorisé à supprimer cette réponse');
+    }
+
+    await this.prisma.companyReply.delete({ where: { reviewId } });
+    return { success: true };
+  }
+
   async delete(id: number, userId: number, userRole: string) {
     try {
       const review = await this.prisma.review.findUnique({ where: { id } });

@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   LayoutDashboard, Building2, FolderTree, Users, MessageSquare,
-  Briefcase, TrendingUp, BarChart3, Star, LogOut, Menu, Bell, ChevronRight,
+  Briefcase, TrendingUp, BarChart3, Star, LogOut, Menu, Bell, ChevronRight, AlertTriangle,
 } from 'lucide-react';
 
 const NAV = [
@@ -11,7 +11,8 @@ const NAV = [
   { label: 'Entreprises', icon: Building2, path: '/admin/companies' },
   { label: 'Catégories', icon: FolderTree, path: '/admin/categories' },
   { label: 'Utilisateurs', icon: Users, path: '/admin/users' },
-  { label: 'Modération', icon: MessageSquare, path: '/admin/reviews', badge: true },
+  { label: 'Modération avis', icon: MessageSquare, path: '/admin/reviews', badge: true },
+  { label: 'Signalements', icon: AlertTriangle, path: '/admin/signalements' },
   { label: "Offres d'emploi", icon: Briefcase, path: '/admin/job-offers' },
   { label: 'Publicités', icon: TrendingUp, path: '/admin/advertisements' },
   { label: 'Analytiques', icon: BarChart3, path: '/admin/analytics' },
