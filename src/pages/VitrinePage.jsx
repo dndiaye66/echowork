@@ -11,7 +11,7 @@ import Foot from '../components/Foot';
 import SearchAutocomplete from '../components/SearchAutocomplete';
 import { useBestCompanies, useStats, useRecentReviews, useBarometer } from '../hooks/useHomeData';
 import { useCategories } from '../hooks/useCategory';
-import backgroundImage from '../assets/image/imgbackground.jpg';
+import backgroundImage from '../assets/image/background_banner.png';
 
 // ── Category icon map ──────────────────────────────────────────────────────
 const catMap = {
