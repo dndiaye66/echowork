@@ -280,8 +280,15 @@ export default function VitrinePage() {
       <Navbar />
 
       {/* ── 1. Hero — split layout ────────────────────────────────────────── */}
-      <section className="bg-white border-b border-gray-100 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20">
+      <section className="bg-white border-b border-gray-100 overflow-hidden relative">
+
+        {/* Decorative background glows */}
+        <div className="absolute -top-32 -left-32 w-[480px] h-[480px] rounded-full bg-red-100 opacity-25 blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-80 h-80 rounded-full bg-rose-100 opacity-20 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 left-1/3 w-96 h-96 rounded-full bg-red-50 opacity-30 blur-3xl pointer-events-none" />
+        <div className="absolute top-8 right-1/2 w-48 h-48 rounded-full bg-pink-100 opacity-15 blur-2xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
 
             {/* Left: Text content */}
