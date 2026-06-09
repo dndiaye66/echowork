@@ -297,7 +297,6 @@ export default function VitrinePage() {
                 {[
                   { n: formatCount(stats?.companyCount), l: 'Entreprises' },
                   { n: formatCount(stats?.categoryCount), l: 'Secteurs' },
-                  { n: stats?.reviewCount > 0 ? formatCount(stats.reviewCount) : '0', l: 'Avis publiés' },
                 ].map(({ n, l }, i, arr) => (
                   <div key={l} className="flex items-center gap-6 md:gap-10">
                     <div>
