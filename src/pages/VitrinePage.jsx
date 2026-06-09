@@ -5,6 +5,7 @@ import {
   Factory, Phone, Zap, Truck, Wheat, GraduationCap,
   MapPin, Home, UtensilsCrossed, Monitor, Smartphone,
   TrendingUp, TrendingDown, MessageSquare, Shield, Users,
+  LayoutGrid, Award, Lock, ArrowRightCircle,
 } from 'lucide-react';
 import Navbar from '../components/navbar';
 import Foot from '../components/Foot';
@@ -12,6 +13,28 @@ import SearchAutocomplete from '../components/SearchAutocomplete';
 import { useBestCompanies, useStats, useRecentReviews, useBarometer } from '../hooks/useHomeData';
 import { useCategories } from '../hooks/useCategory';
 import backgroundImage from '../assets/image/background_banner.png';
+
+// ── Brand color map for known Senegalese companies ────────────────────────
+const BRAND_COLORS = {
+  'orange-senegal':        { bg: 'bg-orange-500',  text: 'text-white' },
+  'orange':                { bg: 'bg-orange-500',  text: 'text-white' },
+  'wave':                  { bg: 'bg-teal-500',    text: 'text-white' },
+  'wave-mobile':           { bg: 'bg-teal-500',    text: 'text-white' },
+  'senelec':               { bg: 'bg-blue-900',    text: 'text-white' },
+  'sonatel':               { bg: 'bg-green-600',   text: 'text-white' },
+  'auchan':                { bg: 'bg-red-600',     text: 'text-white' },
+  'auchan-senegal':        { bg: 'bg-red-600',     text: 'text-white' },
+  'bdk':                   { bg: 'bg-emerald-700', text: 'text-white' },
+  'free-senegal':          { bg: 'bg-red-500',     text: 'text-white' },
+  'expresso':              { bg: 'bg-purple-600',  text: 'text-white' },
+  'cbao':                  { bg: 'bg-blue-600',    text: 'text-white' },
+  'sgbs':                  { bg: 'bg-red-700',     text: 'text-white' },
+  'ecobank':               { bg: 'bg-cyan-600',    text: 'text-white' },
+  'boa':                   { bg: 'bg-green-700',   text: 'text-white' },
+  'bhs':                   { bg: 'bg-yellow-500',  text: 'text-white' },
+  'alios-finance-senegal': { bg: 'bg-teal-600',    text: 'text-white' },
+  'aims-senegal':          { bg: 'bg-lime-600',    text: 'text-white' },
+};
 
 // ── Category icon map ──────────────────────────────────────────────────────
 const catMap = {
@@ -135,33 +158,33 @@ function StarRating({ rating, size = 14 }) {
 
 function CompanyCard({ company }) {
   const avg = parseFloat(company.averageRating || 0);
-  const info = ratingLabel(avg);
+  const brand = BRAND_COLORS[company.slug];
   return (
     <Link
       to={`/companies/${company.slug}`}
-      className="group shrink-0 w-40 md:w-auto bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-red-200 hover:-translate-y-0.5 transition-all duration-200 p-4"
+      className="group shrink-0 w-36 md:w-auto bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-red-200 hover:-translate-y-1 transition-all duration-200 overflow-hidden"
     >
-      <div className="flex items-center gap-2.5 mb-3">
+      {/* Colored brand header */}
+      <div className={`h-20 flex items-center justify-center ${brand ? brand.bg : 'bg-gradient-to-br from-red-50 to-red-100'}`}>
         {company.imageUrl ? (
-          <img src={company.imageUrl} alt={company.name} className="w-10 h-10 rounded-xl object-cover shrink-0" />
+          <img src={company.imageUrl} alt={company.name} className="w-12 h-12 object-contain" />
         ) : (
-          <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0 text-red-500 font-black text-lg">
+          <span className={`text-3xl font-black ${brand ? brand.text : 'text-red-400'}`}>
             {company.name?.[0]?.toUpperCase()}
-          </div>
+          </span>
         )}
-        <p className="font-semibold text-gray-900 text-sm leading-tight line-clamp-2 group-hover:text-red-600 transition-colors">
+      </div>
+      {/* Card body */}
+      <div className="p-3">
+        <p className="font-semibold text-gray-900 text-xs leading-tight line-clamp-2 group-hover:text-red-600 transition-colors mb-1.5">
           {company.name}
         </p>
-      </div>
-      <div className="flex items-center gap-1.5 mb-2">
-        <StarRating rating={avg} size={12} />
-        <span className="text-sm font-bold text-gray-800">{avg.toFixed(1)}</span>
-        {info && <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${info.c}`}>{info.t}</span>}
-      </div>
-      <div className="flex items-center gap-3 text-xs text-gray-400">
-        {company.ville && <span className="flex items-center gap-1"><MapPin size={10} />{company.ville}</span>}
+        <div className="flex items-center gap-1 mb-1">
+          <StarRating rating={avg} size={10} />
+          <span className="text-xs font-bold text-gray-700">{avg.toFixed(1)}</span>
+        </div>
         {+company.reviewCount > 0 && (
-          <span className="flex items-center gap-1"><MessageSquare size={10} />{company.reviewCount} avis</span>
+          <p className="text-[10px] text-gray-400">{company.reviewCount} avis</p>
         )}
       </div>
     </Link>
@@ -215,11 +238,14 @@ function HeroCard({ company, className }) {
     <div className={`absolute bg-white rounded-2xl shadow-lg border border-gray-100 p-3 flex items-center gap-3 w-52 ${className}`}>
       {company.imageUrl ? (
         <img src={company.imageUrl} alt={company.name} className="w-9 h-9 rounded-xl object-cover shrink-0" />
-      ) : (
-        <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center shrink-0 text-red-500 font-black text-base">
-          {company.name?.[0]?.toUpperCase()}
-        </div>
-      )}
+      ) : (() => {
+        const brand = BRAND_COLORS[company.slug];
+        return (
+          <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 font-black text-base ${brand ? `${brand.bg} ${brand.text}` : 'bg-red-50 text-red-500'}`}>
+            {company.name?.[0]?.toUpperCase()}
+          </div>
+        );
+      })()}
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-gray-900 text-xs truncate">{company.name}</p>
         <div className="flex items-center gap-1 mt-0.5">
@@ -260,8 +286,8 @@ export default function VitrinePage() {
 
             {/* Left: Text content */}
             <div>
-              <div className="inline-flex items-center gap-2 bg-red-50 border border-red-100 rounded-full px-4 py-1.5 text-xs font-semibold text-red-600 mb-6">
-                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shrink-0" />
+              <div className="inline-flex items-center gap-2 bg-white border border-red-200 rounded-full px-4 py-1.5 text-xs font-semibold text-red-600 mb-6 shadow-sm">
+                <Shield size={13} className="shrink-0" />
                 La plateforme de confiance des Sénégalais
               </div>
 
@@ -289,21 +315,25 @@ export default function VitrinePage() {
                   href="#categories"
                   className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-300 text-gray-700 rounded-full font-semibold text-sm hover:border-red-300 hover:text-red-600 transition-colors"
                 >
-                  Explorer les entreprises <ArrowRight size={13} />
+                  Explorer les entreprises <ArrowRightCircle size={14} />
                 </a>
               </div>
 
-              <div className="flex items-center gap-6 md:gap-10">
+              <div className="flex items-center gap-3 flex-wrap">
                 {[
-                  { n: formatCount(stats?.companyCount), l: 'Entreprises' },
-                  { n: formatCount(stats?.categoryCount), l: 'Secteurs' },
-                ].map(({ n, l }, i, arr) => (
-                  <div key={l} className="flex items-center gap-6 md:gap-10">
-                    <div>
-                      <p className="text-2xl md:text-3xl font-black text-gray-900">{n}</p>
-                      <p className="text-xs text-gray-400 uppercase tracking-wider mt-0.5">{l}</p>
+                  { Icon: Building2,   iconBg: 'bg-red-50',    iconColor: 'text-red-500',    n: formatCount(stats?.companyCount),  l1: 'Entreprises', l2: 'référencées' },
+                  { Icon: LayoutGrid,  iconBg: 'bg-green-50',  iconColor: 'text-green-600',  n: formatCount(stats?.categoryCount), l1: 'Secteurs',    l2: "d'activité" },
+                  { Icon: Users,       iconBg: 'bg-purple-50', iconColor: 'text-purple-500', n: '1 000+',                          l1: 'Avis',        l2: 'publiés' },
+                ].map(({ Icon, iconBg, iconColor, n, l1, l2 }) => (
+                  <div key={l1} className="flex items-center gap-2.5 bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 shadow-sm">
+                    <div className={`w-9 h-9 rounded-lg ${iconBg} flex items-center justify-center shrink-0`}>
+                      <Icon size={17} className={iconColor} />
                     </div>
-                    {i < arr.length - 1 && <div className="w-px h-8 bg-gray-200" />}
+                    <div>
+                      <p className="text-lg font-black text-gray-900 leading-none">{n}</p>
+                      <p className="text-[11px] text-gray-500 leading-tight">{l1}</p>
+                      <p className="text-[10px] text-gray-400 leading-tight">{l2}</p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -369,6 +399,30 @@ export default function VitrinePage() {
 
             </div>
 
+          </div>
+        </div>
+      </section>
+
+      {/* ── Trust features strip ────────────────────────────────────────── */}
+      <section className="bg-white py-6 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+            {[
+              { Icon: Shield,        title: 'Avis authentiques',         desc: 'Des avis vérifiés pour des informations fiables.' },
+              { Icon: Award,         title: 'Classements objectifs',     desc: 'Découvrez les entreprises les mieux notées.' },
+              { Icon: MessageSquare, title: 'Partagez votre expérience', desc: "Votre avis aide la communauté à faire les bons choix." },
+              { Icon: Lock,          title: '100% sécurisé',             desc: 'Vos données sont protégées et confidentielles.' },
+            ].map(({ Icon, title, desc }) => (
+              <div key={title} className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+                  <Icon size={18} className="text-red-500" />
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 text-sm">{title}</p>
+                  <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -509,11 +563,14 @@ export default function VitrinePage() {
 
                     {co.imageUrl ? (
                       <img src={co.imageUrl} alt={co.name} className="w-10 h-10 rounded-xl object-cover shrink-0" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0 text-red-400 font-bold">
-                        {co.name?.[0]}
-                      </div>
-                    )}
+                    ) : (() => {
+                      const brand = BRAND_COLORS[co.slug];
+                      return (
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-bold ${brand ? `${brand.bg} ${brand.text}` : 'bg-red-50 text-red-400'}`}>
+                          {co.name?.[0]}
+                        </div>
+                      );
+                    })()}
 
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-gray-900 text-sm truncate group-hover:text-red-600 transition-colors">
