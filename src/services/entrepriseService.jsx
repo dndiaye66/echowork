@@ -2,7 +2,7 @@ import apiClient from '../api/Config';
 
 export const entrepriseService = {
   getMyCompanies: async () => {
-    const res = await apiClient.get('/companies/my');
+    const res = await apiClient.get('/users/me/companies');
     return res.data;
   },
 

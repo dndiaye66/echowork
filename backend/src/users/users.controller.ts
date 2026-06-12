@@ -49,6 +49,12 @@ export class UsersController {
     );
   }
 
+  /** GET /api/users/me/companies — entreprises réclamées */
+  @Get('me/companies')
+  getMyCompanies(@Request() req: any) {
+    return this.usersService.getMyCompanies(req.user.id);
+  }
+
   /** GET /api/users/me/reviews?page=1&limit=10 */
   @Get('me/reviews')
   getMyReviews(

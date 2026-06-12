@@ -133,6 +133,28 @@ export class UsersService {
     return { message: 'Mot de passe mis à jour avec succès.' };
   }
 
+  async getMyCompanies(userId: number) {
+    return this.prisma.company.findMany({
+      where: { claimedByUserId: userId, parentCompanyId: null },
+      include: {
+        category: true,
+        scores: true,
+        photos: { orderBy: { createdAt: 'asc' } },
+        subscription: true,
+        _count: { select: { reviews: true, branches: true } },
+        branches: {
+          include: {
+            category: true,
+            scores: true,
+            _count: { select: { reviews: true } },
+          },
+          orderBy: { name: 'asc' },
+        },
+      },
+      orderBy: { name: 'asc' },
+    });
+  }
+
   async getMyReviews(userId: number, page = 1, limit = 10) {
     const skip = (page - 1) * limit;
     const [reviews, total] = await Promise.all([
