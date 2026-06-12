@@ -59,6 +59,11 @@ export const entrepriseService = {
     return res.data;
   },
 
+  createBranch: async (companyId, data) => {
+    const res = await apiClient.post(`/companies/${companyId}/branches`, data);
+    return res.data;
+  },
+
   createReply: async (reviewId, content) => {
     const res = await apiClient.post(`/reviews/${reviewId}/reply`, { content });
     return res.data;

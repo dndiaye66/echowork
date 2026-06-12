@@ -218,11 +218,22 @@ export class CompaniesService {
    */
   async findBySlug(slug: string) {
     try {
-      return await this.prisma.company.findUnique({ 
-        where: { slug }, 
-        include: { 
+      return await this.prisma.company.findUnique({
+        where: { slug },
+        include: {
           category: true,
+          parent: { select: { id: true, name: true, slug: true, imageUrl: true } },
+          branches: {
+            select: {
+              id: true, name: true, slug: true, imageUrl: true,
+              ville: true, adresse: true, tel: true,
+              scores: { select: { globalScore: true } },
+              _count: { select: { reviews: true } },
+            },
+            orderBy: { name: 'asc' },
+          },
           reviews: {
+            where: { status: 'APPROVED' },
             include: {
               user: {
                 select: {
@@ -239,14 +250,14 @@ export class CompaniesService {
             orderBy: { createdAt: 'desc' },
           },
           advertisements: {
-            where: { 
+            where: {
               isActive: true,
               startDate: { lte: new Date() },
               endDate: { gte: new Date() },
             },
             orderBy: { createdAt: 'desc' },
           },
-        } 
+        }
       });
     } catch (error) {
       this.logger.error(`Failed to fetch company with slug ${slug}`, error);
@@ -397,9 +408,55 @@ export class CompaniesService {
         category: true,
         scores: true,
         photos: { orderBy: { createdAt: 'asc' } },
-        _count: { select: { reviews: true } },
+        subscription: true,
+        _count: { select: { reviews: true, branches: true } },
+        branches: {
+          include: {
+            category: true,
+            scores: true,
+            _count: { select: { reviews: true } },
+          },
+          orderBy: { name: 'asc' },
+        },
       },
       orderBy: { name: 'asc' },
+    });
+  }
+
+  async createBranch(parentId: number, dto: {
+    name: string;
+    slug: string;
+    ville?: string;
+    adresse?: string;
+    tel?: string;
+    description?: string;
+    categoryId?: number;
+  }, userId: number) {
+    const parent = await this.prisma.company.findUnique({
+      where: { id: parentId },
+      select: { id: true, claimedByUserId: true, categoryId: true },
+    });
+    if (!parent) throw new NotFoundException('Entreprise introuvable');
+
+    const slug = dto.slug || dto.name
+      .toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+
+    return this.prisma.company.create({
+      data: {
+        name: dto.name,
+        slug,
+        ville: dto.ville,
+        adresse: dto.adresse,
+        tel: dto.tel,
+        description: dto.description,
+        categoryId: dto.categoryId ?? parent.categoryId,
+        parentCompanyId: parentId,
+        claimedByUserId: userId,
+      },
+      include: { category: true },
     });
   }
 

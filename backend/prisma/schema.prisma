@@ -133,6 +133,9 @@ model Company {
   description     String?
   imageUrl        String?
   coverImageUrl   String?
+  parentCompanyId Int?
+  parent          Company?           @relation("CompanyBranches", fields: [parentCompanyId], references: [id], onDelete: SetNull)
+  branches        Company[]          @relation("CompanyBranches")
   ville           String?
   adresse         String?
   tel             String?

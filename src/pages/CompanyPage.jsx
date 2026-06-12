@@ -586,6 +586,64 @@ export default function CompanyPage() {
         </div>
       </div>
 
+      {/* Agences / succursales */}
+      {company.branches?.length > 0 && (
+        <section className="py-10 px-4 bg-white border-t border-gray-100">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-xl font-black text-gray-900 mb-1">
+              Nos agences <span className="text-sm font-medium text-gray-400 ml-1">({company.branches.length})</span>
+            </h2>
+            <p className="text-sm text-gray-400 mb-5">Retrouvez toutes nos agences au Sénégal</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {company.branches.map((branch) => (
+                <Link
+                  key={branch.id}
+                  to={`/companies/${branch.slug}`}
+                  className="flex items-start gap-3 bg-gray-50 hover:bg-red-50 hover:border-red-200 border border-gray-100 rounded-2xl p-4 transition-all group"
+                >
+                  {branch.imageUrl ? (
+                    <img src={branch.imageUrl} alt={branch.name} className="w-10 h-10 rounded-xl object-cover shrink-0" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center shrink-0">
+                      <Building2 size={18} className="text-gray-400" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 group-hover:text-red-600 text-sm truncate transition-colors">{branch.name}</p>
+                    {branch.ville && (
+                      <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                        <MapPin size={10} /> {branch.ville}
+                      </p>
+                    )}
+                    {branch.scores?.globalScore > 0 && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <Star size={11} className="fill-red-400 text-red-400" />
+                        <span className="text-xs font-semibold text-gray-700">{Number(branch.scores.globalScore).toFixed(1)}</span>
+                        <span className="text-[10px] text-gray-400">({branch._count?.reviews} avis)</span>
+                      </div>
+                    )}
+                  </div>
+                  <ChevronRight size={14} className="text-gray-300 group-hover:text-red-400 transition-colors shrink-0 mt-1" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {company.parent && (
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <Link
+            to={`/companies/${company.parent.slug}`}
+            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-red-600 transition-colors"
+          >
+            <Building2 size={14} />
+            Agence de <span className="font-semibold">{company.parent.name}</span>
+            <ChevronRight size={13} />
+          </Link>
+        </div>
+      )}
+
       {company.jobOffers?.length > 0 && (
         <section className="py-10 px-4 bg-white">
           <div className="max-w-6xl mx-auto">

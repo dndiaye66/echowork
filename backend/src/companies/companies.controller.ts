@@ -113,6 +113,17 @@ export class CompaniesController {
     return this.companiesService.updateProfile(id, dto);
   }
 
+  /** POST /api/companies/:id/branches — créer une agence */
+  @Post(':id/branches')
+  @UseGuards(JwtAuthGuard, CompanyOwnerGuard)
+  async createBranch(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: { name: string; slug?: string; ville?: string; adresse?: string; tel?: string; description?: string; categoryId?: number },
+    @Request() req: any,
+  ) {
+    return this.companiesService.createBranch(id, dto, req.user.id);
+  }
+
   /** POST /api/companies/:id/logo — upload logo */
   @Post(':id/logo')
   @UseGuards(JwtAuthGuard, CompanyOwnerGuard)
