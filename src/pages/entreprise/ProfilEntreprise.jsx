@@ -180,6 +180,26 @@ export default function ProfilEntreprise() {
     );
   }
 
+  if (!company) {
+    return (
+      <EntrepriseLayout title="Mon profil">
+        <div className="max-w-lg mx-auto text-center py-20">
+          <Building2 size={48} className="mx-auto text-gray-200 mb-4" />
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Aucune entreprise sélectionnée</h2>
+          <p className="text-gray-500 text-sm mb-6">
+            Allez dans "Vue d'ensemble" et cliquez sur "Modifier" pour accéder au profil d'une entreprise.
+          </p>
+          <a
+            href="/espace-entreprise/tableau-de-bord"
+            className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-full transition-colors text-sm"
+          >
+            Vue d'ensemble
+          </a>
+        </div>
+      </EntrepriseLayout>
+    );
+  }
+
   const logoUrl = logoPreview || resolveUrl(company?.imageUrl);
   const coverUrl = coverPreview || resolveUrl(company?.coverImageUrl);
 

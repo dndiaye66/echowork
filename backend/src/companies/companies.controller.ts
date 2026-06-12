@@ -36,7 +36,19 @@ const photoStorage = diskStorage({
 export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 
-  // ── Public routes ──────────────────────────────────────────────
+  // ── Static / non-parameterized routes first (NestJS/Express ordering) ──
+
+  /** GET /api/companies/my — mes entreprises réclamées */
+  @Get('my')
+  @UseGuards(JwtAuthGuard)
+  async getMyCompanies(@Request() req: any) {
+    return this.companiesService.getMyCompanies(req.user.id);
+  }
+
+  @Get('best')
+  async getBestCompanies() {
+    return this.companiesService.findBestCompanies();
+  }
 
   @Get('search/autocomplete')
   async searchAutocomplete(
@@ -44,11 +56,6 @@ export class CompaniesController {
     @Query('limit') limit?: string,
   ) {
     return this.companiesService.searchWithAutocomplete(query || '', limit ? parseInt(limit, 10) : 10);
-  }
-
-  @Get('best')
-  async getBestCompanies() {
-    return this.companiesService.findBestCompanies();
   }
 
   @Get('category/slug/:slug')
@@ -74,13 +81,6 @@ export class CompaniesController {
   }
 
   // ── Authenticated routes ───────────────────────────────────────
-
-  /** GET /api/companies/my — mes entreprises réclamées */
-  @Get('my')
-  @UseGuards(JwtAuthGuard)
-  async getMyCompanies(@Request() req: any) {
-    return this.companiesService.getMyCompanies(req.user.id);
-  }
 
   /** POST /api/companies/:id/claim — réclamer une fiche */
   @Post(':id/claim')
