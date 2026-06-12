@@ -66,37 +66,7 @@ const baroIcons = {
   'sante-et-pharmacie':                  { Icon: Hospital,  bg: 'bg-red-50',     color: 'text-red-600',     border: 'border-red-100'     },
 };
 
-// ── Static fallbacks ───────────────────────────────────────────────────────
-const STATIC_REVIEWS = [
-  {
-    id: -1, rating: 5,
-    comment: "Très bon accueil et service rapide. Le personnel est très professionnel et attentionné.",
-    user: { username: 'Djibril N.' },
-    company: { name: 'Orange Sénégal', slug: 'orange-senegal', imageUrl: null },
-    createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
-  },
-  {
-    id: -2, rating: 3,
-    comment: "Délai d'intervention assez long mais le technicien était professionnel une fois arrivé.",
-    user: { username: 'Fatou K.' },
-    company: { name: 'Senelec', slug: 'senelec', imageUrl: null },
-    createdAt: new Date(Date.now() - 4 * 3600 * 1000).toISOString(),
-  },
-  {
-    id: -3, rating: 4,
-    comment: "Bon rapport qualité/prix. J'adore leur menu poulet braisé, toujours frais et bien préparé.",
-    user: { username: 'Moustapha C.' },
-    company: { name: 'YUM-YUM Nord Foire', slug: 'yum-yum-nord-foire', imageUrl: null },
-    createdAt: new Date(Date.now() - 6 * 3600 * 1000).toISOString(),
-  },
-  {
-    id: -4, rating: 4,
-    comment: "Service client très réactif. J'ai été bien guidé pour mon compte et les frais sont transparents.",
-    user: { username: 'Aminata S.' },
-    company: { name: 'BDK', slug: 'bdk', imageUrl: null },
-    createdAt: new Date(Date.now() - 10 * 3600 * 1000).toISOString(),
-  },
-];
+// Static reviews removed — only real approved reviews from the API are shown
 
 const STATIC_BAROMETER = [
   { slug: 'banques-et-institutions-financieres', label: 'Banques',          avg: 4.3, trend: 0.2,  count: 0 },
@@ -119,7 +89,7 @@ function timeAgo(dateStr) {
 
 function formatCount(n) {
   if (!n) return '—';
-  if (n >= 1000) return `${(Math.floor(n / 100) * 100).toLocaleString('fr')}+`;
+  if (n >= 1000) return `${(Math.floor(n / 1000) * 1000).toLocaleString('fr')}+`;
   if (n >= 100)  return `${Math.floor(n / 10) * 10}+`;
   return `${n}`;
 }
@@ -273,7 +243,7 @@ export default function VitrinePage() {
   const rankCompanies = companies?.slice(0, 5) || [];
   const visibleCats   = categories?.slice(0, 7) || [];
   const hasMoreCats   = (categories?.length || 0) > 7;
-  const reviews       = reviewsData?.length > 0 ? reviewsData.slice(0, 4) : STATIC_REVIEWS;
+  const reviews       = reviewsData?.slice(0, 4) ?? [];
   const barometer     = baroData?.filter(b => b.avg !== null).length > 0 ? baroData : STATIC_BAROMETER;
 
   return (
@@ -614,7 +584,15 @@ export default function VitrinePage() {
             </div>
 
             <div className="space-y-3">
-              {reviews.map(r => <ReviewCard key={r.id} review={r} />)}
+              {reviews.length > 0 ? (
+                reviews.map(r => <ReviewCard key={r.id} review={r} />)
+              ) : (
+                <div className="text-center py-10 text-gray-400">
+                  <MessageSquare size={28} className="mx-auto mb-2 opacity-30" />
+                  <p className="text-sm font-medium text-gray-500">Aucun avis récent</p>
+                  <p className="text-xs mt-1">Soyez le premier à noter une entreprise !</p>
+                </div>
+              )}
             </div>
           </div>
 
