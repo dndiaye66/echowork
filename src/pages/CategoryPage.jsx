@@ -4,7 +4,7 @@ import {
   Search, X, Star, Building2, MapPin, ChevronRight,
   Utensils, Landmark, ShoppingCart, Hospital, Briefcase,
   Factory, Phone, Zap, Truck, Wheat, GraduationCap,
-  Home, UtensilsCrossed, Monitor,
+  Home, UtensilsCrossed, Monitor, Scale,
 } from 'lucide-react';
 import Navbar from '../components/navbar';
 import Foot from '../components/Foot';
@@ -30,6 +30,7 @@ const catIconMap = {
   'immobilier': Home,
   'restauration-et-hotellerie': UtensilsCrossed,
   'informatique-et-numerique': Monitor,
+  'services-publics': Scale,
 };
 
 function StarDisplay({ rating, size = 13 }) {

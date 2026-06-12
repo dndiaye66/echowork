@@ -5,7 +5,7 @@ import {
   Factory, Phone, Zap, Truck, Wheat, GraduationCap,
   MapPin, Home, UtensilsCrossed, Monitor, Smartphone,
   TrendingUp, TrendingDown, MessageSquare, Shield, Users,
-  LayoutGrid, Award, Lock, ArrowRightCircle,
+  LayoutGrid, Award, Lock, ArrowRightCircle, Scale,
 } from 'lucide-react';
 import Navbar from '../components/navbar';
 import Foot from '../components/Foot';
@@ -56,6 +56,7 @@ const catMap = {
   'immobilier':                               { Icon: Home,            bg: 'bg-rose-100',    color: 'text-rose-700'    },
   'restauration-et-hotellerie':               { Icon: UtensilsCrossed, bg: 'bg-orange-100',  color: 'text-orange-700'  },
   'informatique-et-numerique':                { Icon: Monitor,         bg: 'bg-blue-100',    color: 'text-blue-700'    },
+  'services-publics':                         { Icon: Scale,           bg: 'bg-slate-100',   color: 'text-slate-700'   },
 };
 
 const baroIcons = {

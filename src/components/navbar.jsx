@@ -4,7 +4,7 @@ import {
   ChevronDown, Menu, X, LogOut, LayoutDashboard, User,
   Utensils, Landmark, ShoppingCart, Hospital, Briefcase,
   Factory, Phone, Zap, Truck, Building2, Wheat, GraduationCap,
-  Home, UtensilsCrossed, Monitor,
+  Home, UtensilsCrossed, Monitor, Scale,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import SearchAutocomplete from './SearchAutocomplete';
@@ -29,6 +29,7 @@ const catIconMap = {
   'immobilier': Home,
   'restauration-et-hotellerie': UtensilsCrossed,
   'informatique-et-numerique': Monitor,
+  'services-publics': Scale,
 };
 
 export default function Navbar() {
