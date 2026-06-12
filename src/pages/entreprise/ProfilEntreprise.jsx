@@ -99,7 +99,7 @@ export default function ProfilEntreprise() {
     setSaving(true);
     setStatus(null);
     try {
-      await entrepriseService.updateProfile(companyId, form);
+      await entrepriseService.updateProfile(company?.id, form);
       setStatus('success');
       setTimeout(() => setStatus(null), 4000);
     } catch {
@@ -115,7 +115,7 @@ export default function ProfilEntreprise() {
     setLogoPreview(URL.createObjectURL(file));
     setLogoUploading(true);
     try {
-      const updated = await entrepriseService.uploadLogo(companyId, file);
+      const updated = await entrepriseService.uploadLogo(company?.id, file);
       setCompany((c) => ({ ...c, imageUrl: updated.imageUrl }));
       setStatus('success');
       setTimeout(() => setStatus(null), 3000);
@@ -134,7 +134,7 @@ export default function ProfilEntreprise() {
     setCoverPreview(URL.createObjectURL(file));
     setCoverUploading(true);
     try {
-      const updated = await entrepriseService.uploadCover(companyId, file);
+      const updated = await entrepriseService.uploadCover(company?.id, file);
       setCompany((c) => ({ ...c, coverImageUrl: updated.coverImageUrl }));
       setStatus('success');
       setTimeout(() => setStatus(null), 3000);
@@ -152,7 +152,7 @@ export default function ProfilEntreprise() {
     if (!file) return;
     setPhotoUploading(true);
     try {
-      const photo = await entrepriseService.addPhoto(companyId, file);
+      const photo = await entrepriseService.addPhoto(company?.id, file);
       setCompany((c) => ({ ...c, photos: [...(c.photos ?? []), photo] }));
     } catch {
       setStatus('error');
@@ -164,7 +164,7 @@ export default function ProfilEntreprise() {
 
   const handleDeletePhoto = async (photoId) => {
     try {
-      await entrepriseService.deletePhoto(companyId, photoId);
+      await entrepriseService.deletePhoto(company?.id, photoId);
       setCompany((c) => ({ ...c, photos: c.photos.filter((p) => p.id !== photoId) }));
     } catch {
       setStatus('error');
