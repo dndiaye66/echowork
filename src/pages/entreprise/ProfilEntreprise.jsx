@@ -18,8 +18,9 @@ const defaultHours = () =>
 
 function resolveUrl(url) {
   if (!url) return null;
-  if (url.startsWith('http')) return url;
-  return `${API_BASE}${url}`;
+  if (url.startsWith('/')) return url; // chemin relatif → navigateur utilise l'origine HTTPS courante
+  if (url.startsWith('http://')) return url.replace('http://', 'https://');
+  return url;
 }
 
 export default function ProfilEntreprise() {

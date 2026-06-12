@@ -249,7 +249,7 @@ export default function CompanyPage() {
       <div
         className="relative text-white"
         style={company.coverImageUrl ? {
-          backgroundImage: `url(${company.coverImageUrl.startsWith('http') ? company.coverImageUrl : (import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3000') + company.coverImageUrl})`,
+          backgroundImage: `url(${company.coverImageUrl.startsWith('/') ? company.coverImageUrl : company.coverImageUrl.replace(/^http:\/\//, 'https://')})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         } : undefined}

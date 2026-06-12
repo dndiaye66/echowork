@@ -12,8 +12,9 @@ const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://lo
 
 function resolveUrl(url) {
   if (!url) return null;
-  if (url.startsWith('http')) return url;
-  return `${API_BASE}${url}`;
+  if (url.startsWith('/')) return url;
+  if (url.startsWith('http://')) return url.replace('http://', 'https://');
+  return url;
 }
 
 function CompanyCard({ company, isChild = false }) {
