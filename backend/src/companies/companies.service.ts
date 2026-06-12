@@ -218,7 +218,7 @@ export class CompaniesService {
    */
   async findBySlug(slug: string) {
     try {
-      return await (this.prisma.company as any).findUnique({
+      return await this.prisma.company.findUnique({
         where: { slug },
         include: {
           category: true,
@@ -402,8 +402,8 @@ export class CompaniesService {
   }
 
   async getMyCompanies(userId: number) {
-    return (this.prisma.company as any).findMany({
-      where: { claimedByUserId: userId },
+    return this.prisma.company.findMany({
+      where: { claimedByUserId: userId, parentCompanyId: null },
       include: {
         category: true,
         scores: true,
@@ -444,7 +444,7 @@ export class CompaniesService {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '');
 
-    return (this.prisma.company as any).create({
+    return this.prisma.company.create({
       data: {
         name: dto.name,
         slug,
@@ -461,7 +461,7 @@ export class CompaniesService {
   }
 
   async updateProfile(companyId: number, dto: UpdateCompanyProfileDto) {
-    return (this.prisma.company as any).update({
+    return this.prisma.company.update({
       where: { id: companyId },
       data: {
         ...(dto.description !== undefined && { description: dto.description }),
@@ -487,7 +487,7 @@ export class CompaniesService {
   }
 
   async uploadCover(companyId: number, url: string) {
-    return (this.prisma.company as any).update({
+    return this.prisma.company.update({
       where: { id: companyId },
       data: { coverImageUrl: url },
       include: { category: true },
