@@ -28,8 +28,7 @@ export class RankingsService {
         LEFT JOIN "Review" r ON r."companyId" = c.id AND r.status = 'APPROVED'
         WHERE cat.slug = ${categorySlug}
         GROUP BY c.id, cat.id
-        HAVING COUNT(r.id) > 0
-        ORDER BY "averageRating" DESC, "reviewCount" DESC
+        ORDER BY "averageRating" DESC, "reviewCount" DESC, c.name ASC
         LIMIT ${limit}
       `;
       return this.formatRows(rows);
@@ -61,8 +60,7 @@ export class RankingsService {
         LEFT JOIN "CompanyLocation" loc ON loc."companyId" = c.id AND loc."isPrimary" = true
         WHERE LOWER(COALESCE(loc.city, c.ville, '')) LIKE LOWER(${`%${city}%`})
         GROUP BY c.id, cat.id
-        HAVING COUNT(r.id) > 0
-        ORDER BY "averageRating" DESC, "reviewCount" DESC
+        ORDER BY "averageRating" DESC, "reviewCount" DESC, c.name ASC
         LIMIT ${limit}
       `;
       return this.formatRows(rows);
@@ -74,12 +72,13 @@ export class RankingsService {
 
   async getTopCategories() {
     try {
-      return await this.prisma.category.findMany({
+      const cats = await this.prisma.category.findMany({
         where: { parentId: null },
         select: { id: true, name: true, slug: true, _count: { select: { companies: true } } },
-        orderBy: { companies: { _count: 'desc' } },
-        take: 12,
+        orderBy: { name: 'asc' },
       });
+      // Tri par nombre d'entreprises décroissant côté JS pour éviter les problèmes de version Prisma
+      return cats.sort((a, b) => (b._count?.companies ?? 0) - (a._count?.companies ?? 0));
     } catch (err) {
       this.logger.error('Failed to get top categories', err);
       throw new InternalServerErrorException();

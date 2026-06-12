@@ -28,17 +28,20 @@ function TrendBadge({ trend }) {
 
 function RankCard({ company }) {
   const { rank, name, slug, imageUrl, category, averageRating, reviewCount, isVerified, trend } = company;
+  const hasReviews = reviewCount > 0;
   return (
     <Link
       to={`/companies/${slug}`}
       className="flex items-center gap-4 bg-white rounded-2xl border border-gray-100 shadow-sm p-4 hover:border-red-200 hover:shadow-md transition-all group"
     >
-      <span className="text-2xl w-8 text-center shrink-0">{MEDAL[rank - 1] ?? `#${rank}`}</span>
+      <span className="text-2xl w-8 text-center shrink-0">
+        {hasReviews ? (MEDAL[rank - 1] ?? `#${rank}`) : '—'}
+      </span>
       {imageUrl ? (
         <img src={imageUrl} alt={name} className="w-12 h-12 rounded-xl object-cover shrink-0" />
       ) : (
-        <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
-          <Building2 size={20} className="text-gray-400" />
+        <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center shrink-0 text-red-400 font-bold text-lg">
+          {name?.[0]?.toUpperCase()}
         </div>
       )}
       <div className="flex-1 min-w-0">
@@ -51,16 +54,20 @@ function RankCard({ company }) {
           )}
         </div>
         <span className="text-xs text-gray-400">{category?.name}</span>
-        <div className="mt-1">
-          <TrendBadge trend={trend} />
-        </div>
+        {hasReviews && <div className="mt-1"><TrendBadge trend={trend} /></div>}
       </div>
       <div className="text-right shrink-0">
-        <div className="flex items-center gap-1 justify-end">
-          <Star size={14} className="fill-red-500 text-red-500" />
-          <span className="font-bold text-gray-900">{averageRating.toFixed(1)}</span>
-        </div>
-        <span className="text-xs text-gray-400">{reviewCount} avis</span>
+        {hasReviews ? (
+          <>
+            <div className="flex items-center gap-1 justify-end">
+              <Star size={14} className="fill-red-500 text-red-500" />
+              <span className="font-bold text-gray-900">{averageRating.toFixed(1)}</span>
+            </div>
+            <span className="text-xs text-gray-400">{reviewCount} avis</span>
+          </>
+        ) : (
+          <span className="text-xs text-gray-300 italic">Aucun avis</span>
+        )}
       </div>
       <ChevronRight size={16} className="text-gray-300 group-hover:text-red-400 shrink-0 transition-colors" />
     </Link>
@@ -199,7 +206,8 @@ export default function ClassementsPage() {
         ) : error ? (
           <div className="text-center py-16 text-gray-400">
             <Trophy size={32} className="mx-auto mb-3 opacity-30" />
-            <p className="text-sm">{error}</p>
+            <p className="text-sm font-medium text-gray-500 mb-1">{error}</p>
+            <p className="text-xs text-gray-400">Soyez le premier à noter une entreprise dans ce secteur !</p>
           </div>
         ) : (
           <div className="space-y-3">
