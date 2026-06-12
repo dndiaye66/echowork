@@ -3,16 +3,24 @@ import { useSearchParams } from 'react-router-dom';
 import {
   Building2, Globe, Phone, MapPin, Clock, Image,
   Save, Loader2, AlertCircle, CheckCircle, Plus, Trash2,
-  Facebook, Instagram, Linkedin, Twitter,
+  Facebook, Instagram, Linkedin, Twitter, Upload, Camera,
 } from 'lucide-react';
 import EntrepriseLayout from '../../components/EntrepriseLayout';
 import { entrepriseService } from '../../services/entrepriseService';
+
+const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3000';
 
 const JOURS = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
 const JOURS_LABELS = { lundi: 'Lun', mardi: 'Mar', mercredi: 'Mer', jeudi: 'Jeu', vendredi: 'Ven', samedi: 'Sam', dimanche: 'Dim' };
 
 const defaultHours = () =>
   Object.fromEntries(JOURS.map((j) => [j, { open: '08:00', close: '18:00', closed: false }]));
+
+function resolveUrl(url) {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  return `${API_BASE}${url}`;
+}
 
 export default function ProfilEntreprise() {
   const [searchParams] = useSearchParams();
@@ -21,21 +29,29 @@ export default function ProfilEntreprise() {
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [status, setStatus] = useState(null); // 'success' | 'error'
+  const [status, setStatus] = useState(null);
+
+  const [logoPreview, setLogoPreview] = useState(null);
+  const [coverPreview, setCoverPreview] = useState(null);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [coverUploading, setCoverUploading] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
+
+  const logoInputRef = useRef();
+  const coverInputRef = useRef();
   const photoInputRef = useRef();
 
   const [form, setForm] = useState({
     description: '', tel: '', adresse: '', ville: '',
-    website: '', imageUrl: '',
+    website: '',
     openingHours: defaultHours(),
     socialLinks: { facebook: '', instagram: '', linkedin: '', twitter: '' },
   });
 
   useEffect(() => {
-    if (!companyId) return;
-    entrepriseService.getDashboard(companyId)
-      .then((data) => {
+    const load = async (id) => {
+      try {
+        const data = await entrepriseService.getDashboard(id);
         setCompany(data);
         setForm({
           description: data.description ?? '',
@@ -43,13 +59,27 @@ export default function ProfilEntreprise() {
           adresse: data.adresse ?? '',
           ville: data.ville ?? '',
           website: data.website ?? '',
-          imageUrl: data.imageUrl ?? '',
           openingHours: data.openingHours ?? defaultHours(),
           socialLinks: data.socialLinks ?? { facebook: '', instagram: '', linkedin: '', twitter: '' },
         });
-      })
-      .catch(() => setStatus('error'))
-      .finally(() => setLoading(false));
+      } catch {
+        setStatus('error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (companyId && !isNaN(companyId)) {
+      load(companyId);
+    } else {
+      // No ID in URL — load the first claimed company
+      entrepriseService.getMyCompanies()
+        .then((list) => {
+          if (list.length > 0) load(list[0].id);
+          else setLoading(false);
+        })
+        .catch(() => { setStatus('error'); setLoading(false); });
+    }
   }, [companyId]);
 
   const handleField = (field, value) =>
@@ -70,10 +100,49 @@ export default function ProfilEntreprise() {
     try {
       await entrepriseService.updateProfile(companyId, form);
       setStatus('success');
+      setTimeout(() => setStatus(null), 4000);
     } catch {
       setStatus('error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogoPreview(URL.createObjectURL(file));
+    setLogoUploading(true);
+    try {
+      const updated = await entrepriseService.uploadLogo(companyId, file);
+      setCompany((c) => ({ ...c, imageUrl: updated.imageUrl }));
+      setStatus('success');
+      setTimeout(() => setStatus(null), 3000);
+    } catch {
+      setLogoPreview(null);
+      setStatus('error');
+    } finally {
+      setLogoUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleCoverUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCoverPreview(URL.createObjectURL(file));
+    setCoverUploading(true);
+    try {
+      const updated = await entrepriseService.uploadCover(companyId, file);
+      setCompany((c) => ({ ...c, coverImageUrl: updated.coverImageUrl }));
+      setStatus('success');
+      setTimeout(() => setStatus(null), 3000);
+    } catch {
+      setCoverPreview(null);
+      setStatus('error');
+    } finally {
+      setCoverUploading(false);
+      e.target.value = '';
     }
   };
 
@@ -111,6 +180,9 @@ export default function ProfilEntreprise() {
     );
   }
 
+  const logoUrl = logoPreview || resolveUrl(company?.imageUrl);
+  const coverUrl = coverPreview || resolveUrl(company?.coverImageUrl);
+
   return (
     <EntrepriseLayout title={`Mon profil — ${company?.name ?? ''}`}>
       <div className="max-w-3xl space-y-6">
@@ -118,7 +190,7 @@ export default function ProfilEntreprise() {
         {/* Status */}
         {status === 'success' && (
           <div className="flex items-center gap-2 bg-green-50 text-green-700 border border-green-100 rounded-xl px-4 py-3 text-sm">
-            <CheckCircle size={16} /> Profil mis à jour avec succès.
+            <CheckCircle size={16} /> Modifications enregistrées avec succès.
           </div>
         )}
         {status === 'error' && (
@@ -126,6 +198,84 @@ export default function ProfilEntreprise() {
             <AlertCircle size={16} /> Une erreur est survenue. Veuillez réessayer.
           </div>
         )}
+
+        {/* Identité visuelle */}
+        <section className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          {/* Cover photo */}
+          <div
+            className="relative h-44 bg-gradient-to-br from-gray-200 to-gray-300 cursor-pointer group"
+            onClick={() => !coverUploading && coverInputRef.current?.click()}
+          >
+            {coverUrl ? (
+              <img src={coverUrl} alt="Couverture" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-gray-400">
+                <Image size={32} />
+                <span className="text-sm font-medium">Photo de couverture</span>
+                <span className="text-xs text-gray-400">Recommandé : 1200×400px — JPG/PNG/WEBP — max 5 Mo</span>
+              </div>
+            )}
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center gap-2 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+              {coverUploading
+                ? <Loader2 size={22} className="animate-spin" />
+                : <><Camera size={20} /> <span className="text-sm font-semibold">Changer la couverture</span></>
+              }
+            </div>
+            <input ref={coverInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleCoverUpload} />
+          </div>
+
+          {/* Logo + name */}
+          <div className="px-6 pb-6">
+            <div className="flex items-end gap-4 -mt-10 mb-4">
+              {/* Logo */}
+              <div
+                className="relative w-20 h-20 rounded-2xl border-4 border-white shadow-md bg-gray-100 overflow-hidden cursor-pointer group shrink-0"
+                onClick={() => !logoUploading && logoInputRef.current?.click()}
+              >
+                {logoUrl ? (
+                  <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Building2 size={28} className="text-gray-400" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  {logoUploading
+                    ? <Loader2 size={16} className="animate-spin text-white" />
+                    : <Upload size={16} className="text-white" />
+                  }
+                </div>
+                <input ref={logoInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleLogoUpload} />
+              </div>
+
+              <div className="pb-1">
+                <h2 className="font-bold text-gray-900 text-lg">{company?.name}</h2>
+                <p className="text-sm text-gray-400">{company?.category?.name}</p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 flex-wrap">
+              <button
+                type="button"
+                onClick={() => logoInputRef.current?.click()}
+                disabled={logoUploading}
+                className="flex items-center gap-2 text-sm font-medium text-gray-600 bg-gray-50 hover:bg-red-50 hover:text-red-600 px-4 py-2 rounded-xl transition-colors border border-gray-200"
+              >
+                <Upload size={14} />
+                {logoUploading ? 'Envoi...' : 'Changer le logo'}
+              </button>
+              <button
+                type="button"
+                onClick={() => coverInputRef.current?.click()}
+                disabled={coverUploading}
+                className="flex items-center gap-2 text-sm font-medium text-gray-600 bg-gray-50 hover:bg-red-50 hover:text-red-600 px-4 py-2 rounded-xl transition-colors border border-gray-200"
+              >
+                <Camera size={14} />
+                {coverUploading ? 'Envoi...' : 'Changer la couverture'}
+              </button>
+            </div>
+          </div>
+        </section>
 
         {/* Infos générales */}
         <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
@@ -192,16 +342,6 @@ export default function ProfilEntreprise() {
                   className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
               </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">URL du logo</label>
-              <input
-                type="url"
-                value={form.imageUrl}
-                onChange={(e) => handleField('imageUrl', e.target.value)}
-                placeholder="https://..."
-                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-              />
             </div>
           </div>
         </section>
@@ -285,7 +425,7 @@ export default function ProfilEntreprise() {
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-4">
             {(company?.photos ?? []).map((photo) => (
               <div key={photo.id} className="relative group aspect-square rounded-xl overflow-hidden bg-gray-100">
-                <img src={photo.url} alt={photo.caption ?? ''} className="w-full h-full object-cover" />
+                <img src={resolveUrl(photo.url)} alt={photo.caption ?? ''} className="w-full h-full object-cover" />
                 <button
                   onClick={() => handleDeletePhoto(photo.id)}
                   className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"

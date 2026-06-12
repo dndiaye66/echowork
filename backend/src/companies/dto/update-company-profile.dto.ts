@@ -38,6 +38,7 @@ export class UpdateCompanyProfileDto {
   @IsOptional() @IsString() ville?: string;
   @IsOptional() @IsString() @MaxLength(200) website?: string;
   @IsOptional() @IsString() imageUrl?: string;
+  @IsOptional() @IsString() coverImageUrl?: string;
 
   @IsOptional()
   @IsObject()

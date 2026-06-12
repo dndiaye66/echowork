@@ -132,6 +132,7 @@ model Company {
   slug            String             @unique
   description     String?
   imageUrl        String?
+  coverImageUrl   String?
   ville           String?
   adresse         String?
   tel             String?

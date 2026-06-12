@@ -246,8 +246,19 @@ export default function CompanyPage() {
       <Navbar />
 
       {/* Company header */}
-      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
-        <div className="max-w-6xl mx-auto px-4 py-7 md:py-12">
+      <div
+        className="relative text-white"
+        style={company.coverImageUrl ? {
+          backgroundImage: `url(${company.coverImageUrl.startsWith('http') ? company.coverImageUrl : (import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3000') + company.coverImageUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        } : undefined}
+      >
+        {company.coverImageUrl
+          ? <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/60 to-black/80" />
+          : <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
+        }
+        <div className="relative z-10 max-w-6xl mx-auto px-4 py-7 md:py-12">
           <div className="flex items-center gap-1.5 text-xs text-white/40 mb-4 md:mb-6">
             <Link to="/" className="hover:text-white/80 transition-colors">Accueil</Link>
             <ChevronRight size={11} />

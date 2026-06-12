@@ -413,10 +413,27 @@ export class CompaniesService {
         ...(dto.ville !== undefined && { ville: dto.ville }),
         ...(dto.website !== undefined && { website: dto.website }),
         ...(dto.imageUrl !== undefined && { imageUrl: dto.imageUrl }),
+        ...(dto.coverImageUrl !== undefined && { coverImageUrl: dto.coverImageUrl }),
         ...(dto.openingHours !== undefined && { openingHours: dto.openingHours as object }),
         ...(dto.socialLinks !== undefined && { socialLinks: dto.socialLinks as object }),
       },
       include: { category: true, photos: true, scores: true },
+    });
+  }
+
+  async uploadLogo(companyId: number, url: string) {
+    return this.prisma.company.update({
+      where: { id: companyId },
+      data: { imageUrl: url },
+      include: { category: true },
+    });
+  }
+
+  async uploadCover(companyId: number, url: string) {
+    return this.prisma.company.update({
+      where: { id: companyId },
+      data: { coverImageUrl: url },
+      include: { category: true },
     });
   }
 

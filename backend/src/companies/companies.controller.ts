@@ -113,6 +113,50 @@ export class CompaniesController {
     return this.companiesService.updateProfile(id, dto);
   }
 
+  /** POST /api/companies/:id/logo — upload logo */
+  @Post(':id/logo')
+  @UseGuards(JwtAuthGuard, CompanyOwnerGuard)
+  @UseInterceptors(FileInterceptor('logo', {
+    storage: photoStorage,
+    limits: { fileSize: 2 * 1024 * 1024 },
+    fileFilter: (_req, file, cb) => {
+      if (!file.mimetype.match(/\/(jpg|jpeg|png|webp)$/)) {
+        return cb(new BadRequestException('Seuls les fichiers JPG, PNG ou WEBP sont acceptés'), false);
+      }
+      cb(null, true);
+    },
+  }))
+  async uploadLogo(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) throw new BadRequestException('Aucun fichier reçu');
+    const url = `/uploads/companies/${file.filename}`;
+    return this.companiesService.uploadLogo(id, url);
+  }
+
+  /** POST /api/companies/:id/cover — upload photo de couverture */
+  @Post(':id/cover')
+  @UseGuards(JwtAuthGuard, CompanyOwnerGuard)
+  @UseInterceptors(FileInterceptor('cover', {
+    storage: photoStorage,
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (_req, file, cb) => {
+      if (!file.mimetype.match(/\/(jpg|jpeg|png|webp)$/)) {
+        return cb(new BadRequestException('Seuls les fichiers JPG, PNG ou WEBP sont acceptés'), false);
+      }
+      cb(null, true);
+    },
+  }))
+  async uploadCover(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) throw new BadRequestException('Aucun fichier reçu');
+    const url = `/uploads/companies/${file.filename}`;
+    return this.companiesService.uploadCover(id, url);
+  }
+
   /** POST /api/companies/:id/photos — ajouter une photo */
   @Post(':id/photos')
   @UseGuards(JwtAuthGuard, CompanyOwnerGuard)

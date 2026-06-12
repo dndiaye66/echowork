@@ -26,6 +26,24 @@ export const entrepriseService = {
     return res.data;
   },
 
+  uploadLogo: async (companyId, file) => {
+    const form = new FormData();
+    form.append('logo', file);
+    const res = await apiClient.post(`/companies/${companyId}/logo`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data;
+  },
+
+  uploadCover: async (companyId, file) => {
+    const form = new FormData();
+    form.append('cover', file);
+    const res = await apiClient.post(`/companies/${companyId}/cover`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data;
+  },
+
   addPhoto: async (companyId, file, caption = '') => {
     const form = new FormData();
     form.append('photo', file);
