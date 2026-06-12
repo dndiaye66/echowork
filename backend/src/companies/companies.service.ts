@@ -264,14 +264,15 @@ export class CompaniesService {
     try {
       // Use raw query for efficient aggregation at database level
       const companies = await this.prisma.$queryRaw`
-        SELECT 
+        SELECT
           c.id, c.name, c.slug, c.description, c."imageUrl", c.ville, c.adresse, c.tel, c.activite, c."categoryId",
           c."createdAt", c."updatedAt",
           COALESCE(AVG(r.rating), 0) as "averageRating",
           COUNT(r.id) as "reviewCount"
         FROM "Company" c
-        LEFT JOIN "Review" r ON c.id = r."companyId"
+        LEFT JOIN "Review" r ON c.id = r."companyId" AND r.status = 'APPROVED'
         GROUP BY c.id
+        HAVING COUNT(r.id) > 0
         ORDER BY "averageRating" DESC, "reviewCount" DESC
         LIMIT 10
       ` as any[];
@@ -309,7 +310,7 @@ export class CompaniesService {
     try {
       // Use raw query for efficient aggregation at database level with JOIN
       const companies = await this.prisma.$queryRaw`
-        SELECT 
+        SELECT
           c.id, c.name, c.slug, c.description, c."imageUrl", c.ville, c.adresse, c.tel, c.activite, c."categoryId",
           c."createdAt", c."updatedAt",
           COALESCE(AVG(r.rating), 0) as "averageRating",
@@ -317,7 +318,7 @@ export class CompaniesService {
           cat.id as "category_id", cat.name as "category_name", cat.slug as "category_slug",
           cat."parentId" as "category_parentId"
         FROM "Company" c
-        LEFT JOIN "Review" r ON c.id = r."companyId"
+        LEFT JOIN "Review" r ON c.id = r."companyId" AND r.status = 'APPROVED'
         LEFT JOIN "Category" cat ON c."categoryId" = cat.id
         GROUP BY c.id, cat.id
         HAVING COUNT(r.id) > 0
