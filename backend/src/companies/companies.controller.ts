@@ -82,6 +82,16 @@ export class CompaniesController {
 
   // ── Authenticated routes ───────────────────────────────────────
 
+  /** POST /api/companies — créer une nouvelle fiche et la réclamer immédiatement */
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  async createForUser(
+    @Body() dto: { name: string; categoryId: number; ville?: string; adresse?: string; tel?: string; description?: string; website?: string },
+    @Request() req: any,
+  ) {
+    return this.companiesService.createForUser(req.user.id, dto);
+  }
+
   /** POST /api/companies/:id/claim — réclamer une fiche */
   @Post(':id/claim')
   @UseGuards(JwtAuthGuard)

@@ -9,9 +9,25 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateCompanyProfileDto } from './dto/update-company-profile.dto';
 
-/**
- * Service responsible for company-related business logic
- */
+function toSlug(name: string): string {
+  return name
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+export interface CreateCompanyByUserDto {
+  name: string;
+  categoryId: number;
+  ville?: string;
+  adresse?: string;
+  tel?: string;
+  description?: string;
+  website?: string;
+}
+
 @Injectable()
 export class CompaniesService {
   private readonly logger = new Logger(CompaniesService.name);
@@ -364,6 +380,34 @@ export class CompaniesService {
       this.logger.error('Failed to fetch worst companies', error);
       throw new InternalServerErrorException('Failed to fetch worst companies');
     }
+  }
+
+  async createForUser(userId: number, dto: CreateCompanyByUserDto) {
+    const baseSlug = toSlug(dto.name) || `entreprise-${Date.now()}`;
+    let slug = baseSlug;
+    let attempt = 0;
+    while (await this.prisma.company.findUnique({ where: { slug } })) {
+      attempt++;
+      slug = `${baseSlug}-${attempt}`;
+    }
+
+    const company = await this.prisma.company.create({
+      data: {
+        name: dto.name,
+        slug,
+        categoryId: dto.categoryId,
+        ville: dto.ville ?? null,
+        adresse: dto.adresse ?? null,
+        tel: dto.tel ?? null,
+        description: dto.description ?? null,
+        website: dto.website ?? null,
+        claimedByUserId: userId,
+        isVerified: false,
+      },
+      include: { category: true, scores: true, subscription: true },
+    });
+
+    return company;
   }
 
   async claimCompany(companyId: number, userId: number) {

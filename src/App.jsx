@@ -29,6 +29,7 @@ import ProfilEntreprise from "./pages/entreprise/ProfilEntreprise";
 import AvisEntreprise from "./pages/entreprise/AvisEntreprise";
 import StatistiquesEntreprise from "./pages/entreprise/StatistiquesEntreprise";
 import AnalyseIA from "./pages/entreprise/AnalyseIA";
+import AbonnementEntreprise from "./pages/entreprise/AbonnementEntreprise";
 import ClassementsPage from "./pages/ClassementsPage";
 import SignalementsModeration from "./pages/admin/SignalementsModeration";
 
@@ -109,6 +110,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AnalyseIA />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/espace-entreprise/tableau-de-bord/abonnement"
+            element={
+              <ProtectedRoute>
+                <AbonnementEntreprise />
               </ProtectedRoute>
             }
           />
