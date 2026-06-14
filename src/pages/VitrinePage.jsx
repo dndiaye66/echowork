@@ -13,6 +13,7 @@ import SearchAutocomplete from '../components/SearchAutocomplete';
 import { useBestCompanies, useStats, useRecentReviews, useBarometer } from '../hooks/useHomeData';
 import { useCategories } from '../hooks/useCategory';
 import backgroundImage from '../assets/image/background_banner.png';
+import campusPoster from '../assets/image/campus-challenge-2026.png';
 
 // ── Brand color map for known Senegalese companies ────────────────────────
 const BRAND_COLORS = {
@@ -762,6 +763,46 @@ export default function VitrinePage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ── Campus Challenge Banner ───────────────────── */}
+      <section className="bg-gray-950 py-12 px-4">
+        <div className="max-w-5xl mx-auto">
+          <Link
+            to="/campus"
+            className="group flex flex-col md:flex-row items-center gap-8 rounded-3xl overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 border border-white/10 hover:border-red-500/40 transition-all duration-300 hover:shadow-2xl hover:shadow-red-900/20 p-6 md:p-8"
+          >
+            {/* Poster */}
+            <div className="shrink-0 w-48 md:w-56">
+              <img
+                src={campusPoster}
+                alt="EchoWork Campus Challenge 2026"
+                className="w-full rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+
+            {/* Text */}
+            <div className="flex-1 text-center md:text-left">
+              <span className="inline-flex items-center gap-1.5 bg-red-600/20 border border-red-500/30 text-red-400 text-xs font-bold px-3 py-1 rounded-full mb-4">
+                <GraduationCap size={11} /> Du 15 Juin au 15 Juillet 2026
+              </span>
+              <h2 className="text-2xl md:text-3xl font-black text-white leading-tight mb-2">
+                EchoWork <span className="text-red-500">Campus Challenge</span> 2026
+              </h2>
+              <p className="text-gray-400 text-sm md:text-base mb-5 max-w-lg">
+                Le 1er classement participatif des écoles et universités du Sénégal par les étudiants.
+                Ton avis compte, ton école progresse !
+              </p>
+              <div className="inline-flex items-center gap-2 bg-red-600 group-hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-full text-sm transition-colors">
+                <Star size={14} /> Participer maintenant
+                <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+              </div>
+              <p className="mt-3 text-xs text-gray-600">
+                Classement national publié le 20 Juillet 2026
+              </p>
+            </div>
+          </Link>
         </div>
       </section>
 
