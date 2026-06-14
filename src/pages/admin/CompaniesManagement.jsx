@@ -169,19 +169,6 @@ function CompanyModal({ modal, categories, onClose, onSaved }) {
             />
           </div>
 
-          {/* Image URL */}
-          <div className="form-control">
-            <label className="label py-1">
-              <span className="label-text text-xs font-medium">URL du logo</span>
-            </label>
-            <input
-              type="text"
-              className="input input-bordered input-sm"
-              value={form.imageUrl}
-              onChange={(e) => handleField('imageUrl', e.target.value)}
-              placeholder="https://..."
-            />
-          </div>
 
           {/* Collapsible extra info */}
           <div className="border border-base-300 rounded-lg overflow-hidden">
