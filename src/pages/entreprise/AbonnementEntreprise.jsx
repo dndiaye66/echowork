@@ -11,18 +11,19 @@ import { entrepriseService } from '../../services/entrepriseService';
 const PLANS = [
   {
     key: 'FREE',
-    label: 'Gratuit',
-    price: '0',
-    period: 'toujours',
+    label: 'Basic',
+    price: '25 000',
+    period: 'mois',
     icon: Star,
     color: 'gray',
+    trial: true,
     description: 'Pour démarrer et gérer votre réputation en ligne.',
     features: [
       'Fiche entreprise publique',
       'Réception d\'avis clients',
       'Réponse aux avis',
       'Statistiques de base',
-      '3 photos max',
+      '5 photos max',
     ],
     missing: [
       'Analyse IA des avis',
@@ -35,14 +36,15 @@ const PLANS = [
   {
     key: 'PRO',
     label: 'Pro',
-    price: '15 000',
+    price: '35 000',
     period: 'mois',
     icon: Zap,
     color: 'red',
     popular: true,
+    trial: true,
     description: 'Pour les entreprises qui veulent se démarquer.',
     features: [
-      'Tout du plan Gratuit',
+      'Tout du plan Basic',
       'Badge "Vérifié"',
       'Galerie photos illimitée',
       'Statistiques avancées',
@@ -51,22 +53,21 @@ const PLANS = [
     ],
     missing: [
       'Support prioritaire 24/7',
-      'Gestion multi-agences illimitée',
+      'Rapport mensuel dédié',
     ],
   },
   {
     key: 'PREMIUM',
     label: 'Premium',
-    price: '35 000',
+    price: '50 000',
     period: 'mois',
     icon: Crown,
     color: 'amber',
+    trial: true,
     description: 'La solution complète pour les grandes entreprises.',
     features: [
       'Tout du plan Pro',
       'Support prioritaire 24/7',
-      'Gestion multi-agences illimitée',
-      'Intégration API',
       'Rapport mensuel détaillé',
       'Gestionnaire de compte dédié',
     ],
@@ -76,7 +77,7 @@ const PLANS = [
 
 const PLAN_ORDER = { FREE: 0, PRO: 1, PREMIUM: 2 };
 
-function PlanCard({ plan, currentPlan, company, onUpgrade }) {
+function PlanCard({ plan, currentPlan, onUpgrade }) {
   const Icon = plan.icon;
   const isCurrentPlan = currentPlan === plan.key;
   const isUpgrade = PLAN_ORDER[plan.key] > PLAN_ORDER[currentPlan ?? 'FREE'];
@@ -116,13 +117,11 @@ function PlanCard({ plan, currentPlan, company, onUpgrade }) {
         <p className="text-xs text-gray-500 mt-0.5 mb-3">{plan.description}</p>
         <div className="flex items-end gap-1">
           <span className="text-3xl font-extrabold text-gray-900">{plan.price}</span>
-          {plan.price !== '0' && (
-            <span className="text-sm text-gray-400 mb-1">FCFA / {plan.period}</span>
-          )}
-          {plan.price === '0' && (
-            <span className="text-sm text-gray-400 mb-1">({plan.period})</span>
-          )}
+          <span className="text-sm text-gray-400 mb-1">FCFA / {plan.period}</span>
         </div>
+        {plan.trial && (
+          <p className="text-xs text-green-600 font-medium mt-1">✓ 1 mois d'essai offert</p>
+        )}
       </div>
 
       <div className="p-6 flex-1 space-y-2">
@@ -149,7 +148,7 @@ function PlanCard({ plan, currentPlan, company, onUpgrade }) {
           {isCurrentPlan
             ? 'Plan actuel'
             : isUpgrade
-            ? `Passer au plan ${plan.label}`
+            ? `Essayer ${plan.label} — 1 mois offert`
             : 'Non disponible'}
         </button>
       </div>
@@ -284,9 +283,9 @@ export default function AbonnementEntreprise() {
             <div className="mt-4 flex items-start gap-3 bg-red-50 border border-red-100 rounded-xl px-4 py-3">
               <Sparkles size={18} className="text-red-500 mt-0.5 shrink-0" />
               <div>
-                <p className="text-sm font-semibold text-red-700">Passez à la vitesse supérieure</p>
+                <p className="text-sm font-semibold text-red-700">1 mois d'essai offert sur tous les plans</p>
                 <p className="text-xs text-red-600 mt-0.5">
-                  Débloquez l'analyse IA, le badge vérifié et les statistiques avancées avec le plan Pro.
+                  Débloquez l'analyse IA, le badge vérifié et les statistiques avancées. Sans engagement.
                 </p>
               </div>
             </div>

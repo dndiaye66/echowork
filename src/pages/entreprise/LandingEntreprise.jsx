@@ -68,7 +68,7 @@ export default function LandingEntreprise() {
               to={ctaLink}
               className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3.5 rounded-full transition-colors"
             >
-              Commencer gratuitement
+              Essayer 1 mois gratuit
               <ChevronRight size={18} />
             </Link>
             <Link
@@ -145,26 +145,27 @@ export default function LandingEntreprise() {
       {/* Plans */}
       <section className="py-16 px-4 bg-gray-50">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-3">Nos offres</h2>
-          <p className="text-gray-500 text-center mb-10">Commencez gratuitement, évoluez selon vos besoins.</p>
+          <h2 className="text-2xl font-bold text-gray-900 text-center mb-2">Nos offres</h2>
+          <p className="text-gray-500 text-center mb-2">1 mois d'essai gratuit sur tous les plans.</p>
+          <p className="text-xs text-gray-400 text-center mb-10">Sans engagement — résiliable à tout moment.</p>
           <div className="grid sm:grid-cols-3 gap-6">
             {[
               {
-                plan: 'Gratuit',
-                price: '0 FCFA',
-                features: ['Réclamer sa fiche', 'Répondre aux avis', 'Profil de base'],
+                plan: 'Basic',
+                price: '25 000',
+                features: ['Fiche entreprise publique', 'Réponse aux avis', 'Galerie photos (5 max)', 'Statistiques de base'],
                 highlighted: false,
               },
               {
                 plan: 'Pro',
-                price: '9 900 FCFA/mois',
-                features: ['Tout le gratuit', 'Galerie photos', 'Statistiques avancées', 'Badge vérifié'],
+                price: '35 000',
+                features: ['Tout le Basic', 'Badge vérifié', 'Galerie photos illimitée', 'Statistiques avancées', 'Analyse IA des avis'],
                 highlighted: true,
               },
               {
                 plan: 'Premium',
-                price: '24 900 FCFA/mois',
-                features: ['Tout le Pro', 'Mise en avant dans les recherches', 'Publicités sponsorisées', 'Support prioritaire'],
+                price: '50 000',
+                features: ['Tout le Pro', 'Priorité dans les résultats', 'Support prioritaire 24/7', 'Rapport mensuel dédié'],
                 highlighted: false,
               },
             ].map(({ plan, price, features, highlighted }) => (
@@ -177,7 +178,11 @@ export default function LandingEntreprise() {
                 }`}
               >
                 <h3 className={`font-bold text-lg mb-1 ${highlighted ? 'text-white' : 'text-gray-900'}`}>{plan}</h3>
-                <p className={`text-2xl font-bold mb-5 ${highlighted ? 'text-white' : 'text-gray-900'}`}>{price}</p>
+                <div className="mb-1">
+                  <span className={`text-2xl font-bold ${highlighted ? 'text-white' : 'text-gray-900'}`}>{price}</span>
+                  <span className={`text-sm ml-1 ${highlighted ? 'text-red-200' : 'text-gray-400'}`}>FCFA/mois</span>
+                </div>
+                <p className={`text-xs mb-5 ${highlighted ? 'text-red-200' : 'text-gray-400'}`}>1 mois offert à l'inscription</p>
                 <ul className="space-y-2 mb-6">
                   {features.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
@@ -194,7 +199,7 @@ export default function LandingEntreprise() {
                       : 'bg-red-600 text-white hover:bg-red-700'
                   }`}
                 >
-                  Choisir {plan}
+                  Essayer {plan} gratuitement
                 </Link>
               </div>
             ))}
@@ -205,7 +210,7 @@ export default function LandingEntreprise() {
       {/* CTA final */}
       <section className="py-16 px-4 bg-gradient-to-br from-gray-900 to-gray-800 text-white text-center">
         <h2 className="text-2xl font-bold mb-4">Prêt à gérer votre réputation ?</h2>
-        <p className="text-gray-400 mb-8">Réclamez votre fiche gratuitement en moins de 2 minutes.</p>
+        <p className="text-gray-400 mb-8">1 mois d'essai offert — sans carte bancaire, sans engagement.</p>
         <Link
           to={ctaLink}
           className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3.5 rounded-full transition-colors"
