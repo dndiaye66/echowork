@@ -1,4 +1,4 @@
-import { IsString, IsInt, IsOptional, IsUrl, IsBoolean, IsEnum } from 'class-validator';
+import { IsString, IsInt, IsOptional, IsBoolean, IsEnum } from 'class-validator';
 
 enum CompanySize { TPE = 'TPE', PME = 'PME', GRANDE = 'GRANDE' }
 
@@ -6,7 +6,7 @@ export class UpdateCompanyDto {
   @IsString() @IsOptional() name?: string;
   @IsString() @IsOptional() slug?: string;
   @IsString() @IsOptional() description?: string;
-  @IsUrl({}, { message: 'Image URL must be a valid URL' }) @IsOptional() imageUrl?: string;
+  @IsString() @IsOptional() imageUrl?: string;
   @IsInt() @IsOptional() categoryId?: number;
   @IsString() @IsOptional() tel?: string;
   @IsString() @IsOptional() ville?: string;
