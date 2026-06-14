@@ -204,7 +204,7 @@ export class EmailService {
 </html>`;
 
       const info = await this.transporter.sendMail({
-        from: process.env.EMAIL_FROM || '"EchoWork" <noreply@echowork.net>',
+        from: process.env.EMAIL_FROM || '"EchoWork" <no-reply@echowork.net>',
         replyTo: process.env.EMAIL_REPLY_TO || 'contact@echowork.net',
         to: email,
         subject: `Confirmation de votre compte EchoWork`,
@@ -387,7 +387,7 @@ export class EmailService {
 </body></html>`;
 
       await this.transporter.sendMail({
-        from: process.env.EMAIL_FROM || '"EchoWork" <noreply@echowork.net>',
+        from: process.env.EMAIL_FROM || '"EchoWork" <no-reply@echowork.net>',
         to: opts.email,
         subject,
         html,
@@ -473,7 +473,7 @@ export class EmailService {
 </body></html>`;
 
       await this.transporter.sendMail({
-        from: process.env.EMAIL_FROM || '"EchoWork" <noreply@echowork.net>',
+        from: process.env.EMAIL_FROM || '"EchoWork" <no-reply@echowork.net>',
         to: opts.adminEmail,
         subject: `🚨 Signalement citoyen — ${opts.companyName} (${categoryLabel})`,
         html,
