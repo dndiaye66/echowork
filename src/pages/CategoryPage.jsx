@@ -239,9 +239,17 @@ export default function CategoryPage() {
 
                         {/* Info */}
                         <div className="flex-1 min-w-0">
-                          <h2 className="font-bold text-gray-900 text-sm md:text-base group-hover:text-red-600 transition-colors leading-snug truncate">
-                            {company.name}
-                          </h2>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <h2 className="font-bold text-gray-900 text-sm md:text-base group-hover:text-red-600 transition-colors leading-snug truncate">
+                              {company.name}
+                            </h2>
+                            {company.subscription?.isActive && company.subscription?.plan === 'PREMIUM' && (
+                              <span className="shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">★ PREMIUM</span>
+                            )}
+                            {company.subscription?.isActive && company.subscription?.plan === 'PRO' && (
+                              <span className="shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700">✦ PRO</span>
+                            )}
+                          </div>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <StarDisplay rating={avg} size={11} />
                             {avg > 0 && (

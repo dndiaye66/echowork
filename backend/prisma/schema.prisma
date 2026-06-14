@@ -163,6 +163,7 @@ model Company {
   views           CompanyView[]
   analysis        ReviewAnalysis?
   reports         CitizenReport[]
+  posts           CompanyPost[]
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 
@@ -350,6 +351,12 @@ model CompanyReply {
   @@index([companyId])
 }
 
+enum PostType {
+  ANNONCE
+  OFFRE
+  EVENEMENT
+}
+
 enum ReportCategory {
   CORRUPTION
   MAUVAIS_ACCUEIL
@@ -410,6 +417,21 @@ model CitizenReport {
   @@index([companyId])
   @@index([status])
   @@index([category])
+}
+
+model CompanyPost {
+  id        Int      @id @default(autoincrement())
+  companyId Int
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  type      PostType @default(ANNONCE)
+  title     String
+  content   String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([isActive])
 }
 
 model Advertisement {

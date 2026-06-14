@@ -30,6 +30,7 @@ import AvisEntreprise from "./pages/entreprise/AvisEntreprise";
 import StatistiquesEntreprise from "./pages/entreprise/StatistiquesEntreprise";
 import AnalyseIA from "./pages/entreprise/AnalyseIA";
 import AbonnementEntreprise from "./pages/entreprise/AbonnementEntreprise";
+import PublicationsEntreprise from "./pages/entreprise/PublicationsEntreprise";
 import ClassementsPage from "./pages/ClassementsPage";
 import SignalementsModeration from "./pages/admin/SignalementsModeration";
 
@@ -94,6 +95,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AvisEntreprise />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/espace-entreprise/tableau-de-bord/publications"
+            element={
+              <ProtectedRoute>
+                <PublicationsEntreprise />
               </ProtectedRoute>
             }
           />

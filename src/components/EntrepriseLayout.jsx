@@ -3,13 +3,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   LayoutDashboard, Building2, MessageSquare, BarChart3,
-  CreditCard, LogOut, Menu, Star, ChevronRight, Sparkles,
+  CreditCard, LogOut, Menu, Star, ChevronRight, Sparkles, Newspaper,
 } from 'lucide-react';
 
 const NAV = [
   { label: 'Vue d\'ensemble', icon: LayoutDashboard, path: '/espace-entreprise/tableau-de-bord' },
   { label: 'Mon profil', icon: Building2, path: '/espace-entreprise/tableau-de-bord/profil' },
   { label: 'Avis clients', icon: MessageSquare, path: '/espace-entreprise/tableau-de-bord/avis' },
+  { label: 'Publications', icon: Newspaper, path: '/espace-entreprise/tableau-de-bord/publications', badge: 'PRO' },
   { label: 'Statistiques', icon: BarChart3, path: '/espace-entreprise/tableau-de-bord/statistiques' },
   { label: 'Analyse IA', icon: Sparkles, path: '/espace-entreprise/tableau-de-bord/analyse-ia' },
   { label: 'Abonnement', icon: CreditCard, path: '/espace-entreprise/tableau-de-bord/abonnement' },
@@ -41,7 +42,7 @@ export default function EntrepriseLayout({ children, title }) {
       </div>
 
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
-        {NAV.map(({ label, icon: Icon, path }) => {
+        {NAV.map(({ label, icon: Icon, path, badge }) => {
           const active = isActive(path);
           return (
             <Link
@@ -56,6 +57,9 @@ export default function EntrepriseLayout({ children, title }) {
             >
               <Icon size={18} className={active ? 'text-red-600' : 'text-gray-400'} />
               <span className="flex-1">{label}</span>
+              {badge && !active && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">{badge}</span>
+              )}
               {active && <ChevronRight size={14} className="text-red-400" />}
             </Link>
           );

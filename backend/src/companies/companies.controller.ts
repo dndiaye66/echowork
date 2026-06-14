@@ -211,6 +211,32 @@ export class CompaniesController {
     return this.companiesService.addPhoto(id, url, caption);
   }
 
+  /** GET /api/companies/:id/posts — publications publiques */
+  @Get(':id/posts')
+  async getPosts(@Param('id', ParseIntPipe) id: number) {
+    return this.companiesService.getPosts(id);
+  }
+
+  /** POST /api/companies/:id/posts — créer une publication (propriétaire) */
+  @Post(':id/posts')
+  @UseGuards(JwtAuthGuard, CompanyOwnerGuard)
+  async createPost(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: { type: string; title: string; content: string },
+  ) {
+    return this.companiesService.createPost(id, dto);
+  }
+
+  /** DELETE /api/companies/:id/posts/:postId — supprimer une publication */
+  @Delete(':id/posts/:postId')
+  @UseGuards(JwtAuthGuard, CompanyOwnerGuard)
+  async deletePost(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('postId', ParseIntPipe) postId: number,
+  ) {
+    return this.companiesService.deletePost(id, postId);
+  }
+
   /** DELETE /api/companies/:id/photos/:photoId — supprimer une photo */
   @Delete(':id/photos/:photoId')
   @UseGuards(JwtAuthGuard, CompanyOwnerGuard)

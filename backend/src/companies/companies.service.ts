@@ -207,8 +207,9 @@ export class CompaniesService {
             slug: categorySlug,
           },
         },
-        include: { 
+        include: {
           category: true,
+          subscription: { select: { plan: true, isActive: true } },
           reviews: {
             select: {
               id: true,
@@ -219,7 +220,14 @@ export class CompaniesService {
         orderBy: { name: 'asc' },
       });
 
-      return this.calculateAverageRatings(companies);
+      const withRatings = this.calculateAverageRatings(companies);
+      const planOrder: Record<string, number> = { PREMIUM: 0, PRO: 1, FREE: 2 };
+      return withRatings.sort((a: any, b: any) => {
+        const aPlan = (a.subscription?.isActive && a.subscription?.plan) || 'FREE';
+        const bPlan = (b.subscription?.isActive && b.subscription?.plan) || 'FREE';
+        const diff = (planOrder[aPlan] ?? 2) - (planOrder[bPlan] ?? 2);
+        return diff !== 0 ? diff : b.averageRating - a.averageRating;
+      });
     } catch (error) {
       this.logger.error(`Failed to fetch companies for category slug ${categorySlug}`, error);
       throw new InternalServerErrorException('Failed to fetch companies by category slug');
@@ -264,6 +272,12 @@ export class CompaniesService {
           jobOffers: {
             where: { isActive: true },
             orderBy: { createdAt: 'desc' },
+          },
+          subscription: { select: { plan: true, isActive: true } },
+          posts: {
+            where: { isActive: true },
+            orderBy: { createdAt: 'desc' },
+            take: 10,
           },
           advertisements: {
             where: {
@@ -621,6 +635,30 @@ export class CompaniesService {
         _count: { select: { reviews: true } },
       },
     });
+  }
+
+  async getPosts(companyId: number) {
+    return this.prisma.companyPost.findMany({
+      where: { companyId, isActive: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async createPost(companyId: number, dto: { type: string; title: string; content: string }) {
+    return this.prisma.companyPost.create({
+      data: {
+        companyId,
+        type: dto.type as any,
+        title: dto.title.trim(),
+        content: dto.content.trim(),
+      },
+    });
+  }
+
+  async deletePost(companyId: number, postId: number) {
+    const post = await this.prisma.companyPost.findFirst({ where: { id: postId, companyId } });
+    if (!post) throw new NotFoundException('Publication introuvable');
+    await this.prisma.companyPost.update({ where: { id: postId }, data: { isActive: false } });
   }
 
   /**

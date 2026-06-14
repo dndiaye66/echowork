@@ -295,6 +295,16 @@ export default function CompanyPage() {
                       <CheckCircle size={10} /> Vérifié
                     </span>
                   )}
+                  {company.subscription?.isActive && company.subscription?.plan === 'PREMIUM' && (
+                    <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-400/20 text-amber-300 rounded-full text-[10px] md:text-xs font-bold">
+                      ★ Premium
+                    </span>
+                  )}
+                  {company.subscription?.isActive && company.subscription?.plan === 'PRO' && (
+                    <span className="flex items-center gap-1 px-2 py-0.5 bg-blue-400/20 text-blue-200 rounded-full text-[10px] md:text-xs font-bold">
+                      ✦ Pro
+                    </span>
+                  )}
                 </div>
 
                 <h1 className="text-xl md:text-4xl font-black mb-2 md:mb-3 leading-tight">{company.name}</h1>
@@ -682,6 +692,37 @@ export default function CompanyPage() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* Publications de l'entreprise */}
+      {company.posts?.length > 0 && (
+        <section className="max-w-4xl mx-auto px-4 pb-8">
+          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <span className="w-1 h-5 rounded-full bg-red-500 inline-block" />
+            Publications
+          </h2>
+          <div className="space-y-3">
+            {company.posts.map((post) => {
+              const typeConfig = {
+                ANNONCE: { label: 'Annonce', color: 'bg-blue-50 text-blue-600' },
+                OFFRE: { label: 'Offre', color: 'bg-green-50 text-green-600' },
+                EVENEMENT: { label: 'Événement', color: 'bg-purple-50 text-purple-600' },
+              }[post.type] ?? { label: post.type, color: 'bg-gray-100 text-gray-500' };
+              return (
+                <div key={post.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${typeConfig.color}`}>{typeConfig.label}</span>
+                    <span className="text-xs text-gray-400">
+                      {new Date(post.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                  </div>
+                  <h3 className="font-semibold text-gray-900 text-sm leading-snug">{post.title}</h3>
+                  <p className="text-sm text-gray-500 mt-1.5 whitespace-pre-line leading-relaxed">{post.content}</p>
+                </div>
+              );
+            })}
           </div>
         </section>
       )}

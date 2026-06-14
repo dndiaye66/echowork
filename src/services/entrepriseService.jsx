@@ -69,6 +69,21 @@ export const entrepriseService = {
     return res.data;
   },
 
+  getPosts: async (companyId) => {
+    const res = await apiClient.get(`/companies/${companyId}/posts`);
+    return res.data;
+  },
+
+  createPost: async (companyId, data) => {
+    const res = await apiClient.post(`/companies/${companyId}/posts`, data);
+    return res.data;
+  },
+
+  deletePost: async (companyId, postId) => {
+    const res = await apiClient.delete(`/companies/${companyId}/posts/${postId}`);
+    return res.data;
+  },
+
   createBranch: async (companyId, data) => {
     const res = await apiClient.post(`/companies/${companyId}/branches`, data);
     return res.data;
