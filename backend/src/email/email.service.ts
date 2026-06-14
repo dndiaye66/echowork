@@ -175,14 +175,23 @@ export class EmailService {
             </td>
           </tr>
 
+          <!-- SPAM NOTE -->
+          <tr>
+            <td style="padding:16px 0 0;text-align:center;">
+              <p style="margin:0;font-size:12px;color:#9ca3af;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px 16px;display:inline-block;">
+                📬 Si vous ne trouvez pas cet email, vérifiez votre dossier <strong style="color:#6b7280;">Spams</strong> ou <strong style="color:#6b7280;">Courrier indésirable</strong>.
+              </p>
+            </td>
+          </tr>
+
           <!-- FOOTER -->
           <tr>
-            <td style="padding:28px 0 0;text-align:center;">
+            <td style="padding:20px 0 0;text-align:center;">
               <p style="margin:0 0 6px;font-size:12px;color:#9ca3af;">
                 Cet email vous a été envoyé par <strong style="color:#6b7280;">EchoWork</strong>
               </p>
               <p style="margin:0;font-size:11px;color:#d1d5db;">
-                &copy; ${new Date().getFullYear()} EchoWork · Dakar, Sénégal
+                &copy; ${new Date().getFullYear()} EchoWork · Dakar, Sénégal · <a href="https://echowork.net" style="color:#d1d5db;">echowork.net</a>
               </p>
             </td>
           </tr>
@@ -195,11 +204,17 @@ export class EmailService {
 </html>`;
 
       const info = await this.transporter.sendMail({
-        from: process.env.EMAIL_FROM || '"EchoWork" <noreply@echowork.com>',
+        from: process.env.EMAIL_FROM || '"EchoWork" <noreply@echowork.net>',
+        replyTo: process.env.EMAIL_REPLY_TO || 'contact@echowork.net',
         to: email,
-        subject: `${otp} — Votre code de confirmation EchoWork`,
+        subject: `Confirmation de votre compte EchoWork`,
         html,
-        text: `Bonjour ${username},\n\nVotre code de confirmation EchoWork : ${otp}\n\nCe code expire dans 15 minutes. Ne le partagez jamais.\n\n© ${new Date().getFullYear()} EchoWork`,
+        text: `Bonjour ${username},\n\nVotre code de confirmation EchoWork : ${otp}\n\nCe code expire dans 15 minutes. Ne le partagez jamais.\n\nSi vous ne trouvez pas cet email, vérifiez votre dossier Spams / Courrier indésirable.\n\n© ${new Date().getFullYear()} EchoWork · echowork.net`,
+        headers: {
+          'X-Priority': '1',
+          'X-MSMail-Priority': 'High',
+          'Importance': 'high',
+        },
       });
       this.logger.log(`OTP email sent to ${email}. ID: ${info.messageId}`);
       if (!process.env.SMTP_HOST || process.env.SMTP_HOST === 'smtp.ethereal.email') {

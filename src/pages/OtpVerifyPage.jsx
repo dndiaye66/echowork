@@ -223,10 +223,17 @@ export default function OtpVerifyPage() {
               </p>
             </div>
 
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-6 flex items-start gap-2">
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-3 flex items-start gap-2">
               <Mail size={16} className="text-amber-600 shrink-0 mt-0.5" />
               <p className="text-amber-800 text-xs leading-relaxed">
                 Entrez le code à 6 chiffres reçu par email. Il expire dans <strong>15 minutes</strong>.
+              </p>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-6 flex items-start gap-2">
+              <span className="text-base shrink-0 mt-0.5">📬</span>
+              <p className="text-blue-800 text-xs leading-relaxed">
+                Vous ne trouvez pas l'email ? Vérifiez votre dossier <strong>Spams</strong> ou <strong>Courrier indésirable</strong>.
               </p>
             </div>
 
