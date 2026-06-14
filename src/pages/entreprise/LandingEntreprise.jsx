@@ -152,23 +152,24 @@ export default function LandingEntreprise() {
             {[
               {
                 plan: 'Basic',
-                price: '25 000',
-                features: ['Fiche entreprise publique', 'Réponse aux avis', 'Galerie photos (5 max)', 'Statistiques de base'],
+                price: 'Gratuit',
+                features: ["Fiche entreprise publique", "Réception d'avis clients", "Réponse aux avis"],
                 highlighted: false,
+                free: true,
               },
               {
                 plan: 'Pro',
-                price: '35 000',
+                price: '15 000',
                 features: ['Tout le Basic', 'Badge vérifié', 'Galerie photos illimitée', 'Statistiques avancées', 'Analyse IA des avis'],
                 highlighted: true,
               },
               {
                 plan: 'Premium',
-                price: '50 000',
+                price: '25 000',
                 features: ['Tout le Pro', 'Priorité dans les résultats', 'Support prioritaire 24/7', 'Rapport mensuel dédié'],
                 highlighted: false,
               },
-            ].map(({ plan, price, features, highlighted }) => (
+            ].map(({ plan, price, features, highlighted, free }) => (
               <div
                 key={plan}
                 className={`rounded-2xl p-6 border ${
@@ -180,9 +181,11 @@ export default function LandingEntreprise() {
                 <h3 className={`font-bold text-lg mb-1 ${highlighted ? 'text-white' : 'text-gray-900'}`}>{plan}</h3>
                 <div className="mb-1">
                   <span className={`text-2xl font-bold ${highlighted ? 'text-white' : 'text-gray-900'}`}>{price}</span>
-                  <span className={`text-sm ml-1 ${highlighted ? 'text-red-200' : 'text-gray-400'}`}>FCFA/mois</span>
+                  {!free && <span className={`text-sm ml-1 ${highlighted ? 'text-red-200' : 'text-gray-400'}`}>FCFA/mois</span>}
                 </div>
-                <p className={`text-xs mb-5 ${highlighted ? 'text-red-200' : 'text-gray-400'}`}>1 mois offert à l'inscription</p>
+                <p className={`text-xs mb-5 ${highlighted ? 'text-red-200' : 'text-gray-400'}`}>
+                  {free ? 'Toujours gratuit' : '1 mois offert à l\'inscription'}
+                </p>
                 <ul className="space-y-2 mb-6">
                   {features.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
