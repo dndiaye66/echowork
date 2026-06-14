@@ -8,6 +8,7 @@ import {
 import Navbar from '../components/navbar';
 import Foot from '../components/Foot';
 import { companyService } from '../services/companyService';
+import campusPoster from '../assets/image/campus-challenge-2026.png';
 
 const ECOLES = [
   { name: 'UCAD', slug: 'ucad', short: 'UC' },
@@ -88,10 +89,15 @@ export default function CampusPage() {
       <Navbar />
 
       {/* ── Hero ────────────────────────────────────────── */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-red-950 text-white">
-        <div className="absolute inset-0 opacity-5"
-          style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, #dc2626 0%, transparent 50%), radial-gradient(circle at 80% 20%, #dc2626 0%, transparent 40%)' }}
-        />
+      <div
+        className="relative overflow-hidden text-white"
+        style={{
+          backgroundImage: `url(${campusPoster})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center top',
+        }}
+      >
+        <div className="absolute inset-0 bg-black/65" />
         <div className="relative max-w-5xl mx-auto px-4 py-16 md:py-24 text-center">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-xs font-semibold text-white/80 mb-6">
             <GraduationCap size={13} />
