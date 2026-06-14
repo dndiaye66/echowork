@@ -71,7 +71,7 @@ export default function CampusPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    companyService.getCompaniesByCategory('etablissements-d-enseignement-superieur')
+    companyService.getCompaniesByCategory('ecole-et-enseignement-superieure')
       .then((data) => {
         const sorted = (data?.companies || data || [])
           .filter((c) => c.averageRating > 0)
@@ -116,7 +116,7 @@ export default function CampusPage() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              to="/categories/etablissements-d-enseignement-superieur"
+              to="/categories/ecole-et-enseignement-superieure"
               className="inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-3.5 rounded-full text-base transition-colors shadow-lg shadow-red-900/40"
             >
               <Star size={16} /> Donner mon avis maintenant
@@ -219,7 +219,7 @@ export default function CampusPage() {
               <GraduationCap size={40} className="text-gray-200 mx-auto mb-3" />
               <p className="text-gray-500 font-medium">Sois le premier à noter ton école !</p>
               <Link
-                to="/categories/etablissements-d-enseignement-superieur"
+                to="/categories/ecole-et-enseignement-superieure"
                 className="mt-4 inline-flex items-center gap-1.5 text-sm text-red-600 font-semibold hover:underline"
               >
                 Voir les établissements <ArrowRight size={14} />
@@ -229,7 +229,7 @@ export default function CampusPage() {
 
           <div className="mt-6 text-center">
             <Link
-              to="/categories/etablissements-d-enseignement-superieur"
+              to="/categories/ecole-et-enseignement-superieure"
               className="inline-flex items-center gap-2 text-sm font-semibold text-red-600 hover:underline"
             >
               Voir tous les établissements <ChevronRight size={14} />
@@ -325,7 +325,7 @@ export default function CampusPage() {
           Chaque avis compte. Sois le changement que tu veux voir dans l'enseignement supérieur.
         </p>
         <Link
-          to="/categories/etablissements-d-enseignement-superieur"
+          to="/categories/ecole-et-enseignement-superieure"
           className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold px-10 py-4 rounded-full text-base transition-colors shadow-lg shadow-red-900/40"
         >
           <Star size={16} /> Donner mon avis maintenant
