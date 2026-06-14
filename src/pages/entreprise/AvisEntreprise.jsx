@@ -184,11 +184,27 @@ export default function AvisEntreprise() {
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    if (!companyId) return;
-    entrepriseService.getDashboard(companyId)
-      .then(setDashboard)
-      .catch(() => setError('Impossible de charger les avis.'))
-      .finally(() => setLoading(false));
+    const load = async (id) => {
+      try {
+        const data = await entrepriseService.getDashboard(id);
+        setDashboard(data);
+      } catch {
+        setError('Impossible de charger les avis.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (companyId && !isNaN(companyId)) {
+      load(companyId);
+    } else {
+      entrepriseService.getMyCompanies()
+        .then((list) => {
+          if (list.length > 0) load(list[0].id);
+          else setLoading(false);
+        })
+        .catch(() => { setError('Impossible de charger les avis.'); setLoading(false); });
+    }
   }, [companyId]);
 
   const handleReplyCreated = (reviewId, reply) => {
