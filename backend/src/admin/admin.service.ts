@@ -7,6 +7,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { EmailService } from '../email/email.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { CreateJobOfferDto } from './dto/create-job-offer.dto';
@@ -21,7 +22,10 @@ import * as crypto from 'crypto';
 export class AdminService {
   private readonly logger = new Logger(AdminService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly emailService: EmailService,
+  ) {}
 
   // ===== COMPANIES =====
 
@@ -474,13 +478,23 @@ export class AdminService {
 
   async approveReview(id: number) {
     try {
-      const review = await this.prisma.review.findUnique({ where: { id } });
+      const review = await this.prisma.review.findUnique({
+        where: { id },
+        include: {
+          user: { select: { username: true } },
+          company: {
+            select: {
+              name: true,
+              slug: true,
+              claimedBy: { select: { email: true, username: true } },
+            },
+          },
+        },
+      });
 
-      if (!review) {
-        throw new NotFoundException(`Review with ID ${id} not found`);
-      }
+      if (!review) throw new NotFoundException(`Review with ID ${id} not found`);
 
-      return await this.prisma.review.update({
+      const updated = await this.prisma.review.update({
         where: { id },
         data: { status: 'APPROVED' },
         include: {
@@ -488,10 +502,23 @@ export class AdminService {
           company: { select: { name: true } },
         },
       });
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
+
+      // Notify company owner if the company is claimed
+      if (review.company.claimedBy?.email) {
+        this.emailService.sendReviewAlert({
+          email: review.company.claimedBy.email,
+          ownerUsername: review.company.claimedBy.username,
+          companyName: review.company.name,
+          companySlug: review.company.slug,
+          rating: review.rating,
+          comment: review.comment,
+          reviewerUsername: review.user.username,
+        }).catch(() => {}); // fire-and-forget
       }
+
+      return updated;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
       this.logger.error(`Failed to approve review ${id}`, error);
       throw new InternalServerErrorException('Failed to approve review');
     }

@@ -277,6 +277,199 @@ export class EmailService {
    * @param email - User's email address
    * @param username - User's username
    */
+  async sendReviewAlert(opts: {
+    email: string;
+    ownerUsername: string;
+    companyName: string;
+    companySlug: string;
+    rating: number;
+    comment: string;
+    reviewerUsername: string;
+  }): Promise<void> {
+    try {
+      const isNegative = opts.rating <= 2;
+      const stars = '⭐'.repeat(opts.rating) + '☆'.repeat(5 - opts.rating);
+      const dashboardUrl = `${process.env.FRONTEND_URL || 'https://echowork.net'}/espace-entreprise/tableau-de-bord/avis`;
+      const companyUrl = `${process.env.FRONTEND_URL || 'https://echowork.net'}/companies/${opts.companySlug}`;
+      const safeCompany = this.escapeHtml(opts.companyName);
+      const safeComment = this.escapeHtml(opts.comment?.slice(0, 200) || '');
+      const safeOwner = this.escapeHtml(opts.ownerUsername);
+      const safeReviewer = this.escapeHtml(opts.reviewerUsername);
+
+      const accentColor = isNegative ? '#dc2626' : '#16a34a';
+      const headerBg = isNegative
+        ? 'linear-gradient(135deg,#dc2626 0%,#b91c1c 100%)'
+        : 'linear-gradient(135deg,#16a34a 0%,#15803d 100%)';
+      const icon = isNegative ? '⚠️' : '🌟';
+      const subject = isNegative
+        ? `⚠️ Avis négatif reçu — ${opts.companyName}`
+        : `⭐ Nouvel avis sur ${opts.companyName}`;
+      const headline = isNegative ? 'Avis négatif reçu' : 'Nouvel avis reçu';
+      const subline = isNegative
+        ? 'Un client a laissé un avis défavorable. Répondez rapidement.'
+        : 'Un nouveau client a partagé son expérience.';
+
+      const html = `<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:'Helvetica Neue',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 0;">
+  <tr><td align="center">
+    <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+      <tr><td align="center" style="padding-bottom:20px;">
+        <table cellpadding="0" cellspacing="0"><tr>
+          <td style="background:#dc2626;border-radius:12px;padding:8px 18px;">
+            <span style="color:#fff;font-size:20px;font-weight:900;font-family:'Helvetica Neue',Arial,sans-serif;">Echo<span style="color:rgba(255,255,255,0.7);">Work</span></span>
+          </td>
+        </tr></table>
+      </td></tr>
+      <tr><td style="background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr><td style="background:${headerBg};padding:32px 40px;text-align:center;">
+            <div style="font-size:36px;margin-bottom:12px;">${icon}</div>
+            <div style="color:#fff;font-size:22px;font-weight:800;">${headline}</div>
+            <div style="color:rgba(255,255,255,0.8);font-size:13px;margin-top:6px;">${subline}</div>
+          </td></tr>
+          <tr><td style="padding:32px 40px;">
+            <p style="margin:0 0 4px;font-size:15px;color:#111827;font-weight:600;">Bonjour ${safeOwner},</p>
+            <p style="margin:0 0 24px;font-size:13px;color:#6b7280;">Un avis vient d'être publié sur la fiche <strong style="color:#111827;">${safeCompany}</strong>.</p>
+
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:14px;margin-bottom:24px;">
+              <tr><td style="padding:20px 24px;">
+                <div style="font-size:20px;margin-bottom:8px;">${stars}</div>
+                <div style="font-size:13px;color:#374151;line-height:1.6;">"${safeComment}${opts.comment?.length > 200 ? '…' : ''}"</div>
+                <div style="margin-top:10px;font-size:12px;color:#9ca3af;">— ${safeReviewer}</div>
+              </td></tr>
+            </table>
+
+            ${isNegative ? `
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;margin-bottom:24px;">
+              <tr><td style="padding:14px 18px;font-size:13px;color:#b91c1c;line-height:1.6;">
+                💡 <strong>Conseil :</strong> Répondez sous 24h. Une réponse rapide et professionnelle rassure les autres visiteurs et montre votre engagement.
+              </td></tr>
+            </table>` : ''}
+
+            <table cellpadding="0" cellspacing="0"><tr>
+              <td style="background:${accentColor};border-radius:10px;padding:12px 28px;">
+                <a href="${dashboardUrl}" style="color:#fff;font-size:14px;font-weight:700;text-decoration:none;">Voir et répondre à l'avis →</a>
+              </td>
+              <td width="12"></td>
+              <td style="border:1px solid #e5e7eb;border-radius:10px;padding:12px 20px;">
+                <a href="${companyUrl}" style="color:#374151;font-size:13px;font-weight:500;text-decoration:none;">Voir la fiche</a>
+              </td>
+            </tr></table>
+          </td></tr>
+          <tr><td style="padding:0 40px 28px;">
+            <div style="border-top:1px solid #f3f4f6;padding-top:20px;font-size:11px;color:#9ca3af;">
+              © ${new Date().getFullYear()} EchoWork · Dakar, Sénégal · <a href="${process.env.FRONTEND_URL || 'https://echowork.net'}" style="color:#9ca3af;">echowork.net</a>
+            </div>
+          </td></tr>
+        </table>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body></html>`;
+
+      await this.transporter.sendMail({
+        from: process.env.EMAIL_FROM || '"EchoWork" <noreply@echowork.net>',
+        to: opts.email,
+        subject,
+        html,
+        text: `Bonjour ${opts.ownerUsername},\n\nNouvel avis (${opts.rating}/5) sur ${opts.companyName} par ${opts.reviewerUsername} :\n"${opts.comment}"\n\nRépondez : ${dashboardUrl}`,
+      });
+      this.logger.log(`Review alert sent to ${opts.email} for company ${opts.companyName}`);
+    } catch (error) {
+      this.logger.error(`Failed to send review alert: ${error instanceof Error ? error.message : error}`);
+    }
+  }
+
+  async sendSignalementAlert(opts: {
+    adminEmail: string;
+    companyName: string;
+    companySlug: string;
+    category: string;
+    description: string;
+    isAnonymous: boolean;
+    reporterUsername?: string;
+  }): Promise<void> {
+    try {
+      const adminUrl = `${process.env.FRONTEND_URL || 'https://echowork.net'}/admin/signalements`;
+      const safeCompany = this.escapeHtml(opts.companyName);
+      const safeDesc = this.escapeHtml(opts.description?.slice(0, 300) || '');
+      const categoryLabels: Record<string, string> = {
+        CORRUPTION: '🚨 Corruption',
+        MAUVAIS_ACCUEIL: '😠 Mauvais accueil',
+        RETARD_ADMINISTRATIF: '⏰ Retard administratif',
+        NON_RESPECT_ENGAGEMENT: '📋 Non-respect des engagements',
+        AUTRE: '📝 Autre',
+      };
+      const categoryLabel = categoryLabels[opts.category] ?? opts.category;
+
+      const html = `<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:'Helvetica Neue',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 0;">
+  <tr><td align="center">
+    <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+      <tr><td align="center" style="padding-bottom:20px;">
+        <table cellpadding="0" cellspacing="0"><tr>
+          <td style="background:#dc2626;border-radius:12px;padding:8px 18px;">
+            <span style="color:#fff;font-size:20px;font-weight:900;">Echo<span style="color:rgba(255,255,255,0.7);">Work</span></span>
+          </td>
+        </tr></table>
+      </td></tr>
+      <tr><td style="background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr><td style="background:linear-gradient(135deg,#ea580c 0%,#c2410c 100%);padding:28px 40px;text-align:center;">
+            <div style="font-size:32px;margin-bottom:10px;">🚨</div>
+            <div style="color:#fff;font-size:20px;font-weight:800;">Nouveau signalement citoyen</div>
+            <div style="color:rgba(255,255,255,0.8);font-size:13px;margin-top:4px;">Action de modération requise</div>
+          </td></tr>
+          <tr><td style="padding:32px 40px;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:14px;margin-bottom:24px;">
+              <tr><td style="padding:20px 24px;">
+                <div style="display:flex;gap:8px;margin-bottom:12px;">
+                  <span style="font-size:13px;font-weight:700;color:#ea580c;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:3px 10px;">${categoryLabel}</span>
+                  ${opts.isAnonymous ? '<span style="font-size:13px;color:#6b7280;background:#f3f4f6;border-radius:8px;padding:3px 10px;">Anonyme</span>' : ''}
+                </div>
+                <div style="font-size:13px;font-weight:600;color:#111827;margin-bottom:4px;">Entreprise concernée</div>
+                <div style="font-size:14px;font-weight:700;color:#dc2626;margin-bottom:16px;">${safeCompany}</div>
+                <div style="font-size:13px;font-weight:600;color:#111827;margin-bottom:6px;">Description</div>
+                <div style="font-size:13px;color:#374151;line-height:1.7;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;">"${safeDesc}${opts.description?.length > 300 ? '…' : ''}"</div>
+                ${!opts.isAnonymous && opts.reporterUsername ? `<div style="margin-top:12px;font-size:12px;color:#9ca3af;">Déposé par : ${this.escapeHtml(opts.reporterUsername)}</div>` : ''}
+              </td></tr>
+            </table>
+            <table cellpadding="0" cellspacing="0"><tr>
+              <td style="background:#dc2626;border-radius:10px;padding:12px 28px;">
+                <a href="${adminUrl}" style="color:#fff;font-size:14px;font-weight:700;text-decoration:none;">Modérer le signalement →</a>
+              </td>
+            </tr></table>
+          </td></tr>
+          <tr><td style="padding:0 40px 24px;font-size:11px;color:#9ca3af;border-top:1px solid #f3f4f6;">
+            <div style="padding-top:16px;">© ${new Date().getFullYear()} EchoWork · Portail admin</div>
+          </td></tr>
+        </table>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body></html>`;
+
+      await this.transporter.sendMail({
+        from: process.env.EMAIL_FROM || '"EchoWork" <noreply@echowork.net>',
+        to: opts.adminEmail,
+        subject: `🚨 Signalement citoyen — ${opts.companyName} (${categoryLabel})`,
+        html,
+        text: `Nouveau signalement citoyen\nEntreprise : ${opts.companyName}\nCatégorie : ${categoryLabel}\nDescription : ${opts.description}\n\nModérer : ${adminUrl}`,
+      });
+      this.logger.log(`Signalement alert sent to admin for company ${opts.companyName}`);
+    } catch (error) {
+      this.logger.error(`Failed to send signalement alert: ${error instanceof Error ? error.message : error}`);
+    }
+  }
+
   async sendWelcomeEmail(email: string, username: string): Promise<void> {
     try {
       const safeUsername = this.escapeHtml(username);

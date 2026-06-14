@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { EmailService } from '../email/email.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { ReportStatus } from '@prisma/client';
 
@@ -12,14 +13,30 @@ import { ReportStatus } from '@prisma/client';
 export class ReportsService {
   private readonly logger = new Logger(ReportsService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly emailService: EmailService,
+  ) {}
 
   async create(dto: CreateReportDto, userId?: number) {
     try {
-      const company = await this.prisma.company.findUnique({ where: { id: dto.companyId } });
+      const company = await this.prisma.company.findUnique({
+        where: { id: dto.companyId },
+        select: { name: true, slug: true },
+      });
       if (!company) throw new NotFoundException('Entreprise introuvable');
 
-      return this.prisma.citizenReport.create({
+      // Fetch reporter username if not anonymous
+      let reporterUsername: string | undefined;
+      if (!dto.isAnonymous && userId) {
+        const user = await this.prisma.user.findUnique({
+          where: { id: userId },
+          select: { username: true },
+        });
+        reporterUsername = user?.username;
+      }
+
+      const report = await this.prisma.citizenReport.create({
         data: {
           companyId: dto.companyId,
           userId: dto.isAnonymous ? null : (userId ?? null),
@@ -29,6 +46,22 @@ export class ReportsService {
           isAnonymous: dto.isAnonymous ?? false,
         },
       });
+
+      // Notify admin
+      const adminEmail = process.env.ADMIN_EMAIL;
+      if (adminEmail) {
+        this.emailService.sendSignalementAlert({
+          adminEmail,
+          companyName: company.name,
+          companySlug: company.slug,
+          category: dto.category,
+          description: dto.description,
+          isAnonymous: dto.isAnonymous ?? false,
+          reporterUsername,
+        }).catch(() => {});
+      }
+
+      return report;
     } catch (err) {
       if (err instanceof NotFoundException) throw err;
       this.logger.error('Failed to create report', err);

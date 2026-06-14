@@ -32,6 +32,7 @@ import AnalyseIA from "./pages/entreprise/AnalyseIA";
 import AbonnementEntreprise from "./pages/entreprise/AbonnementEntreprise";
 import PublicationsEntreprise from "./pages/entreprise/PublicationsEntreprise";
 import ClassementsPage from "./pages/ClassementsPage";
+import CarrieresPage from "./pages/CarrieresPage";
 import SignalementsModeration from "./pages/admin/SignalementsModeration";
 
 function App() {
@@ -63,6 +64,7 @@ function App() {
 
           {/* ── Public Phase 2 ── */}
           <Route path="/classements" element={<ClassementsPage />} />
+          <Route path="/carrieres" element={<CarrieresPage />} />
 
           {/* ── Espace Entreprise ── */}
           <Route path="/espace-entreprise" element={<LandingEntreprise />} />

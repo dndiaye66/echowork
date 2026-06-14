@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   Star, ThumbsUp, ThumbsDown, MapPin, Phone,
-  Building2, ChevronRight, CheckCircle, AlertCircle, Mail, AlertTriangle,
+  Building2, Briefcase, ChevronRight, CheckCircle, AlertCircle, Mail, AlertTriangle,
 } from 'lucide-react';
 import Navbar from '../components/navbar';
 import Foot from '../components/Foot';
@@ -655,19 +655,26 @@ export default function CompanyPage() {
       )}
 
       {company.jobOffers?.length > 0 && (
-        <section className="py-10 px-4 bg-white">
+        <section className="py-6 px-4 bg-white border-t border-gray-100">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl font-black text-gray-900 mb-6">
-              Offres emploi <span className="ml-1 text-sm font-medium text-gray-400">({company.jobOffers.length})</span>
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {company.jobOffers.map((job) => (
-                <div key={job.id} className="bg-gray-50 rounded-2xl p-5 border border-gray-100 hover:border-red-200 transition-colors">
-                  <h3 className="font-bold text-gray-900 mb-2">{job.title}</h3>
-                  <p className="text-sm text-gray-500 line-clamp-3 leading-relaxed">{job.description}</p>
-                  <div className="flex flex-wrap gap-3 mt-3 text-xs">
-                    {job.location && <span className="flex items-center gap-1 text-gray-400"><MapPin size={11} />{job.location}</span>}
-                    {job.salary && <span className="font-semibold text-green-600">{job.salary}</span>}
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-gray-500 flex items-center gap-2">
+                <Briefcase size={14} className="text-gray-400" />
+                Recrutement ({company.jobOffers.length} offre{company.jobOffers.length > 1 ? 's' : ''})
+              </h2>
+              <Link to="/carrieres" className="text-xs text-red-600 hover:underline font-medium flex items-center gap-1">
+                Voir toutes les offres <ChevronRight size={12} />
+              </Link>
+            </div>
+            <div className="flex flex-col gap-2">
+              {company.jobOffers.slice(0, 3).map((job) => (
+                <div key={job.id} className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-100">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-800 truncate">{job.title}</p>
+                    <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-400">
+                      {job.location && <span className="flex items-center gap-1"><MapPin size={10} />{job.location}</span>}
+                      {job.salary && <span className="text-green-600 font-semibold">{job.salary}</span>}
+                    </div>
                   </div>
                 </div>
               ))}
