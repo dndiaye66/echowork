@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from '../api/Config';
 import {
   Eye, EyeOff, User, Mail, Lock, CheckCircle2, ArrowRight,
-  Star, Building2, Phone,
+  Star, Building2, Phone, FileText, X,
 } from 'lucide-react';
 
 /* ── Welcome modal shown after successful signup ── */
@@ -91,6 +91,262 @@ function WelcomeModal({ username, onClose }) {
   );
 }
 
+function CguModal({ onClose, onAccept }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col" style={{ maxHeight: '85vh' }}>
+
+        {/* Header */}
+        <div className="flex items-center gap-3 p-5 border-b border-gray-100 shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center">
+            <FileText size={18} className="text-red-600" />
+          </div>
+          <div className="flex-1">
+            <h2 className="font-bold text-gray-900 text-sm">Conditions Générales d'Utilisation</h2>
+            <p className="text-xs text-gray-400">EchoWork · Droit sénégalais</p>
+          </div>
+          <button type="button" onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <X size={18} className="text-gray-500" />
+          </button>
+        </div>
+
+        {/* Scrollable content */}
+        <div className="overflow-y-auto flex-1 px-6 py-5 text-sm text-gray-700 space-y-5">
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-1">1. Objet</h3>
+            <p>Les présentes Conditions Générales d'Utilisation définissent les règles applicables à l'utilisation de la plateforme EchoWork.</p>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-1">2. Inscription</h3>
+            <p>L'utilisateur s'engage à fournir des informations exactes lors de son inscription.</p>
+            <p className="mt-1">Il est responsable de la confidentialité de ses identifiants de connexion.</p>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-2">3. Publication d'avis</h3>
+            <p className="mb-2">Tout utilisateur peut publier un avis concernant une entreprise ou un service après une expérience réelle.</p>
+            <p className="mb-1">L'utilisateur s'engage à publier des contenus :</p>
+            <ul className="list-disc list-inside space-y-0.5 text-gray-600 pl-1">
+              <li>Sincères ;</li>
+              <li>Respectueux ;</li>
+              <li>Fondés sur des faits réels ;</li>
+              <li>Non diffamatoires ;</li>
+              <li>Non injurieux ;</li>
+              <li>Non discriminatoires.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-2">4. Contenus interdits</h3>
+            <p className="mb-1">Il est interdit de publier :</p>
+            <ul className="list-disc list-inside space-y-0.5 text-gray-600 pl-1">
+              <li>De fausses informations ;</li>
+              <li>Des propos diffamatoires ;</li>
+              <li>Des insultes ;</li>
+              <li>Des menaces ;</li>
+              <li>Des données personnelles de tiers ;</li>
+              <li>Des contenus contraires aux lois sénégalaises.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-2">5. Modération</h3>
+            <p className="mb-1">EchoWork se réserve le droit de :</p>
+            <ul className="list-disc list-inside space-y-0.5 text-gray-600 pl-1">
+              <li>Vérifier certains avis ;</li>
+              <li>Demander des justificatifs ;</li>
+              <li>Suspendre ou supprimer un contenu litigieux ;</li>
+              <li>Suspendre ou supprimer un compte utilisateur.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-1">6. Droit de réponse des entreprises</h3>
+            <p>Toute entreprise référencée sur EchoWork peut répondre aux avis publiés la concernant.</p>
+            <p className="mt-1">Elle peut également signaler un contenu qu'elle estime inexact ou contraire aux présentes conditions.</p>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-1">7. Responsabilité</h3>
+            <p>Les avis publiés engagent exclusivement leurs auteurs.</p>
+            <p className="mt-1">EchoWork agit en qualité d'hébergeur et de modérateur de la plateforme.</p>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-1">8. Suspension de compte</h3>
+            <p>Tout manquement aux présentes CGU peut entraîner la suspension ou la suppression du compte concerné.</p>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-1">9. Modification</h3>
+            <p>EchoWork se réserve le droit de modifier les présentes CGU à tout moment.</p>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-1">10. Droit applicable</h3>
+            <p>Les présentes CGU sont soumises au droit sénégalais.</p>
+          </section>
+        </div>
+
+        {/* Footer */}
+        <div className="shrink-0 p-5 border-t border-gray-100 flex gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 rounded-xl text-sm transition-colors"
+          >
+            Fermer
+          </button>
+          <button
+            type="button"
+            onClick={onAccept}
+            className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
+          >
+            <CheckCircle2 size={15} />
+            J'accepte les CGU
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PolitiqueModal({ onClose }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col" style={{ maxHeight: '85vh' }}>
+
+        <div className="flex items-center gap-3 p-5 border-b border-gray-100 shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
+            <FileText size={18} className="text-blue-600" />
+          </div>
+          <div className="flex-1">
+            <h2 className="font-bold text-gray-900 text-sm">Politique de Confidentialité</h2>
+            <p className="text-xs text-gray-400">EchoWork · Dernière mise à jour : juin 2025</p>
+          </div>
+          <button type="button" onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <X size={18} className="text-gray-500" />
+          </button>
+        </div>
+
+        <div className="overflow-y-auto flex-1 px-6 py-5 text-sm text-gray-700 space-y-5">
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-1">1. Présentation</h3>
+            <p>EchoWork est une plateforme communautaire permettant aux utilisateurs de consulter, partager et publier des avis sur les entreprises et services présents au Sénégal.</p>
+            <p className="mt-1">La protection de vos données personnelles constitue une priorité pour EchoWork. La présente politique explique quelles données sont collectées, pourquoi elles le sont et comment elles sont protégées.</p>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-1">2. Responsable du traitement</h3>
+            <p>Le responsable du traitement des données collectées sur la plateforme EchoWork est :</p>
+            <div className="mt-2 bg-gray-50 rounded-xl p-3 text-gray-600">
+              <p className="font-medium text-gray-800">EchoWork</p>
+              <p>Dakar, Sénégal</p>
+              <a href="mailto:contact@echowork.net" className="text-red-600 hover:underline">contact@echowork.net</a>
+            </div>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-2">3. Données collectées</h3>
+            <p className="font-medium text-gray-800 mb-1">Données d'identification</p>
+            <ul className="list-disc list-inside space-y-0.5 text-gray-600 pl-1 mb-3">
+              <li>Pseudo</li>
+              <li>Adresse e-mail</li>
+              <li>Numéro de téléphone (pour les entreprises)</li>
+              <li>Photo de profil (facultative)</li>
+            </ul>
+            <p className="font-medium text-gray-800 mb-1">Données de connexion</p>
+            <ul className="list-disc list-inside space-y-0.5 text-gray-600 pl-1 mb-3">
+              <li>Adresse IP</li>
+              <li>Date et heure de connexion</li>
+              <li>Type d'appareil et navigateur utilisé</li>
+            </ul>
+            <p className="font-medium text-gray-800 mb-1">Données liées aux avis</p>
+            <ul className="list-disc list-inside space-y-0.5 text-gray-600 pl-1">
+              <li>Notes attribuées</li>
+              <li>Commentaires publiés</li>
+              <li>Réponses aux avis</li>
+              <li>Signalements effectués</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-2">4. Finalités de la collecte</h3>
+            <p className="mb-1">Les données sont utilisées afin de :</p>
+            <ul className="list-disc list-inside space-y-0.5 text-gray-600 pl-1">
+              <li>Créer et gérer les comptes utilisateurs ;</li>
+              <li>Garantir l'authenticité des avis ;</li>
+              <li>Prévenir les fraudes et abus ;</li>
+              <li>Assurer la sécurité de la plateforme ;</li>
+              <li>Produire des statistiques anonymisées ;</li>
+              <li>Améliorer les services proposés ;</li>
+              <li>Répondre aux obligations légales.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-1">5. Conservation des données</h3>
+            <p>Les données sont conservées uniquement pendant la durée nécessaire à la réalisation des finalités pour lesquelles elles ont été collectées et conformément à la réglementation applicable.</p>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-1">6. Partage des données</h3>
+            <p className="mb-1">EchoWork ne vend aucune donnée personnelle.</p>
+            <p className="mb-1">Les données peuvent être communiquées :</p>
+            <ul className="list-disc list-inside space-y-0.5 text-gray-600 pl-1">
+              <li>Aux prestataires techniques assurant l'hébergement et la maintenance ;</li>
+              <li>Aux autorités compétentes lorsqu'une obligation légale l'exige.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-1">7. Sécurité</h3>
+            <p>EchoWork met en œuvre des mesures techniques et organisationnelles destinées à protéger les données contre tout accès non autorisé, perte, divulgation ou destruction.</p>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-2">8. Vos droits</h3>
+            <p className="mb-1">Conformément à la réglementation applicable, vous disposez des droits suivants :</p>
+            <ul className="list-disc list-inside space-y-0.5 text-gray-600 pl-1 mb-2">
+              <li>Droit d'accès ;</li>
+              <li>Droit de rectification ;</li>
+              <li>Droit de suppression ;</li>
+              <li>Droit d'opposition ;</li>
+              <li>Droit à la limitation du traitement.</li>
+            </ul>
+            <p>Toute demande peut être adressée à : <a href="mailto:contact@echowork.net" className="text-red-600 hover:underline">contact@echowork.net</a></p>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-1">9. Cookies</h3>
+            <p>EchoWork utilise des cookies nécessaires au bon fonctionnement de la plateforme ainsi que des cookies de mesure d'audience.</p>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-gray-900 mb-1">10. Contact</h3>
+            <p>Pour toute question relative à la protection des données personnelles :</p>
+            <div className="mt-2 text-gray-600">
+              <a href="mailto:contact@echowork.net" className="text-red-600 hover:underline">contact@echowork.net</a>
+              <p>Dakar, Sénégal</p>
+            </div>
+          </section>
+        </div>
+
+        <div className="shrink-0 p-5 border-t border-gray-100">
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 rounded-xl text-sm transition-colors"
+          >
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PasswordStrength({ password }) {
   const checks = [
     { label: '6 caractères minimum', ok: password.length >= 6 },
@@ -140,6 +396,9 @@ function SignupPage() {
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [acceptedCgu, setAcceptedCgu] = useState(false);
+  const [showCguModal, setShowCguModal] = useState(false);
+  const [showPolitiqueModal, setShowPolitiqueModal] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -173,6 +432,12 @@ function SignupPage() {
         setLoading(false);
         return;
       }
+    }
+
+    if (!acceptedCgu) {
+      setError('Vous devez accepter les Conditions Générales d\'Utilisation pour vous inscrire.');
+      setLoading(false);
+      return;
     }
 
     try {
@@ -428,6 +693,35 @@ function SignupPage() {
               <PasswordStrength password={password} />
             </div>
 
+            {/* CGU */}
+            <label className="flex items-start gap-3 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={acceptedCgu}
+                onChange={(e) => setAcceptedCgu(e.target.checked)}
+                className="mt-0.5 accent-red-600 shrink-0"
+              />
+              <span className="text-sm text-gray-600 leading-snug">
+                J'ai lu et j'accepte les{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowCguModal(true)}
+                  className="text-red-600 hover:underline font-medium underline-offset-2"
+                >
+                  CGU
+                </button>
+                {' '}et la{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowPolitiqueModal(true)}
+                  className="text-red-600 hover:underline font-medium underline-offset-2"
+                >
+                  Politique de Confidentialité
+                </button>
+                {' '}d'EchoWork <span className="text-red-500">*</span>
+              </span>
+            </label>
+
             {/* Submit */}
             <button
               type="submit"
@@ -478,7 +772,18 @@ function SignupPage() {
         </div>
       </div>
     </div>
-    </>
+
+    {showCguModal && (
+      <CguModal
+        onClose={() => setShowCguModal(false)}
+        onAccept={() => { setAcceptedCgu(true); setShowCguModal(false); }}
+      />
+    )}
+
+    {showPolitiqueModal && (
+      <PolitiqueModal onClose={() => setShowPolitiqueModal(false)} />
+    )}
+</>
   );
 }
 
