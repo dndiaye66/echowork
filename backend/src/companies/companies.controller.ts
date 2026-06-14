@@ -82,6 +82,16 @@ export class CompaniesController {
 
   // ── Authenticated routes ───────────────────────────────────────
 
+  /** POST /api/companies/:id/subscribe — enregistrer un paiement Wave + activer la subscription */
+  @Post(':id/subscribe')
+  @UseGuards(JwtAuthGuard, CompanyOwnerGuard)
+  async subscribe(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: { plan: string; period: string; amount: number; wavePhone?: string },
+  ) {
+    return this.companiesService.subscribe(id, dto);
+  }
+
   /** POST /api/companies — créer une nouvelle fiche et la réclamer immédiatement */
   @Post()
   @UseGuards(JwtAuthGuard)

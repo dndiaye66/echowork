@@ -157,6 +157,7 @@ model Company {
   locations       CompanyLocation[]
   scores          CompanyScore?
   subscription    Subscription?
+  payments        CompanyPayment[]
   photos          CompanyPhoto[]
   replies         CompanyReply[]
   views           CompanyView[]
@@ -291,6 +292,22 @@ model Subscription {
   @@index([plan])
   @@index([isActive])
   @@index([endDate])
+}
+
+model CompanyPayment {
+  id        Int              @id @default(autoincrement())
+  companyId Int
+  company   Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  plan      SubscriptionPlan
+  period    String           // 'monthly' | 'annual'
+  amount    Int
+  wavePhone String?
+  status    String           @default("pending") // 'pending' | 'confirmed' | 'rejected'
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([companyId])
+  @@index([status])
 }
 
 model ReviewVote {

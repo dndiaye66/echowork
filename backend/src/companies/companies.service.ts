@@ -382,6 +382,33 @@ export class CompaniesService {
     }
   }
 
+  async subscribe(companyId: number, dto: { plan: string; period: string; amount: number; wavePhone?: string }) {
+    const plan = dto.plan as any;
+
+    // Record payment
+    await this.prisma.companyPayment.create({
+      data: { companyId, plan, period: dto.period, amount: dto.amount, wavePhone: dto.wavePhone ?? null, status: 'pending' },
+    });
+
+    // Calculate end date: paid period + 1 free trial month
+    const now = new Date();
+    const endDate = new Date(now);
+    if (dto.period === 'annual') {
+      endDate.setMonth(endDate.getMonth() + 13); // 12 months + 1 trial
+    } else {
+      endDate.setMonth(endDate.getMonth() + 2); // 1 month paid + 1 trial
+    }
+
+    // Activate subscription
+    const sub = await this.prisma.subscription.upsert({
+      where: { companyId },
+      create: { companyId, plan, startDate: now, endDate, isActive: true },
+      update: { plan, startDate: now, endDate, isActive: true },
+    });
+
+    return sub;
+  }
+
   async createForUser(userId: number, dto: CreateCompanyByUserDto) {
     const baseSlug = toSlug(dto.name) || `entreprise-${Date.now()}`;
     let slug = baseSlug;

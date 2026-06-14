@@ -59,6 +59,11 @@ export const entrepriseService = {
     return res.data;
   },
 
+  subscribe: async (companyId, data) => {
+    const res = await apiClient.post(`/companies/${companyId}/subscribe`, data);
+    return res.data;
+  },
+
   createCompany: async (data) => {
     const res = await apiClient.post('/companies', data);
     return res.data;
