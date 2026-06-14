@@ -23,7 +23,6 @@ function CompanyModal({ modal, categories, onClose, onSaved }) {
     name: initial.name || '',
     slug: initial.slug || '',
     description: initial.description || '',
-    imageUrl: initial.imageUrl || '',
     categoryId: initial.categoryId ? String(initial.categoryId) : '',
     tel: initial.tel || '',
     ville: initial.ville || '',
@@ -55,8 +54,9 @@ function CompanyModal({ modal, categories, onClose, onSaved }) {
     setError('');
     setSaving(true);
     try {
+      const { imageUrl: _omit, ...rest } = form;
       const payload = {
-        ...form,
+        ...rest,
         categoryId: form.categoryId ? parseInt(form.categoryId) : undefined,
         isVerified: form.isVerified,
         size: form.size || undefined,
