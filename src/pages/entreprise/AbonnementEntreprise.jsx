@@ -10,9 +10,9 @@ import { entrepriseService } from '../../services/entrepriseService';
 
 const WAVE_BASE = 'https://pay.wave.com/m/M_sn_O8Lki9HsJfSh/c/sn/?amount=';
 
-const MONTHLY_PRICES = { FREE: 25000, PRO: 35000, PREMIUM: 50000 };
+const MONTHLY_PRICES = { FREE: 0, PRO: 15000, PREMIUM: 25000 };
 // Annual = 10 months (2 months free)
-const ANNUAL_PRICES  = { FREE: 250000, PRO: 350000, PREMIUM: 500000 };
+const ANNUAL_PRICES  = { FREE: 0, PRO: 150000, PREMIUM: 250000 };
 
 const PLANS = [
   {
@@ -20,20 +20,19 @@ const PLANS = [
     label: 'Basic',
     icon: Star,
     color: 'gray',
+    free: true,
     description: 'Pour démarrer et gérer votre réputation en ligne.',
     features: [
       'Fiche entreprise publique',
       'Réception d\'avis clients',
       'Réponse aux avis',
-      'Statistiques de base',
-      '5 photos max',
     ],
     missing: [
+      'Galerie photos',
+      'Statistiques',
       'Analyse IA des avis',
       'Badge "Vérifié"',
-      'Statistiques avancées',
       'Priorité dans les résultats',
-      'Support prioritaire',
     ],
   },
   {
@@ -271,7 +270,16 @@ function PlanCard({ plan, currentPlan, billingPeriod, onSubscribe }) {
         <h3 className="font-bold text-gray-900 text-lg">{plan.label}</h3>
         <p className="text-xs text-gray-500 mt-0.5 mb-3">{plan.description}</p>
 
-        {billingPeriod === 'annual' ? (
+        {plan.free ? (
+          <div>
+            <div className="flex items-end gap-1">
+              <span className="text-3xl font-extrabold text-gray-900">Gratuit</span>
+            </div>
+            <span className="inline-block mt-1.5 text-xs bg-gray-100 text-gray-500 font-semibold px-2 py-0.5 rounded-full">
+              Toujours gratuit
+            </span>
+          </div>
+        ) : billingPeriod === 'annual' ? (
           <div>
             <div className="flex items-end gap-1">
               <span className="text-3xl font-extrabold text-gray-900">{fmt(annualPrice)}</span>
@@ -312,14 +320,16 @@ function PlanCard({ plan, currentPlan, billingPeriod, onSubscribe }) {
 
       <div className="p-6 pt-0">
         <button
-          onClick={() => !isCurrentPlan && isUpgrade && onSubscribe(plan)}
-          disabled={isCurrentPlan || isDowngrade}
+          onClick={() => !isCurrentPlan && isUpgrade && !plan.free && onSubscribe(plan)}
+          disabled={isCurrentPlan || isDowngrade || plan.free}
           className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-colors ${btnClass}`}
         >
           {isCurrentPlan
             ? 'Plan actuel'
+            : plan.free
+            ? 'Plan de base'
             : isUpgrade
-            ? `Payer avec Wave`
+            ? 'Payer avec Wave'
             : 'Non disponible'}
         </button>
       </div>
@@ -542,8 +552,8 @@ export default function AbonnementEntreprise() {
               { icon: Building2, label: 'Fiche entreprise', basic: true, pro: true, premium: true, desc: 'Page publique avec avis, note, infos' },
               { icon: MessageSquare, label: 'Réponse aux avis', basic: true, pro: true, premium: true, desc: 'Répondez publiquement aux clients' },
               { icon: Shield, label: 'Badge Vérifié', basic: false, pro: true, premium: true, desc: 'Marque de confiance sur votre fiche' },
-              { icon: Image, label: 'Galerie photos', basic: '5 max', pro: 'Illimité', premium: 'Illimité', desc: 'Photos de votre établissement' },
-              { icon: BarChart3, label: 'Statistiques', basic: 'Basiques', pro: 'Avancées', premium: 'Avancées', desc: 'Évolution de votre réputation' },
+              { icon: Image, label: 'Galerie photos', basic: false, pro: 'Illimité', premium: 'Illimité', desc: 'Photos de votre établissement' },
+              { icon: BarChart3, label: 'Statistiques', basic: false, pro: 'Avancées', premium: 'Avancées', desc: 'Évolution de votre réputation' },
               { icon: Sparkles, label: 'Analyse IA', basic: false, pro: true, premium: true, desc: 'Résumé et insights de vos avis' },
               { icon: Globe, label: 'Priorité résultats', basic: false, pro: true, premium: true, desc: 'Apparaissez en tête des listes' },
               { icon: Crown, label: 'Support dédié', basic: false, pro: false, premium: true, desc: 'Gestionnaire de compte personnel' },
