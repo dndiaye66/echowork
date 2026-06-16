@@ -636,9 +636,9 @@ export default function VitrinePage() {
                   to="/espace-entreprise"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-full font-semibold text-sm hover:bg-red-700 transition-colors shadow-lg"
                 >
-                  Réclamer ma fiche <ArrowRight size={14} />
+                  En savoir plus <ArrowRight size={14} />
                 </Link>
-                <span className="text-white/40 text-xs">C'est gratuit et rapide !</span>
+                <span className="text-white/40 text-xs">Inscriptions bientôt disponibles</span>
               </div>
             </div>
 

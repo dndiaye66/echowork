@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Search, Building2, CheckCircle, ChevronRight, Loader2, AlertCircle,
-  Star, Plus, MapPin, Phone, Globe, X,
+  Star, Plus, MapPin, Phone, Globe, X, Clock,
 } from 'lucide-react';
 import { companyService } from '../../services/companyService';
 import { entrepriseService } from '../../services/entrepriseService';
@@ -200,6 +200,10 @@ function CreateModal({ initialName, onClose, onCreated }) {
   );
 }
 
+// EchoWork se concentre temporairement sur les avis citoyens : la création
+// de fiche et la réclamation d'entreprise sont suspendues.
+const COMPANY_SIGNUPS_DISABLED = true;
+
 export default function RejoindreEntreprise() {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
@@ -255,6 +259,32 @@ export default function RejoindreEntreprise() {
     setClaimMode('create');
     setClaimed(company);
   };
+
+  if (COMPANY_SIGNUPS_DISABLED) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="max-w-lg mx-auto pt-20 px-4 text-center">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10">
+            <div className="w-16 h-16 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-5">
+              <Clock size={32} className="text-amber-500" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Inscriptions entreprises suspendues</h2>
+            <p className="text-gray-500 mb-6">
+              EchoWork se concentre actuellement sur les avis des citoyens. La création et la réclamation de fiches entreprises reprendront bientôt.
+            </p>
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-full transition-colors w-full justify-center"
+            >
+              Retour à l'accueil
+              <ChevronRight size={18} />
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (claimed) {
     return (

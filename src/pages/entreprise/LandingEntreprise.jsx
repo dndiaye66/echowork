@@ -4,8 +4,12 @@ import Navbar from '../../components/navbar';
 import Foot from '../../components/Foot';
 import {
   Star, MessageSquare, BarChart3, Shield, CheckCircle,
-  ChevronRight, Building2, TrendingUp, Users,
+  ChevronRight, Building2, TrendingUp, Users, Clock,
 } from 'lucide-react';
+
+// EchoWork se concentre temporairement sur les avis citoyens : la création
+// de fiche et la réclamation d'entreprise sont suspendues.
+const COMPANY_SIGNUPS_DISABLED = true;
 
 const FEATURES = [
   {
@@ -48,6 +52,13 @@ export default function LandingEntreprise() {
     <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
 
+      {COMPANY_SIGNUPS_DISABLED && (
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-3 text-center text-sm text-amber-800 flex items-center justify-center gap-2">
+          <Clock size={16} className="shrink-0" />
+          EchoWork se concentre actuellement sur les avis citoyens — les inscriptions entreprises sont temporairement suspendues.
+        </div>
+      )}
+
       {/* Hero */}
       <section className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
@@ -64,13 +75,20 @@ export default function LandingEntreprise() {
             pour gérer leurs avis clients et renforcer leur crédibilité.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to={ctaLink}
-              className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3.5 rounded-full transition-colors"
-            >
-              Essayer 1 mois gratuit
-              <ChevronRight size={18} />
-            </Link>
+            {COMPANY_SIGNUPS_DISABLED ? (
+              <span className="inline-flex items-center gap-2 bg-white/10 text-white/60 font-semibold px-8 py-3.5 rounded-full cursor-not-allowed">
+                <Clock size={18} />
+                Bientôt disponible
+              </span>
+            ) : (
+              <Link
+                to={ctaLink}
+                className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3.5 rounded-full transition-colors"
+              >
+                Essayer 1 mois gratuit
+                <ChevronRight size={18} />
+              </Link>
+            )}
             <Link
               to="#comment-ca-marche"
               className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-8 py-3.5 rounded-full transition-colors"
@@ -194,16 +212,24 @@ export default function LandingEntreprise() {
                     </li>
                   ))}
                 </ul>
-                <Link
-                  to={ctaLink}
-                  className={`block text-center text-sm font-semibold py-2.5 rounded-full transition-colors ${
-                    highlighted
-                      ? 'bg-white text-red-600 hover:bg-red-50'
-                      : 'bg-red-600 text-white hover:bg-red-700'
-                  }`}
-                >
-                  Essayer {plan} gratuitement
-                </Link>
+                {COMPANY_SIGNUPS_DISABLED ? (
+                  <span className={`block text-center text-sm font-semibold py-2.5 rounded-full cursor-not-allowed ${
+                    highlighted ? 'bg-white/30 text-white/70' : 'bg-gray-100 text-gray-400'
+                  }`}>
+                    Bientôt disponible
+                  </span>
+                ) : (
+                  <Link
+                    to={ctaLink}
+                    className={`block text-center text-sm font-semibold py-2.5 rounded-full transition-colors ${
+                      highlighted
+                        ? 'bg-white text-red-600 hover:bg-red-50'
+                        : 'bg-red-600 text-white hover:bg-red-700'
+                    }`}
+                  >
+                    Essayer {plan} gratuitement
+                  </Link>
+                )}
               </div>
             ))}
           </div>
@@ -213,14 +239,22 @@ export default function LandingEntreprise() {
       {/* CTA final */}
       <section className="py-16 px-4 bg-gradient-to-br from-gray-900 to-gray-800 text-white text-center">
         <h2 className="text-2xl font-bold mb-4">Prêt à gérer votre réputation ?</h2>
-        <p className="text-gray-400 mb-8">1 mois d'essai offert — sans carte bancaire, sans engagement.</p>
-        <Link
-          to={ctaLink}
-          className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3.5 rounded-full transition-colors"
-        >
-          Commencer maintenant
-          <ChevronRight size={18} />
-        </Link>
+        {COMPANY_SIGNUPS_DISABLED ? (
+          <p className="text-gray-400">
+            Les inscriptions entreprises reprendront bientôt. EchoWork se concentre actuellement sur les avis citoyens.
+          </p>
+        ) : (
+          <>
+            <p className="text-gray-400 mb-8">1 mois d'essai offert — sans carte bancaire, sans engagement.</p>
+            <Link
+              to={ctaLink}
+              className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-8 py-3.5 rounded-full transition-colors"
+            >
+              Commencer maintenant
+              <ChevronRight size={18} />
+            </Link>
+          </>
+        )}
       </section>
 
       <Foot />

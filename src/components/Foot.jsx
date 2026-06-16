@@ -104,10 +104,10 @@ export default function Foot() {
               aux avis de vos clients.
             </p>
             <Link
-              to="/signup"
+              to="/espace-entreprise"
               className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-full text-sm font-semibold hover:bg-red-700 transition-colors"
             >
-              Rejoindre gratuitement
+              En savoir plus
               <ExternalLink size={12} />
             </Link>
             <p className="text-xs text-gray-600 mt-3">

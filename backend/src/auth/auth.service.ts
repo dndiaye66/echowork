@@ -33,6 +33,12 @@ export class AuthService {
     const { password, email, accountType, firstName, lastName, phone } = signupDto;
     const isCompany = accountType === 'company';
 
+    if (isCompany) {
+      throw new ForbiddenException(
+        'Les inscriptions entreprises sont temporairement suspendues. EchoWork se concentre actuellement sur les avis des citoyens.',
+      );
+    }
+
     // Determine username
     let username = signupDto.username?.trim();
     if (isCompany) {

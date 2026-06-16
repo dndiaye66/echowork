@@ -8,6 +8,7 @@ import {
   Query,
   Body,
   NotFoundException,
+  ForbiddenException,
   UseGuards,
   Request,
   ParseIntPipe,
@@ -31,6 +32,11 @@ const photoStorage = diskStorage({
     cb(null, `company-${unique}${extname(file.originalname)}`);
   },
 });
+
+// EchoWork se concentre temporairement sur les avis citoyens : les comptes
+// entreprises (création de fiche / réclamation) sont suspendus.
+const COMPANY_SIGNUPS_DISABLED_MESSAGE =
+  "Les inscriptions entreprises sont temporairement suspendues. EchoWork se concentre actuellement sur les avis des citoyens.";
 
 @Controller('companies')
 export class CompaniesController {
@@ -99,14 +105,14 @@ export class CompaniesController {
     @Body() dto: { name: string; categoryId: number; ville?: string; adresse?: string; tel?: string; description?: string; website?: string },
     @Request() req: any,
   ) {
-    return this.companiesService.createForUser(req.user.id, dto);
+    throw new ForbiddenException(COMPANY_SIGNUPS_DISABLED_MESSAGE);
   }
 
   /** POST /api/companies/:id/claim — réclamer une fiche */
   @Post(':id/claim')
   @UseGuards(JwtAuthGuard)
   async claim(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
-    return this.companiesService.claimCompany(id, req.user.id);
+    throw new ForbiddenException(COMPANY_SIGNUPS_DISABLED_MESSAGE);
   }
 
   /** DELETE /api/companies/:id/claim — abandonner la réclamation */
