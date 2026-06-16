@@ -162,12 +162,6 @@ export default function Navbar() {
                       Mon profil
                     </Link>
                   </li>
-                  <li>
-                    <Link to="/espace-entreprise/tableau-de-bord" className="flex items-center gap-2 text-sm rounded-xl">
-                      <Building2 size={14} />
-                      Espace Entreprise
-                    </Link>
-                  </li>
                   {user?.role === 'ADMIN' && (
                     <li>
                       <Link to="/admin" className="flex items-center gap-2 text-sm rounded-xl">

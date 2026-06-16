@@ -26,7 +26,7 @@ export default function Foot() {
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 py-14">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
 
           {/* Brand */}
           <div>
@@ -92,30 +92,6 @@ export default function Foot() {
                 <span className="text-gray-400">Toutes catégories d'entreprises</span>
               </div>
             </div>
-          </div>
-
-          {/* For businesses CTA */}
-          <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
-              Pour les entreprises
-            </h3>
-            <p className="text-sm text-gray-400 mb-4 leading-relaxed">
-              Rejoignez EchoWork pour renforcer votre visibilité et répondre
-              aux avis de vos clients.
-            </p>
-            <Link
-              to="/espace-entreprise"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-full text-sm font-semibold hover:bg-red-700 transition-colors"
-            >
-              En savoir plus
-              <ExternalLink size={12} />
-            </Link>
-            <p className="text-xs text-gray-600 mt-3">
-              Déjà inscrit ?{' '}
-              <Link to="/login" className="text-gray-400 hover:text-white transition-colors underline">
-                Se connecter
-              </Link>
-            </p>
           </div>
         </div>
       </div>

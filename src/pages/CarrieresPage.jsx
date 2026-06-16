@@ -180,18 +180,6 @@ export default function CarrieresPage() {
             </div>
           )}
 
-          {/* CTA entreprise */}
-          <div className="mt-10 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 text-center text-white">
-            <Briefcase size={28} className="mx-auto mb-3 text-white/60" />
-            <h3 className="font-bold text-lg mb-1">Vous recrutez ?</h3>
-            <p className="text-white/60 text-sm mb-4">Publiez vos offres d'emploi gratuitement sur EchoWork.</p>
-            <Link
-              to="/espace-entreprise"
-              className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2.5 rounded-full text-sm transition-colors"
-            >
-              Inscrire mon entreprise <ChevronRight size={15} />
-            </Link>
-          </div>
         </div>
       </div>
 
