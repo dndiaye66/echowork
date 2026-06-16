@@ -34,6 +34,9 @@ import PublicationsEntreprise from "./pages/entreprise/PublicationsEntreprise";
 import ClassementsPage from "./pages/ClassementsPage";
 import CarrieresPage from "./pages/CarrieresPage";
 import CampusPage from "./pages/CampusPage";
+import EntreprisesPage from "./pages/EntreprisesPage";
+import AProposPage from "./pages/AProposPage";
+import InsightsPage from "./pages/InsightsPage";
 import SignalementsModeration from "./pages/admin/SignalementsModeration";
 
 function App() {
@@ -67,6 +70,9 @@ function App() {
           <Route path="/classements" element={<ClassementsPage />} />
           <Route path="/carrieres" element={<CarrieresPage />} />
           <Route path="/campus" element={<CampusPage />} />
+          <Route path="/entreprises" element={<EntreprisesPage />} />
+          <Route path="/a-propos" element={<AProposPage />} />
+          <Route path="/insights" element={<InsightsPage />} />
 
           {/* ── Espace Entreprise ── */}
           <Route path="/espace-entreprise" element={<LandingEntreprise />} />

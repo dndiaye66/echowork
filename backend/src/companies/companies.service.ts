@@ -50,10 +50,23 @@ export class CompaniesService {
         ];
       }
 
-      return await this.prisma.company.findMany({ 
+      const companies = await this.prisma.company.findMany({
         where,
-        include: { category: true },
+        include: {
+          category: true,
+          reviews: { where: { status: 'APPROVED' }, select: { rating: true } },
+        },
         orderBy: { name: 'asc' },
+      });
+
+      return companies.map(({ reviews, ...company }) => {
+        const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+        const averageRating = reviews.length > 0 ? totalRating / reviews.length : 0;
+        return {
+          ...company,
+          averageRating: parseFloat(averageRating.toFixed(2)),
+          reviewCount: reviews.length,
+        };
       });
     } catch (error) {
       this.logger.error('Failed to fetch companies', error);

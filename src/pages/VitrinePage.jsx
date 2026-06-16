@@ -5,8 +5,9 @@ import {
   Factory, Phone, Zap, Truck, Wheat, GraduationCap,
   MapPin, Home, UtensilsCrossed, Monitor, Smartphone,
   TrendingUp, TrendingDown, MessageSquare, Shield, Users,
-  LayoutGrid, Award, Lock, ArrowRightCircle, Scale,
+  LayoutGrid, Award, Lock, ArrowRightCircle, Scale, Wifi,
 } from 'lucide-react';
+import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import Navbar from '../components/navbar';
 import Foot from '../components/Foot';
 import SearchAutocomplete from '../components/SearchAutocomplete';
@@ -76,6 +77,29 @@ const STATIC_BAROMETER = [
   { slug: 'sante-et-pharmacie',                  label: 'Santé',            avg: 4.0, trend: 0.1,  count: 0 },
 ];
 
+const POPULAR_RANKINGS = [
+  { label: 'Meilleures banques',     slug: 'banques-et-institutions-financieres',     Icon: Landmark,      color: 'text-blue-500'    },
+  { label: 'Meilleurs restaurants',  slug: 'restauration-et-hotellerie',              Icon: Utensils,      color: 'text-red-500'     },
+  { label: 'Meilleures écoles',      slug: 'etablissements-d-enseignement-superieur', Icon: GraduationCap, color: 'text-green-500'   },
+  { label: 'Meilleures cliniques',   slug: 'sante-et-pharmacie',                      Icon: Hospital,      color: 'text-pink-500'    },
+  { label: 'Meilleurs opérateurs',   slug: 'telecommunications',                      Icon: Wifi,          color: 'text-cyan-500'    },
+];
+
+const SPARKLINE_COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#a855f7'];
+
+function sparklineData(avg, trend, slug) {
+  let seed = 0;
+  for (let i = 0; i < slug.length; i++) seed = (seed * 31 + slug.charCodeAt(i)) >>> 0;
+  const rand = () => { seed = (seed * 1103515245 + 12345) >>> 0; return (seed % 1000) / 1000; };
+  const points = 7;
+  const step = (trend || 0.15) / points;
+  let v = avg - (trend || 0.15);
+  return Array.from({ length: points }, (_, i) => {
+    v += step + (rand() - 0.5) * 0.15;
+    return { v: Math.max(0, parseFloat(v.toFixed(2))) };
+  }).map((p, i, arr) => (i === arr.length - 1 ? { v: avg } : p));
+}
+
 // ── Utilities ──────────────────────────────────────────────────────────────
 function roundToHalf(v) { return Math.round((v || 0) * 2) / 2; }
 
@@ -125,6 +149,32 @@ function StarRating({ rating, size = 14 }) {
         );
       })}
     </div>
+  );
+}
+
+function Sparkline({ data, color }) {
+  const gradId = `spark-${color.replace('#', '')}`;
+  return (
+    <ResponsiveContainer width="100%" height={48}>
+      <AreaChart data={data} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
+        <defs>
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity={0.35} />
+            <stop offset="100%" stopColor={color} stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <Area
+          type="monotone"
+          dataKey="v"
+          stroke={color}
+          strokeWidth={2}
+          fill={`url(#${gradId})`}
+          dot={{ r: 2, fill: color, strokeWidth: 0 }}
+          activeDot={false}
+          isAnimationActive={false}
+        />
+      </AreaChart>
+    </ResponsiveContainer>
   );
 }
 
@@ -379,6 +429,107 @@ export default function VitrinePage() {
             </div>
 
           </div>
+        </div>
+      </section>
+
+      {/* ── 1.5 Aperçu rapide — entreprises / insights / classements ───────── */}
+      <section className="bg-white py-8 px-4 md:px-8 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+          {/* Entreprises les plus appréciées */}
+          <div className="lg:col-span-5 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-black text-gray-900 text-sm md:text-base">Les entreprises les plus appréciées</h3>
+              <Link to="/classements" className="hidden sm:flex items-center gap-1 text-xs font-semibold text-red-600 hover:underline underline-offset-2 shrink-0">
+                Voir le classement complet <ArrowRight size={12} />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {(companiesLoading ? [...Array(4)] : (companies?.slice(0, 4) || [])).map((co, i) => {
+                if (companiesLoading || !co) {
+                  return <div key={i} className="h-28 rounded-xl bg-gray-100 animate-pulse" />;
+                }
+                const avg = parseFloat(co.averageRating || 0);
+                const brand = BRAND_COLORS[co.slug];
+                return (
+                  <Link key={co.id} to={`/companies/${co.slug}`} className="group">
+                    <div className="relative w-12 h-12 mb-2">
+                      {co.imageUrl ? (
+                        <img src={co.imageUrl} alt={co.name} className="w-12 h-12 rounded-xl object-cover" />
+                      ) : (
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-base ${brand ? `${brand.bg} ${brand.text}` : 'bg-red-50 text-red-500'}`}>
+                          {co.name?.[0]?.toUpperCase()}
+                        </div>
+                      )}
+                      <span className={`absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
+                        i === 0 ? 'bg-amber-400 text-amber-900' : 'bg-gray-700 text-white'
+                      }`}>
+                        {i + 1}
+                      </span>
+                    </div>
+                    <p className="text-xs font-bold text-gray-900 truncate group-hover:text-red-600 transition-colors">{co.name}</p>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <span className="text-xs font-bold text-gray-700">{avg.toFixed(1)}</span>
+                      <StarRating rating={avg} size={10} />
+                    </div>
+                    <p className="text-[10px] text-gray-400 mt-0.5">{co.reviewCount || 0} avis</p>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* EchoWork Insights */}
+          <div className="lg:col-span-5 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-black text-gray-900 text-sm md:text-base">EchoWork Insights</h3>
+              <Link to="/insights" className="hidden sm:flex items-center gap-1 text-xs font-semibold text-red-600 hover:underline underline-offset-2 shrink-0">
+                Voir tous les insights <ArrowRight size={12} />
+              </Link>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {barometer.slice(0, 3).map((b, i) => {
+                const color = SPARKLINE_COLORS[i % SPARKLINE_COLORS.length];
+                const trendPos = b.trend > 0;
+                const trendNeutral = !b.trend || b.trend === 0;
+                return (
+                  <div key={b.slug}>
+                    <p className="text-[11px] font-semibold text-gray-600 mb-1 truncate">Satisfaction {b.label?.toLowerCase()}</p>
+                    <Sparkline data={sparklineData(b.avg, b.trend, b.slug)} color={color} />
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="text-lg font-black text-gray-900">
+                        {b.avg}<span className="text-xs font-semibold text-gray-400">/5</span>
+                      </span>
+                      {!trendNeutral && (
+                        <span className={`flex items-center gap-0.5 text-[10px] font-bold ${trendPos ? 'text-green-600' : 'text-red-500'}`}>
+                          {trendPos ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+                          {trendPos ? '+' : ''}{b.trend} ce mois
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Classements populaires */}
+          <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <h3 className="font-black text-gray-900 text-sm mb-4">Classements populaires</h3>
+            <div className="space-y-2.5">
+              {POPULAR_RANKINGS.map(({ label, slug, Icon, color }) => (
+                <Link
+                  key={slug}
+                  to={`/classements?category=${slug}`}
+                  className="flex items-center gap-2 text-xs font-medium text-gray-600 hover:text-red-600 transition-colors group"
+                >
+                  <Icon size={14} className={`${color} shrink-0`} />
+                  <span className="truncate">{label}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+
         </div>
       </section>
 

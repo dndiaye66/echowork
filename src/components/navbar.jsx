@@ -37,7 +37,6 @@ export default function Navbar() {
   const { categories } = useCategories();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [catOpen, setCatOpen] = useState(false);
-  const [exploreOpen, setExploreOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -67,49 +66,11 @@ export default function Navbar() {
           {/* Desktop links */}
           <div className="hidden md:flex items-center gap-1 ml-auto">
             <Link
-              to="/"
+              to="/entreprises"
               className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
             >
-              Accueil
+              Entreprises
             </Link>
-
-            {/* Explorer dropdown */}
-            <div
-              className="relative"
-              onMouseEnter={() => setExploreOpen(true)}
-              onMouseLeave={() => setExploreOpen(false)}
-            >
-              <button className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors">
-                Explorer
-                <ChevronDown size={14} className={`transition-transform duration-200 ${exploreOpen ? 'rotate-180' : ''}`} />
-              </button>
-              {exploreOpen && (
-                <div className="absolute left-0 top-full pt-2 w-56 z-50">
-                  <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-2 space-y-0.5">
-                    <Link
-                      to="/classements"
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm hover:bg-red-50 transition-colors group"
-                    >
-                      <BarChart3 size={15} className="text-red-500 shrink-0" />
-                      <div>
-                        <p className="font-semibold text-gray-800 group-hover:text-red-600 text-xs">Classements</p>
-                        <p className="text-[10px] text-gray-400">Top entreprises par secteur</p>
-                      </div>
-                    </Link>
-                    <Link
-                      to="/carrieres"
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm hover:bg-red-50 transition-colors group"
-                    >
-                      <Briefcase size={15} className="text-red-500 shrink-0" />
-                      <div>
-                        <p className="font-semibold text-gray-800 group-hover:text-red-600 text-xs">Carrières by EchoWork</p>
-                        <p className="text-[10px] text-gray-400">Offres d'emploi au Sénégal</p>
-                      </div>
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
 
             {/* Categories dropdown */}
             <div
@@ -141,6 +102,25 @@ export default function Navbar() {
                 </div>
               )}
             </div>
+
+            <Link
+              to="/classements"
+              className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+            >
+              Classements
+            </Link>
+            <Link
+              to="/a-propos"
+              className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+            >
+              À propos
+            </Link>
+            <Link
+              to="/insights"
+              className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+            >
+              Insights
+            </Link>
 
             {/* Auth */}
             {isAuthenticated ? (
@@ -230,28 +210,13 @@ export default function Navbar() {
               >
                 Accueil
               </Link>
-
-              <div className="pt-2">
-                <p className="px-3 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">Explorer</p>
-                <Link
-                  to="/classements"
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm hover:bg-red-50 hover:text-red-600 transition-colors"
-                  onClick={closeMobile}
-                >
-                  <BarChart3 size={14} className="text-red-500" />
-                  <span className="font-medium text-gray-700">Classements</span>
-                </Link>
-                <Link
-                  to="/carrieres"
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm hover:bg-red-50 hover:text-red-600 transition-colors"
-                  onClick={closeMobile}
-                >
-                  <Briefcase size={14} className="text-red-500" />
-                  <div>
-                    <span className="font-medium text-gray-700">Carrières by EchoWork</span>
-                  </div>
-                </Link>
-              </div>
+              <Link
+                to="/entreprises"
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-red-50 hover:text-red-600 transition-colors"
+                onClick={closeMobile}
+              >
+                Entreprises
+              </Link>
 
               <div className="pt-2">
                 <p className="px-3 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">
@@ -273,6 +238,31 @@ export default function Navbar() {
                     );
                   })}
                 </div>
+              </div>
+
+              <div className="pt-2 space-y-0.5">
+                <Link
+                  to="/classements"
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm hover:bg-red-50 hover:text-red-600 transition-colors"
+                  onClick={closeMobile}
+                >
+                  <BarChart3 size={14} className="text-red-500" />
+                  <span className="font-medium text-gray-700">Classements</span>
+                </Link>
+                <Link
+                  to="/a-propos"
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm hover:bg-red-50 hover:text-red-600 transition-colors"
+                  onClick={closeMobile}
+                >
+                  <span className="font-medium text-gray-700 ml-[26px]">À propos</span>
+                </Link>
+                <Link
+                  to="/insights"
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm hover:bg-red-50 hover:text-red-600 transition-colors"
+                  onClick={closeMobile}
+                >
+                  <span className="font-medium text-gray-700 ml-[26px]">Insights</span>
+                </Link>
               </div>
             </div>
 

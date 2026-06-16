@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Trophy, Star, TrendingUp, TrendingDown, Minus,
   Building2, MapPin, Loader2, ChevronRight,
@@ -75,6 +75,8 @@ function RankCard({ company }) {
 }
 
 export default function ClassementsPage() {
+  const [searchParams] = useSearchParams();
+  const presetCategory = searchParams.get('category');
   const [tab, setTab] = useState('category');
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -86,9 +88,13 @@ export default function ClassementsPage() {
   useEffect(() => {
     rankingsService.getCategories().then((cats) => {
       setCategories(cats);
-      if (cats.length > 0) setSelectedCategory(cats[0].slug);
+      if (presetCategory && cats.some((c) => c.slug === presetCategory)) {
+        setSelectedCategory(presetCategory);
+      } else if (cats.length > 0) {
+        setSelectedCategory(cats[0].slug);
+      }
     });
-  }, []);
+  }, [presetCategory]);
 
   useEffect(() => {
     if (tab === 'category' && !selectedCategory) return;

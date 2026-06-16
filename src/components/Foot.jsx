@@ -18,6 +18,12 @@ const categories = [
 
 const quickLinks = [
   { label: 'Accueil', href: '/' },
+  { label: 'Entreprises', href: '/entreprises' },
+  { label: 'Classements', href: '/classements' },
+  { label: 'Carrières by EchoWork', href: '/carrieres' },
+  { label: 'Campus Challenge', href: '/campus' },
+  { label: 'Insights', href: '/insights' },
+  { label: 'À propos', href: '/a-propos' },
   { label: 'Connexion', href: '/login' },
   { label: 'Inscription', href: '/signup' },
 ];

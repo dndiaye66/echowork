@@ -2,6 +2,14 @@
 import apiClient from '../api/Config';
 
 export const companyService = {
+  // Recuperer toutes les entreprises (avec recherche optionnelle)
+  getAll: async (search) => {
+    const response = await apiClient.get('/companies', {
+      params: search ? { search } : {},
+    });
+    return response.data;
+  },
+
   // Recuperer les entreprises par categorie (slug)
   getCompaniesByCategory: async (categorySlug) => {
     const response = await apiClient.get(`/companies/category/slug/${categorySlug}`);
