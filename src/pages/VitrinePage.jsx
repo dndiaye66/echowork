@@ -352,7 +352,7 @@ export default function VitrinePage() {
                 {[
                   { Icon: Building2,   iconBg: 'bg-red-50',    iconColor: 'text-red-500',    n: formatCount(stats?.companyCount),  l1: 'Entreprises', l2: 'référencées' },
                   { Icon: LayoutGrid,  iconBg: 'bg-green-50',  iconColor: 'text-green-600',  n: formatCount(stats?.categoryCount), l1: 'Secteurs',    l2: "d'activité" },
-                  { Icon: Users,       iconBg: 'bg-purple-50', iconColor: 'text-purple-500', n: '1 000+',                          l1: 'Avis',        l2: 'publiés' },
+                  { Icon: Users,       iconBg: 'bg-purple-50', iconColor: 'text-purple-500', n: formatCount(stats?.reviewCount),   l1: 'Avis',        l2: 'publiés' },
                 ].map(({ Icon, iconBg, iconColor, n, l1, l2 }) => (
                   <div key={l1} className="flex items-center gap-2.5 bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 shadow-sm">
                     <div className={`w-9 h-9 rounded-lg ${iconBg} flex items-center justify-center shrink-0`}>

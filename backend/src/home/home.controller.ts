@@ -41,7 +41,7 @@ export class HomeController {
     const [companyCount, categoryCount, reviewCount] = await Promise.all([
       this.prisma.company.count(),
       this.prisma.category.count(),
-      this.prisma.review.count(),
+      this.prisma.review.count({ where: { status: 'APPROVED' } }),
     ]);
     return { companyCount, categoryCount, reviewCount };
   }
