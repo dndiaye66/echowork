@@ -46,7 +46,7 @@ export const vitrineService = {
       const res = await apiClient.get('/home/stats');
       return res.data;
     } catch {
-      return { companyCount: 3500, categoryCount: 15, reviewCount: 500 };
+      return { companyCount: 3500, categoryCount: 15, reviewCount: 500, userCount: 1000 };
     }
   },
 
@@ -59,9 +59,9 @@ export const vitrineService = {
     }
   },
 
-  getRecentReviews: async () => {
+  getRecentReviews: async (limit) => {
     try {
-      const res = await apiClient.get('/home/recent-reviews');
+      const res = await apiClient.get('/home/recent-reviews', limit ? { params: { limit } } : undefined);
       return res.data;
     } catch {
       return [];

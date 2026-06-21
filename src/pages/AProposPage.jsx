@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import {
   Shield, Users, MessageSquare, TrendingUp, Star, ArrowRight,
+  Search, Edit3, BarChart2,
 } from 'lucide-react';
 import Navbar from '../components/navbar';
 import Foot from '../components/Foot';
@@ -49,8 +50,20 @@ export default function AProposPage() {
       <div className="bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 py-12 md:py-16">
 
+          {/* Qui sommes-nous */}
+          <div id="qui-sommes-nous" className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 md:p-10 mb-10 scroll-mt-20">
+            <h2 className="text-xl font-black text-gray-900 mb-3">Qui sommes-nous ?</h2>
+            <p className="text-gray-500 leading-relaxed">
+              EchoWork est une plateforme communautaire sénégalaise qui permet à chacun de noter,
+              commenter et consulter des avis sur les entreprises et services du pays — banques,
+              télécoms, commerces, écoles, santé et bien d'autres secteurs. Nous croyons qu'un
+              marché transparent profite autant aux consommateurs qu'aux entreprises qui s'efforcent
+              de bien servir leurs clients.
+            </p>
+          </div>
+
           {/* Mission */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 md:p-10 mb-10">
+          <div id="notre-mission" className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 md:p-10 mb-10 scroll-mt-20">
             <h2 className="text-xl font-black text-gray-900 mb-3">Notre mission</h2>
             <p className="text-gray-500 leading-relaxed mb-4">
               Au Sénégal, les consommateurs manquent encore d'un espace dédié pour partager leur
@@ -62,6 +75,27 @@ export default function AProposPage() {
               Notre objectif est simple — aider les Sénégalais à faire les meilleurs choix, et
               aider les entreprises à progresser grâce à des retours constructifs.
             </p>
+          </div>
+
+          {/* Comment ça marche */}
+          <div id="comment-ca-marche" className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 md:p-10 mb-10 scroll-mt-20">
+            <h2 className="text-xl font-black text-gray-900 mb-5">Comment ça marche ?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { Icon: Search, step: '1', title: 'Recherchez', text: "Trouvez une entreprise par nom ou par secteur d'activité." },
+                { Icon: Edit3,  step: '2', title: 'Partagez',   text: 'Donnez votre note et racontez votre expérience en quelques mots.' },
+                { Icon: BarChart2, step: '3', title: 'Comparez', text: 'Consultez les classements et les avis pour faire le meilleur choix.' },
+              ].map(({ Icon, step, title, text }) => (
+                <div key={step}>
+                  <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center mb-3 relative">
+                    <Icon size={18} className="text-red-500" />
+                    <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center">{step}</span>
+                  </div>
+                  <h3 className="font-bold text-gray-900 text-sm mb-1">{title}</h3>
+                  <p className="text-xs text-gray-500 leading-relaxed">{text}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Values */}

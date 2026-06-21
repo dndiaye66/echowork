@@ -1,18 +1,20 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Star, ArrowRight, ChevronRight, Building2,
   Utensils, Landmark, ShoppingCart, Hospital, Briefcase,
   Factory, Phone, Zap, Truck, Wheat, GraduationCap,
-  MapPin, Home, UtensilsCrossed, Monitor, Smartphone,
+  MapPin, Home, UtensilsCrossed, Monitor,
   TrendingUp, TrendingDown, MessageSquare, Shield, Users,
-  LayoutGrid, Award, Lock, ArrowRightCircle, Scale, Wifi,
+  LayoutGrid, Award, Lock, ArrowRightCircle, Scale,
 } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import Navbar from '../components/navbar';
 import Foot from '../components/Foot';
 import SearchAutocomplete from '../components/SearchAutocomplete';
-import { useBestCompanies, useStats, useRecentReviews, useBarometer } from '../hooks/useHomeData';
+import { useBestCompanies, useStats, useBarometer } from '../hooks/useHomeData';
 import { useCategories } from '../hooks/useCategory';
+import { vitrineService } from '../services/vitrineService';
 import backgroundImage from '../assets/image/background_banner.png';
 import campusPoster from '../assets/image/campus-challenge-2026.png';
 
@@ -61,13 +63,6 @@ const catMap = {
   'services-publics':                         { Icon: Scale,           bg: 'bg-slate-100',   color: 'text-slate-700'   },
 };
 
-const baroIcons = {
-  'banques-et-institutions-financieres': { Icon: Landmark,  bg: 'bg-emerald-50', color: 'text-emerald-600', border: 'border-emerald-100' },
-  'telecommunications':                  { Icon: Phone,     bg: 'bg-cyan-50',    color: 'text-cyan-600',    border: 'border-cyan-100'    },
-  'services':                            { Icon: Briefcase, bg: 'bg-violet-50',  color: 'text-violet-600',  border: 'border-violet-100'  },
-  'sante-et-pharmacie':                  { Icon: Hospital,  bg: 'bg-red-50',     color: 'text-red-600',     border: 'border-red-100'     },
-};
-
 // Static reviews removed — only real approved reviews from the API are shown
 
 const STATIC_BAROMETER = [
@@ -75,14 +70,6 @@ const STATIC_BAROMETER = [
   { slug: 'telecommunications',                  label: 'Télécoms',         avg: 4.1, trend: -0.1, count: 0 },
   { slug: 'services',                            label: 'Services publics', avg: 3.2, trend: 0.3,  count: 0 },
   { slug: 'sante-et-pharmacie',                  label: 'Santé',            avg: 4.0, trend: 0.1,  count: 0 },
-];
-
-const POPULAR_RANKINGS = [
-  { label: 'Meilleures banques',     slug: 'banques-et-institutions-financieres',     Icon: Landmark,      color: 'text-blue-500'    },
-  { label: 'Meilleurs restaurants',  slug: 'restauration-et-hotellerie',              Icon: Utensils,      color: 'text-red-500'     },
-  { label: 'Meilleures écoles',      slug: 'etablissements-d-enseignement-superieur', Icon: GraduationCap, color: 'text-green-500'   },
-  { label: 'Meilleures cliniques',   slug: 'sante-et-pharmacie',                      Icon: Hospital,      color: 'text-pink-500'    },
-  { label: 'Meilleurs opérateurs',   slug: 'telecommunications',                      Icon: Wifi,          color: 'text-cyan-500'    },
 ];
 
 const SPARKLINE_COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#a855f7'];
@@ -119,13 +106,18 @@ function formatCount(n) {
   return `${n}`;
 }
 
-function ratingLabel(avg) {
-  if (!avg) return null;
-  if (avg < 1.5) return { t: 'Mauvais',  c: 'bg-red-100 text-red-700' };
-  if (avg < 2.5) return { t: 'Médiocre', c: 'bg-orange-100 text-orange-700' };
-  if (avg < 3.5) return { t: 'Moyen',    c: 'bg-yellow-100 text-yellow-700' };
-  if (avg < 4.5) return { t: 'Bon',      c: 'bg-green-100 text-green-700' };
-  return               { t: 'Excellent', c: 'bg-emerald-100 text-emerald-700' };
+// Garde le dernier avis par entreprise, dans l'ordre du plus récent au plus ancien
+function dedupeByCompany(reviews, limit) {
+  const seen = new Set();
+  const result = [];
+  for (const r of reviews) {
+    const key = r.company?.id ?? r.companyId;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(r);
+    if (result.length >= limit) break;
+  }
+  return result;
 }
 
 // ── Sub-components ─────────────────────────────────────────────────────────
@@ -178,80 +170,6 @@ function Sparkline({ data, color }) {
   );
 }
 
-function CompanyCard({ company }) {
-  const avg = parseFloat(company.averageRating || 0);
-  const brand = BRAND_COLORS[company.slug];
-  return (
-    <Link
-      to={`/companies/${company.slug}`}
-      className="group shrink-0 w-36 md:w-auto bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-red-200 hover:-translate-y-1 transition-all duration-200 overflow-hidden"
-    >
-      {/* Colored brand header */}
-      <div className={`h-20 flex items-center justify-center ${brand ? brand.bg : 'bg-gradient-to-br from-red-50 to-red-100'}`}>
-        {company.imageUrl ? (
-          <img src={company.imageUrl} alt={company.name} className="w-12 h-12 object-contain" />
-        ) : (
-          <span className={`text-3xl font-black ${brand ? brand.text : 'text-red-400'}`}>
-            {company.name?.[0]?.toUpperCase()}
-          </span>
-        )}
-      </div>
-      {/* Card body */}
-      <div className="p-3">
-        <p className="font-semibold text-gray-900 text-xs leading-tight line-clamp-2 group-hover:text-red-600 transition-colors mb-1.5">
-          {company.name}
-        </p>
-        <div className="flex items-center gap-1 mb-1">
-          <StarRating rating={avg} size={10} />
-          <span className="text-xs font-bold text-gray-700">{avg.toFixed(1)}</span>
-        </div>
-        {+company.reviewCount > 0 && (
-          <p className="text-[10px] text-gray-400">{company.reviewCount} avis</p>
-        )}
-      </div>
-    </Link>
-  );
-}
-
-function ReviewCard({ review }) {
-  const co = review.company;
-  return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-4 flex flex-col gap-2.5 hover:shadow-sm transition-shadow">
-      <div className="flex items-start gap-2.5">
-        {co?.imageUrl ? (
-          <img src={co.imageUrl} alt={co.name} className="w-8 h-8 rounded-lg object-cover shrink-0" />
-        ) : (
-          <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center shrink-0 text-red-500 font-bold text-sm">
-            {co?.name?.[0]?.toUpperCase() || '?'}
-          </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <Link
-            to={co?.slug ? `/companies/${co.slug}` : '#'}
-            className="font-semibold text-gray-900 text-sm hover:text-red-600 transition-colors block truncate"
-          >
-            {co?.name || 'Entreprise'}
-          </Link>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <StarRating rating={review.rating} size={11} />
-            <span className="text-xs font-bold text-gray-600">{review.rating}.0</span>
-          </div>
-        </div>
-      </div>
-      <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">
-        "{review.comment}"
-      </p>
-      <div className="flex items-center gap-2 pt-1.5 border-t border-gray-50">
-        <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-500 shrink-0">
-          {review.user?.username?.[0]?.toUpperCase() || '?'}
-        </div>
-        <span className="text-xs font-medium text-gray-600 flex-1 truncate">{review.user?.username}</span>
-        <span className="text-xs text-gray-400 shrink-0">{timeAgo(review.createdAt)}</span>
-      </div>
-    </div>
-  );
-}
-
 // ── Floating company card (hero decoration) ────────────────────────────────
 function HeroCard({ company, className }) {
   const avg = parseFloat(company?.averageRating || 0);
@@ -287,14 +205,18 @@ export default function VitrinePage() {
   const { data: companies, loading: companiesLoading } = useBestCompanies();
   const { categories, loading: catLoading } = useCategories();
   const { data: stats } = useStats();
-  const { data: reviewsData } = useRecentReviews();
   const { data: baroData } = useBarometer();
+  const [recentReviews, setRecentReviews] = useState([]);
+
+  useEffect(() => {
+    vitrineService.getRecentReviews(30).then(setRecentReviews);
+  }, []);
 
   const topCompanies  = companies?.slice(0, 6) || [];
   const rankCompanies = companies?.slice(0, 5) || [];
   const visibleCats   = categories?.slice(0, 7) || [];
   const hasMoreCats   = (categories?.length || 0) > 7;
-  const reviews       = reviewsData?.slice(0, 4) ?? [];
+  const reviews       = dedupeByCompany(recentReviews, 5);
   const barometer     = baroData?.filter(b => b.avg !== null).length > 0 ? baroData : STATIC_BAROMETER;
 
   return (
@@ -317,16 +239,22 @@ export default function VitrinePage() {
             <div>
               <div className="inline-flex items-center gap-2 bg-white border border-red-200 rounded-full px-4 py-1.5 text-xs font-semibold text-red-600 mb-6 shadow-sm">
                 <Shield size={13} className="shrink-0" />
-                La plateforme de confiance des Sénégalais
+                La plateforme d'avis et de classement des entreprises au Sénégal
               </div>
 
-              <h1 className="text-4xl md:text-5xl font-black text-gray-900 leading-[1.05] mb-4">
-                Trouvez les meilleures entreprises du{' '}
-                <span className="text-red-600">Sénégal</span>
+              <h1 className="text-4xl md:text-5xl font-black text-gray-900 leading-[1.05] mb-3">
+                Notez les{' '}
+                <span className="text-red-600">entreprises</span>{' '}
+                du Sénégal.
               </h1>
+              <div className="flex items-center gap-1 mb-4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star key={i} size={18} className="fill-red-500 text-red-500" />
+                ))}
+              </div>
               <p className="text-gray-500 text-base md:text-lg mb-7 leading-relaxed max-w-lg">
-                Consultez des avis authentiques et partagez votre expérience
-                pour aider la communauté à faire les meilleurs choix.
+                Consultez des avis authentiques, comparez les services et partagez votre
+                expérience pour aider la communauté à faire les meilleurs choix.
               </p>
 
               <div className="mb-6">
@@ -353,6 +281,7 @@ export default function VitrinePage() {
                   { Icon: Building2,   iconBg: 'bg-red-50',    iconColor: 'text-red-500',    n: formatCount(stats?.companyCount),  l1: 'Entreprises', l2: 'référencées' },
                   { Icon: LayoutGrid,  iconBg: 'bg-green-50',  iconColor: 'text-green-600',  n: formatCount(stats?.categoryCount), l1: 'Secteurs',    l2: "d'activité" },
                   { Icon: Users,       iconBg: 'bg-purple-50', iconColor: 'text-purple-500', n: formatCount(stats?.reviewCount),   l1: 'Avis',        l2: 'publiés' },
+                  { Icon: Award,       iconBg: 'bg-amber-50',  iconColor: 'text-amber-500',  n: formatCount(stats?.userCount),     l1: 'Utilisateurs', l2: 'actifs' },
                 ].map(({ Icon, iconBg, iconColor, n, l1, l2 }) => (
                   <div key={l1} className="flex items-center gap-2.5 bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 shadow-sm">
                     <div className={`w-9 h-9 rounded-lg ${iconBg} flex items-center justify-center shrink-0`}>
@@ -432,110 +361,9 @@ export default function VitrinePage() {
         </div>
       </section>
 
-      {/* ── 1.5 Aperçu rapide — entreprises / insights / classements ───────── */}
-      <section className="bg-white py-8 px-4 md:px-8 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5">
-
-          {/* Entreprises les plus appréciées */}
-          <div className="lg:col-span-5 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-black text-gray-900 text-sm md:text-base">Les entreprises les plus appréciées</h3>
-              <Link to="/classements" className="hidden sm:flex items-center gap-1 text-xs font-semibold text-red-600 hover:underline underline-offset-2 shrink-0">
-                Voir le classement complet <ArrowRight size={12} />
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {(companiesLoading ? [...Array(4)] : (companies?.slice(0, 4) || [])).map((co, i) => {
-                if (companiesLoading || !co) {
-                  return <div key={i} className="h-28 rounded-xl bg-gray-100 animate-pulse" />;
-                }
-                const avg = parseFloat(co.averageRating || 0);
-                const brand = BRAND_COLORS[co.slug];
-                return (
-                  <Link key={co.id} to={`/companies/${co.slug}`} className="group">
-                    <div className="relative w-12 h-12 mb-2">
-                      {co.imageUrl ? (
-                        <img src={co.imageUrl} alt={co.name} className="w-12 h-12 rounded-xl object-cover" />
-                      ) : (
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-base ${brand ? `${brand.bg} ${brand.text}` : 'bg-red-50 text-red-500'}`}>
-                          {co.name?.[0]?.toUpperCase()}
-                        </div>
-                      )}
-                      <span className={`absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
-                        i === 0 ? 'bg-amber-400 text-amber-900' : 'bg-gray-700 text-white'
-                      }`}>
-                        {i + 1}
-                      </span>
-                    </div>
-                    <p className="text-xs font-bold text-gray-900 truncate group-hover:text-red-600 transition-colors">{co.name}</p>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <span className="text-xs font-bold text-gray-700">{avg.toFixed(1)}</span>
-                      <StarRating rating={avg} size={10} />
-                    </div>
-                    <p className="text-[10px] text-gray-400 mt-0.5">{co.reviewCount || 0} avis</p>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* EchoWork Insights */}
-          <div className="lg:col-span-5 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-black text-gray-900 text-sm md:text-base">EchoWork Insights</h3>
-              <Link to="/insights" className="hidden sm:flex items-center gap-1 text-xs font-semibold text-red-600 hover:underline underline-offset-2 shrink-0">
-                Voir tous les insights <ArrowRight size={12} />
-              </Link>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              {barometer.slice(0, 3).map((b, i) => {
-                const color = SPARKLINE_COLORS[i % SPARKLINE_COLORS.length];
-                const trendPos = b.trend > 0;
-                const trendNeutral = !b.trend || b.trend === 0;
-                return (
-                  <div key={b.slug}>
-                    <p className="text-[11px] font-semibold text-gray-600 mb-1 truncate">Satisfaction {b.label?.toLowerCase()}</p>
-                    <Sparkline data={sparklineData(b.avg, b.trend, b.slug)} color={color} />
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <span className="text-lg font-black text-gray-900">
-                        {b.avg}<span className="text-xs font-semibold text-gray-400">/5</span>
-                      </span>
-                      {!trendNeutral && (
-                        <span className={`flex items-center gap-0.5 text-[10px] font-bold ${trendPos ? 'text-green-600' : 'text-red-500'}`}>
-                          {trendPos ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-                          {trendPos ? '+' : ''}{b.trend} ce mois
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Classements populaires */}
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <h3 className="font-black text-gray-900 text-sm mb-4">Classements populaires</h3>
-            <div className="space-y-2.5">
-              {POPULAR_RANKINGS.map(({ label, slug, Icon, color }) => (
-                <Link
-                  key={slug}
-                  to={`/classements?category=${slug}`}
-                  className="flex items-center gap-2 text-xs font-medium text-gray-600 hover:text-red-600 transition-colors group"
-                >
-                  <Icon size={14} className={`${color} shrink-0`} />
-                  <span className="truncate">{label}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* ── Trust features strip ────────────────────────────────────────── */}
-      <section className="bg-white py-6 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
+      {/* ── Pourquoi Echowork ────────────────────────────────────────────── */}
+      <section className="bg-white py-8 px-4 md:px-8">
+        <div className="max-w-7xl mx-auto bg-red-50/60 rounded-3xl px-6 md:px-10 py-6 md:py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
             {[
               { Icon: Shield,        title: 'Avis authentiques',         desc: 'Des avis vérifiés pour des informations fiables.' },
@@ -544,7 +372,7 @@ export default function VitrinePage() {
               { Icon: Lock,          title: '100% sécurisé',             desc: 'Vos données sont protégées et confidentielles.' },
             ].map(({ Icon, title, desc }) => (
               <div key={title} className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
                   <Icon size={18} className="text-red-500" />
                 </div>
                 <div>
@@ -557,39 +385,7 @@ export default function VitrinePage() {
         </div>
       </section>
 
-      {/* ── 2. Entreprises populaires ─────────────────────────────────────── */}
-      <section className="bg-gray-50 py-10 md:py-14">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-6 px-4 md:px-8">
-            <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Tendances</p>
-              <h2 className="text-xl md:text-2xl font-black text-gray-900">Les entreprises les plus consultées</h2>
-            </div>
-            <Link to="/classements" className="hidden sm:flex items-center gap-1 text-sm font-semibold text-red-600 hover:underline underline-offset-2 shrink-0">
-              Voir tout <ChevronRight size={15} />
-            </Link>
-          </div>
-
-          {companiesLoading ? (
-            <div className="flex gap-4 px-4 md:px-8">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="shrink-0 w-40 h-28 rounded-2xl bg-gray-200 animate-pulse" />
-              ))}
-            </div>
-          ) : (
-            <>
-              <div className="md:hidden flex gap-3 overflow-x-auto px-4 pb-3 scrollbar-hide">
-                {topCompanies.map(c => <CompanyCard key={c.id} company={c} />)}
-              </div>
-              <div className="hidden md:grid grid-cols-3 lg:grid-cols-6 gap-4 px-4 md:px-8">
-                {topCompanies.map(c => <CompanyCard key={c.id} company={c} />)}
-              </div>
-            </>
-          )}
-        </div>
-      </section>
-
-      {/* ── 3. Catégories ─────────────────────────────────────────────────── */}
+      {/* ── Catégories ─────────────────────────────────────────────────── */}
       <section id="categories" className="bg-white py-10 md:py-14 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-6">
@@ -645,77 +441,58 @@ export default function VitrinePage() {
         </div>
       </section>
 
-      {/* ── 4+5. Classement national + Avis récents (côte à côte) ────────── */}
+      {/* ── Aperçu rapide — mieux notées / insights / avis récents ────────── */}
       <section className="bg-gray-50 py-10 md:py-14 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5">
 
-          {/* Classement — col 3 */}
-          <div className="lg:col-span-3">
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Classement national</p>
-                <h2 className="text-xl font-black text-gray-900">🏆 Top entreprises du Sénégal</h2>
-              </div>
-              <Link to="/classements" className="text-xs font-semibold text-red-600 hover:underline underline-offset-2 flex items-center gap-1 shrink-0">
-                Voir le classement complet <ChevronRight size={13} />
+          {/* Les entreprises les mieux notées */}
+          <div className="lg:col-span-5 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-black text-gray-900 text-sm md:text-base">Les entreprises les mieux notées</h3>
+              <Link to="/classements" className="hidden sm:flex items-center gap-1 text-xs font-semibold text-red-600 hover:underline underline-offset-2 shrink-0">
+                Voir le classement complet <ArrowRight size={12} />
               </Link>
             </div>
-
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-50">
+            <div className="divide-y divide-gray-50">
               {companiesLoading ? (
                 [...Array(5)].map((_, i) => (
-                  <div key={i} className="flex items-center gap-3 p-4">
-                    <div className="w-8 h-8 rounded-xl bg-gray-100 animate-pulse shrink-0" />
-                    <div className="w-10 h-10 rounded-xl bg-gray-100 animate-pulse shrink-0" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-gray-100 rounded animate-pulse w-3/4" />
-                      <div className="h-3 bg-gray-100 rounded animate-pulse w-1/2" />
+                  <div key={i} className="flex items-center gap-3 py-3">
+                    <div className="w-6 h-6 rounded-full bg-gray-100 animate-pulse shrink-0" />
+                    <div className="w-9 h-9 rounded-xl bg-gray-100 animate-pulse shrink-0" />
+                    <div className="flex-1 space-y-1.5">
+                      <div className="h-3.5 bg-gray-100 rounded animate-pulse w-2/3" />
+                      <div className="h-3 bg-gray-100 rounded animate-pulse w-1/3" />
                     </div>
                   </div>
                 ))
               ) : rankCompanies.map((co, i) => {
                 const avg = parseFloat(co.averageRating || 0);
-                const info = ratingLabel(avg);
+                const brand = BRAND_COLORS[co.slug];
                 return (
                   <Link
                     key={co.id}
                     to={`/companies/${co.slug}`}
-                    className="flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors group"
+                    className="flex items-center gap-3 py-3 hover:bg-gray-50/60 -mx-1 px-1 rounded-xl transition-colors group"
                   >
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm font-black shrink-0 ${
-                      i === 0 ? 'bg-yellow-400 text-yellow-900' :
-                      i === 1 ? 'bg-gray-300 text-gray-700' :
-                      i === 2 ? 'bg-amber-600/80 text-white' :
-                                'bg-gray-100 text-gray-400'
+                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black shrink-0 ${
+                      i === 0 ? 'bg-amber-400 text-amber-900' : 'bg-gray-700 text-white'
                     }`}>
-                      {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
-                    </div>
-
+                      {i + 1}
+                    </span>
                     {co.imageUrl ? (
-                      <img src={co.imageUrl} alt={co.name} className="w-10 h-10 rounded-xl object-cover shrink-0" />
-                    ) : (() => {
-                      const brand = BRAND_COLORS[co.slug];
-                      return (
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-bold ${brand ? `${brand.bg} ${brand.text}` : 'bg-red-50 text-red-400'}`}>
-                          {co.name?.[0]}
-                        </div>
-                      );
-                    })()}
-
+                      <img src={co.imageUrl} alt={co.name} className="w-9 h-9 rounded-xl object-cover shrink-0" />
+                    ) : (
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 font-bold text-sm ${brand ? `${brand.bg} ${brand.text}` : 'bg-red-50 text-red-400'}`}>
+                        {co.name?.[0]}
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 text-sm truncate group-hover:text-red-600 transition-colors">
-                        {co.name}
-                      </p>
-                      <div className="flex items-center gap-2 mt-0.5">
+                      <p className="font-semibold text-gray-900 text-sm truncate group-hover:text-red-600 transition-colors">{co.name}</p>
+                      <div className="flex items-center gap-1.5 mt-0.5">
                         <StarRating rating={avg} size={11} />
                         <span className="text-xs font-bold text-gray-700">{avg.toFixed(1)}</span>
-                        {info && <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${info.c}`}>{info.t}</span>}
+                        <span className="text-xs text-gray-400">({co.reviewCount || 0} avis)</span>
                       </div>
-                    </div>
-
-                    <div className="shrink-0 text-right">
-                      <p className="text-xs text-gray-400">{co.reviewCount} avis</p>
-                      <ChevronRight size={13} className="text-gray-300 group-hover:text-red-400 mt-1 ml-auto" />
                     </div>
                   </Link>
                 );
@@ -723,121 +500,120 @@ export default function VitrinePage() {
             </div>
           </div>
 
-          {/* Avis récents — col 2 */}
-          <div className="lg:col-span-2">
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  <span className="text-xs text-gray-400 font-medium">En direct</span>
-                </div>
-                <h2 className="text-xl font-black text-gray-900">Derniers avis publiés</h2>
-              </div>
+          {/* EchoWork Insights */}
+          <div className="lg:col-span-4 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-black text-gray-900 text-sm md:text-base">Echowork Insights</h3>
+              <Link to="/insights" className="hidden sm:flex items-center gap-1 text-xs font-semibold text-red-600 hover:underline underline-offset-2 shrink-0">
+                Voir les insights <ArrowRight size={12} />
+              </Link>
             </div>
+            <div className="space-y-4">
+              {barometer.slice(0, 3).map((b, i) => {
+                const color = SPARKLINE_COLORS[i % SPARKLINE_COLORS.length];
+                const trendPos = b.trend > 0;
+                const trendNeutral = !b.trend || b.trend === 0;
+                return (
+                  <div key={b.slug}>
+                    <p className="text-[11px] font-semibold text-gray-600 mb-1 truncate">Satisfaction {b.label?.toLowerCase()}</p>
+                    <Sparkline data={sparklineData(b.avg, b.trend, b.slug)} color={color} />
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="text-lg font-black text-gray-900">
+                        {b.avg}<span className="text-xs font-semibold text-gray-400">/5</span>
+                      </span>
+                      {!trendNeutral && (
+                        <span className={`flex items-center gap-0.5 text-[10px] font-bold ${trendPos ? 'text-green-600' : 'text-red-500'}`}>
+                          {trendPos ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+                          {trendPos ? '+' : ''}{b.trend} ce mois
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
-            <div className="space-y-3">
+          {/* Avis récents */}
+          <div className="lg:col-span-3 bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-black text-gray-900 text-sm md:text-base">Avis récents</h3>
+              <Link to="/avis-recents" className="hidden sm:flex items-center gap-1 text-xs font-semibold text-red-600 hover:underline underline-offset-2 shrink-0">
+                Voir tous les avis <ArrowRight size={12} />
+              </Link>
+            </div>
+            <div className="space-y-3 flex-1">
               {reviews.length > 0 ? (
-                reviews.map(r => <ReviewCard key={r.id} review={r} />)
+                reviews.map((r) => (
+                  <div key={r.id} className="flex items-start gap-2.5">
+                    <div className="w-7 h-7 rounded-full bg-red-50 flex items-center justify-center shrink-0 text-red-500 font-bold text-xs">
+                      {r.user?.username?.[0]?.toUpperCase() || '?'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-gray-900 truncate">{r.user?.username}</p>
+                      <div className="flex items-center gap-1 mt-0.5 mb-1">
+                        <StarRating rating={r.rating} size={10} />
+                      </div>
+                      <p className="text-xs text-gray-500 leading-snug line-clamp-2">"{r.comment}"</p>
+                      <p className="text-[10px] text-gray-300 mt-0.5">{timeAgo(r.createdAt)}</p>
+                    </div>
+                  </div>
+                ))
               ) : (
-                <div className="text-center py-10 text-gray-400">
-                  <MessageSquare size={28} className="mx-auto mb-2 opacity-30" />
-                  <p className="text-sm font-medium text-gray-500">Aucun avis récent</p>
-                  <p className="text-xs mt-1">Soyez le premier à noter une entreprise !</p>
-                </div>
+                <p className="text-xs text-gray-400 text-center py-6">Aucun avis récent</p>
               )}
             </div>
+            <Link
+              to="/signup"
+              className="mt-4 flex items-center justify-center gap-2 px-4 py-2 border border-red-200 text-red-600 rounded-full text-xs font-semibold hover:bg-red-50 transition-colors"
+            >
+              <Star size={12} /> Donner un avis
+            </Link>
           </div>
 
         </div>
       </section>
 
-      {/* ── 7. Baromètre Echowork ────────────────────────────────────────── */}
-      <section className="bg-gray-50 py-10 md:py-14 px-4 md:px-8">
+      {/* ── CTA — Votre avis compte ────────────────────────────────────────── */}
+      <section className="bg-white py-10 md:py-14 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Données nationales</p>
-            <h2 className="text-xl md:text-2xl font-black text-gray-900">Le baromètre Echowork</h2>
-            <p className="text-gray-500 text-sm mt-1">La satisfaction des Sénégalais en temps réel dans les principaux secteurs</p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {barometer.map((b) => {
-              const conf = baroIcons[b.slug] || { Icon: Briefcase, bg: 'bg-gray-50', color: 'text-gray-600', border: 'border-gray-100' };
-              const Icon = conf.Icon;
-              const trendPos = b.trend > 0;
-              const trendNeutral = !b.trend || b.trend === 0;
-              return (
-                <Link
-                  key={b.slug}
-                  to={`/categories/${b.slug}`}
-                  className={`group bg-white rounded-2xl border ${conf.border} shadow-sm hover:shadow-md p-5 transition-all duration-200 hover:-translate-y-0.5`}
-                >
-                  <div className={`w-10 h-10 rounded-xl ${conf.bg} flex items-center justify-center mb-4`}>
-                    <Icon size={18} className={conf.color} />
-                  </div>
-                  <p className="text-xs text-gray-400 font-medium mb-0.5">Satisfaction</p>
-                  <p className="text-sm font-semibold text-gray-700 mb-3">{b.label}</p>
-                  <p className="text-3xl font-black text-gray-900 mb-1">
-                    {b.avg !== null ? b.avg : '—'}
-                    <span className="text-base font-semibold text-gray-400">/5</span>
-                  </p>
-                  {b.trend !== null && (
-                    <div className={`flex items-center gap-1 text-xs font-semibold mb-2 ${
-                      trendNeutral ? 'text-gray-400' : trendPos ? 'text-green-600' : 'text-red-500'
-                    }`}>
-                      {!trendNeutral && (trendPos ? <TrendingUp size={11} /> : <TrendingDown size={11} />)}
-                      {!trendNeutral && `${trendPos ? '+' : ''}${b.trend} ce mois`}
-                      {trendNeutral && 'Stable ce mois'}
-                    </div>
-                  )}
-                  <p className="text-[10px] text-gray-400 group-hover:text-red-500 transition-colors">
-                    Voir le détail →
-                  </p>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── 8. Application mobile ─────────────────────────────────────────── */}
-      <section className="bg-white py-10 md:py-14 px-4 md:px-8 border-t border-gray-100">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-3xl border border-red-100 px-8 py-10 flex flex-col md:flex-row items-center gap-8">
-            <div className="w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-white shadow-md flex items-center justify-center shrink-0">
-              <Smartphone size={32} className="text-red-500" />
-            </div>
-            <div className="flex-1 text-center md:text-left">
-              <h2 className="text-xl md:text-2xl font-black text-gray-900 mb-2">
-                Echowork partout avec vous !
-              </h2>
-              <p className="text-gray-500 text-sm mb-6">
-                Bientôt disponible sur mobile pour consulter et partager des avis où que vous soyez.
-              </p>
-              <div className="flex items-center gap-3 justify-center md:justify-start">
-                <span className="flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded-xl text-xs font-semibold opacity-75 cursor-not-allowed">
-                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.4-.07 2.38.72 3.2.73.96-.12 1.87-.93 3.22-.82 2.44.2 3.68 2.03 3.68 2.03-3.25 1.96-2.72 6.42 1.07 7.67-.73 1.9-1.71 3.63-3.17 4.27zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" /></svg>
-                  Télécharger sur l'App Store
-                </span>
-                <span className="flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded-xl text-xs font-semibold opacity-75 cursor-not-allowed">
-                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M3.18 23.76c.34.19.72.24 1.1.14l12.44-7.18-2.58-2.58L3.18 23.76zm16.46-10.03L16.9 12l2.74-1.73-12.46-7.21C6.8 2.97 6.4 2.93 6.06 3.1L17.05 14.1l2.59-0.37zM2.38 4.04A2 2 0 0 0 2 5v14a2 2 0 0 0 .37.96l.07.07L14.32 12l-11.87-7.96-.07-.07zM19.64 10.27L17 8.8 14.32 12 17 15.2l2.64-1.47c.76-.42.76-1.62 0-2.05l-.01.59z" /></svg>
-                  Télécharger sur Google Play
-                </span>
+          <div className="relative overflow-hidden bg-red-600 rounded-3xl px-6 md:px-10 py-8 md:py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div
+              className="absolute top-0 left-0 w-32 h-32 opacity-20 pointer-events-none"
+              style={{ backgroundImage: 'radial-gradient(circle, #fff 1.5px, transparent 1.5px)', backgroundSize: '14px 14px' }}
+            />
+            <div className="flex items-center gap-4 relative z-10">
+              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shrink-0">
+                <Star size={22} className="text-red-600 fill-red-600" />
+              </div>
+              <div>
+                <h2 className="text-lg md:text-xl font-black text-white leading-tight">
+                  Votre avis compte, ensemble construisons la confiance.
+                </h2>
+                <p className="text-white/80 text-sm mt-1 max-w-md">
+                  Partagez votre expérience et aidez des milliers de personnes à faire les bons choix au quotidien.
+                </p>
               </div>
             </div>
+            <Link
+              to="/signup"
+              className="relative z-10 shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-white text-red-600 rounded-full font-bold text-sm hover:bg-red-50 transition-colors shadow-sm"
+            >
+              Donner mon avis <ChevronRight size={15} />
+            </Link>
           </div>
         </div>
       </section>
 
       {/* ── Campus Challenge Banner ───────────────────── */}
-      <section className="bg-gray-950 py-12 px-4">
-        <div className="max-w-5xl mx-auto">
+      <section className="bg-gray-950 py-16 md:py-24 px-4">
+        <div className="max-w-7xl mx-auto">
           <Link
             to="/campus"
-            className="group flex flex-col md:flex-row items-center gap-8 rounded-3xl overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 border border-white/10 hover:border-red-500/40 transition-all duration-300 hover:shadow-2xl hover:shadow-red-900/20 p-6 md:p-8"
+            className="group flex flex-col md:flex-row items-center gap-10 md:gap-14 rounded-3xl overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 border border-white/10 hover:border-red-500/40 transition-all duration-300 hover:shadow-2xl hover:shadow-red-900/20 p-8 md:p-14"
           >
             {/* Poster */}
-            <div className="shrink-0 w-48 md:w-56">
+            <div className="shrink-0 w-64 md:w-96">
               <img
                 src={campusPoster}
                 alt="EchoWork Campus Challenge 2026"
@@ -847,21 +623,21 @@ export default function VitrinePage() {
 
             {/* Text */}
             <div className="flex-1 text-center md:text-left">
-              <span className="inline-flex items-center gap-1.5 bg-red-600/20 border border-red-500/30 text-red-400 text-xs font-bold px-3 py-1 rounded-full mb-4">
-                <GraduationCap size={11} /> Du 15 Juin au 15 Juillet 2026
+              <span className="inline-flex items-center gap-1.5 bg-red-600/20 border border-red-500/30 text-red-400 text-sm font-bold px-4 py-1.5 rounded-full mb-5">
+                <GraduationCap size={14} /> Du 15 Juin au 15 Juillet 2026
               </span>
-              <h2 className="text-2xl md:text-3xl font-black text-white leading-tight mb-2">
+              <h2 className="text-3xl md:text-5xl font-black text-white leading-tight mb-4">
                 EchoWork <span className="text-red-500">Campus Challenge</span> 2026
               </h2>
-              <p className="text-gray-400 text-sm md:text-base mb-5 max-w-lg">
+              <p className="text-gray-400 text-base md:text-lg mb-7 max-w-xl">
                 Le 1er classement participatif des écoles et universités du Sénégal par les étudiants.
                 Ton avis compte, ton école progresse !
               </p>
-              <div className="inline-flex items-center gap-2 bg-red-600 group-hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-full text-sm transition-colors">
-                <Star size={14} /> Participer maintenant
-                <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+              <div className="inline-flex items-center gap-2 bg-red-600 group-hover:bg-red-700 text-white font-bold px-8 py-3.5 rounded-full text-base transition-colors">
+                <Star size={16} /> Participer maintenant
+                <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </div>
-              <p className="mt-3 text-xs text-gray-600">
+              <p className="mt-4 text-sm text-gray-600">
                 Classement national publié le 20 Juillet 2026
               </p>
             </div>

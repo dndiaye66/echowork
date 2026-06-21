@@ -1,38 +1,41 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Heart, MapPin, ExternalLink,
-  Utensils, Landmark, ShoppingCart, Hospital, Briefcase,
-  Factory, Phone, Zap, Truck, Building2, Wheat, GraduationCap,
+  Heart, MapPin, Facebook, Instagram, Linkedin, Youtube, ChevronDown,
 } from 'lucide-react';
 
-const categories = [
-  { name: 'Agriculture', slug: 'agriculture', Icon: Wheat },
-  { name: 'Alimentation & Boissons', slug: 'alimentation-et-boissons', Icon: Utensils },
-  { name: 'Automobile', slug: 'automobile', Icon: Truck },
-  { name: 'Commerce & Distribution', slug: 'commerce-et-distribution', Icon: ShoppingCart },
-  { name: 'Santé & Pharmacie', slug: 'sante-et-pharmacie', Icon: Hospital },
-  { name: 'Services', slug: 'services', Icon: Briefcase },
-  { name: 'Banques & Finance', slug: 'banques-et-institutions-financieres', Icon: Landmark },
-  { name: 'Industrie', slug: 'industrie', Icon: Factory },
+const EXPLORER_LINKS = [
+  { label: 'Entreprises', href: '/entreprises' },
+  { label: 'Catégories', href: '/#categories' },
+  { label: 'Classements', href: '/classements' },
+  { label: 'Insights', href: '/insights' },
+  { label: 'Avis récents', href: '/avis-recents' },
+  { label: 'Campus Challenge', href: '/campus' },
 ];
 
-const quickLinks = [
-  { label: 'Accueil', href: '/' },
-  { label: 'Entreprises', href: '/entreprises' },
-  { label: 'Classements', href: '/classements' },
-  { label: 'Carrières by EchoWork', href: '/carrieres' },
-  { label: 'Campus Challenge', href: '/campus' },
-  { label: 'Insights', href: '/insights' },
-  { label: 'À propos', href: '/a-propos' },
-  { label: 'Connexion', href: '/login' },
-  { label: 'Inscription', href: '/signup' },
+const A_PROPOS_LINKS = [
+  { label: 'Qui sommes-nous ?', href: '/a-propos#qui-sommes-nous' },
+  { label: 'Comment ça marche ?', href: '/a-propos#comment-ca-marche' },
+  { label: 'Notre mission', href: '/a-propos#notre-mission' },
+  { label: 'Carrières', href: '/carrieres' },
+  { label: 'Contact', href: '/contact' },
+];
+
+const AIDE_LINKS = [
+  { label: "Centre d'aide", href: '/aide' },
+  { label: 'FAQ', href: '/faq' },
+  { label: "Conditions d'utilisation", href: '/conditions-utilisation' },
+  { label: 'Politique de confidentialité', href: '/confidentialite' },
+  { label: 'Nous contacter', href: '/contact' },
 ];
 
 export default function Foot() {
+  const [langOpen, setLangOpen] = useState(false);
+
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 py-14">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
 
           {/* Brand */}
           <div>
@@ -40,77 +43,103 @@ export default function Foot() {
               <span className="text-red-500">ECHO</span>WORK
             </h2>
             <p className="text-gray-400 text-sm leading-relaxed mb-5">
-              La plateforme communautaire de référence pour noter et évaluer
-              les entreprises et services au Sénégal.
+              La plateforme de confiance des Sénégalais. Ensemble, construisons une
+              économie plus transparente et plus fiable.
             </p>
-            <div className="flex items-center gap-1.5 text-xs text-gray-500">
+            <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-5">
               <MapPin size={13} />
               Dakar, Sénégal
             </div>
+            <div className="flex items-center gap-3">
+              <a href="#" aria-label="Facebook" className="text-gray-500 hover:text-white transition-colors">
+                <Facebook size={16} />
+              </a>
+              <a href="#" aria-label="Instagram" className="text-gray-500 hover:text-white transition-colors">
+                <Instagram size={16} />
+              </a>
+              <a href="#" aria-label="LinkedIn" className="text-gray-500 hover:text-white transition-colors">
+                <Linkedin size={16} />
+              </a>
+              <a href="#" aria-label="YouTube" className="text-gray-500 hover:text-white transition-colors">
+                <Youtube size={16} />
+              </a>
+            </div>
           </div>
 
-          {/* Categories */}
+          {/* Explorer */}
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
-              Catégories
-            </h3>
-            <ul className="grid grid-cols-2 gap-1.5">
-              {categories.map(({ name, slug, Icon }) => (
-                <li key={slug}>
-                  <Link
-                    to={`/categories/${slug}`}
-                    className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors group"
-                  >
-                    <Icon size={11} className="text-red-500/60 group-hover:text-red-400 transition-colors shrink-0" />
-                    <span className="truncate">{name}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Quick links */}
-          <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
-              Liens utiles
+              Explorer
             </h3>
             <ul className="space-y-2.5">
-              {quickLinks.map(({ label, href }) => (
-                <li key={href}>
-                  <Link
-                    to={href}
-                    className="text-sm text-gray-400 hover:text-white transition-colors"
-                  >
+              {EXPLORER_LINKS.map(({ label, href }) => (
+                <li key={label}>
+                  <Link to={href} className="text-sm text-gray-400 hover:text-white transition-colors">
                     {label}
                   </Link>
                 </li>
               ))}
             </ul>
+          </div>
 
-            {/* Stats */}
-            <div className="mt-6 flex flex-col gap-2">
-              <div className="flex items-center gap-2 text-sm">
-                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                <span className="text-gray-400">Service disponible 24h/7j</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Building2 size={12} className="text-red-400" />
-                <span className="text-gray-400">Toutes catégories d'entreprises</span>
-              </div>
-            </div>
+          {/* À propos */}
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
+              À propos
+            </h3>
+            <ul className="space-y-2.5">
+              {A_PROPOS_LINKS.map(({ label, href }) => (
+                <li key={label}>
+                  <Link to={href} className="text-sm text-gray-400 hover:text-white transition-colors">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Aide & Support */}
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
+              Aide &amp; Support
+            </h3>
+            <ul className="space-y-2.5">
+              {AIDE_LINKS.map(({ label, href }) => (
+                <li key={label}>
+                  <Link to={href} className="text-sm text-gray-400 hover:text-white transition-colors">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
 
       {/* Bottom bar */}
       <div className="border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-gray-600">
             © {new Date().getFullYear()} EchoWork. Tous droits réservés.
           </p>
           <p className="text-xs text-gray-600 flex items-center gap-1">
             Fait avec <Heart size={11} className="text-red-500 fill-red-500 mx-0.5" /> au Sénégal
           </p>
+          <div className="relative">
+            <button
+              onClick={() => setLangOpen((v) => !v)}
+              className="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors"
+            >
+              Français
+              <ChevronDown size={12} className={`transition-transform ${langOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {langOpen && (
+              <div className="absolute right-0 bottom-full mb-2 w-32 bg-gray-800 border border-white/10 rounded-xl shadow-xl p-1.5 z-10">
+                <span className="block px-2.5 py-1.5 text-xs text-white rounded-lg bg-white/10">Français</span>
+                <span className="block px-2.5 py-1.5 text-xs text-gray-500 rounded-lg cursor-not-allowed">English (bientôt)</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </footer>

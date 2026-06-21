@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { CompaniesService } from '../companies/companies.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -38,12 +38,13 @@ export class HomeController {
    */
   @Get('stats')
   async getStats() {
-    const [companyCount, categoryCount, reviewCount] = await Promise.all([
+    const [companyCount, categoryCount, reviewCount, userCount] = await Promise.all([
       this.prisma.company.count(),
       this.prisma.category.count(),
       this.prisma.review.count({ where: { status: 'APPROVED' } }),
+      this.prisma.user.count(),
     ]);
-    return { companyCount, categoryCount, reviewCount };
+    return { companyCount, categoryCount, reviewCount, userCount };
   }
 
   @Get('job-offers')
@@ -57,7 +58,8 @@ export class HomeController {
   }
 
   @Get('recent-reviews')
-  async getRecentReviews() {
+  async getRecentReviews(@Query('limit') limit?: string) {
+    const take = Math.min(parseInt(limit ?? '6', 10) || 6, 50);
     return this.prisma.review.findMany({
       where: { status: 'APPROVED' },
       include: {
@@ -65,7 +67,7 @@ export class HomeController {
         user: { select: { id: true, username: true } },
       },
       orderBy: { createdAt: 'desc' },
-      take: 6,
+      take,
     });
   }
 

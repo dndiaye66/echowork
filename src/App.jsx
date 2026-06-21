@@ -37,6 +37,12 @@ import CampusPage from "./pages/CampusPage";
 import EntreprisesPage from "./pages/EntreprisesPage";
 import AProposPage from "./pages/AProposPage";
 import InsightsPage from "./pages/InsightsPage";
+import AvisRecentsPage from "./pages/AvisRecentsPage";
+import ContactPage from "./pages/ContactPage";
+import AidePage from "./pages/AidePage";
+import FaqPage from "./pages/FaqPage";
+import ConditionsUtilisationPage from "./pages/ConditionsUtilisationPage";
+import ConfidentialitePage from "./pages/ConfidentialitePage";
 import SignalementsModeration from "./pages/admin/SignalementsModeration";
 
 function App() {
@@ -73,6 +79,12 @@ function App() {
           <Route path="/entreprises" element={<EntreprisesPage />} />
           <Route path="/a-propos" element={<AProposPage />} />
           <Route path="/insights" element={<InsightsPage />} />
+          <Route path="/avis-recents" element={<AvisRecentsPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/aide" element={<AidePage />} />
+          <Route path="/faq" element={<FaqPage />} />
+          <Route path="/conditions-utilisation" element={<ConditionsUtilisationPage />} />
+          <Route path="/confidentialite" element={<ConfidentialitePage />} />
 
           {/* ── Espace Entreprise ── */}
           <Route path="/espace-entreprise" element={<LandingEntreprise />} />

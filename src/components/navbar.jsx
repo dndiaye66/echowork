@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ChevronDown, Menu, X, LogOut, LayoutDashboard, User,
   Utensils, Landmark, ShoppingCart, Hospital, Briefcase,
   Factory, Phone, Zap, Truck, Building2, Wheat, GraduationCap,
-  Home, UtensilsCrossed, Monitor, Scale, BarChart3,
+  Home, UtensilsCrossed, Monitor, Scale, BarChart3, Search, Bell,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import SearchAutocomplete from './SearchAutocomplete';
@@ -38,11 +38,24 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [catOpen, setCatOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const searchPanelRef = useRef(null);
+  const notifPanelRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const onClickOutside = (e) => {
+      if (searchPanelRef.current && !searchPanelRef.current.contains(e.target)) setSearchOpen(false);
+      if (notifPanelRef.current && !notifPanelRef.current.contains(e.target)) setNotifOpen(false);
+    };
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
   }, []);
 
   const closeMobile = () => setMobileOpen(false);
@@ -57,11 +70,6 @@ export default function Navbar() {
             <span className="text-red-600">ECHO</span>
             <span className="text-gray-900">WORK</span>
           </Link>
-
-          {/* Search — desktop */}
-          <div className="flex-1 max-w-md hidden md:block">
-            <SearchAutocomplete placeholder="Rechercher une entreprise..." variant="light" />
-          </div>
 
           {/* Desktop links */}
           <div className="hidden md:flex items-center gap-1 ml-auto">
@@ -121,6 +129,43 @@ export default function Navbar() {
             >
               Insights
             </Link>
+
+            {/* Search toggle */}
+            <div className="relative ml-1" ref={searchPanelRef}>
+              <button
+                onClick={() => setSearchOpen((v) => !v)}
+                className="p-2 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                aria-label="Rechercher"
+              >
+                <Search size={17} />
+              </button>
+              {searchOpen && (
+                <div className="absolute right-0 top-full pt-2 w-80 z-50">
+                  <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-3">
+                    <SearchAutocomplete placeholder="Rechercher une entreprise..." variant="light" />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Notifications */}
+            <div className="relative" ref={notifPanelRef}>
+              <button
+                onClick={() => setNotifOpen((v) => !v)}
+                className="p-2 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                aria-label="Notifications"
+              >
+                <Bell size={17} />
+              </button>
+              {notifOpen && (
+                <div className="absolute right-0 top-full pt-2 w-64 z-50">
+                  <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-4 text-center">
+                    <Bell size={20} className="text-gray-300 mx-auto mb-2" />
+                    <p className="text-xs text-gray-400">Aucune notification pour le moment</p>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Auth */}
             {isAuthenticated ? (
