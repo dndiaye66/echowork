@@ -542,23 +542,45 @@ export default function VitrinePage() {
                 Voir tous les avis <ArrowRight size={12} />
               </Link>
             </div>
-            <div className="space-y-3 flex-1">
+            <div className="space-y-4 flex-1">
               {reviews.length > 0 ? (
-                reviews.map((r) => (
-                  <div key={r.id} className="flex items-start gap-2.5">
-                    <div className="w-7 h-7 rounded-full bg-red-50 flex items-center justify-center shrink-0 text-red-500 font-bold text-xs">
-                      {r.user?.username?.[0]?.toUpperCase() || '?'}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-gray-900 truncate">{r.user?.username}</p>
-                      <div className="flex items-center gap-1 mt-0.5 mb-1">
-                        <StarRating rating={r.rating} size={10} />
+                reviews.map((r) => {
+                  const co = r.company;
+                  const brand = BRAND_COLORS[co?.slug];
+                  return (
+                    <div key={r.id} className="pb-4 border-b border-gray-50 last:border-0 last:pb-0">
+                      <div className="flex items-start gap-2.5">
+                        {co?.imageUrl ? (
+                          <img src={co.imageUrl} alt={co.name} className="w-8 h-8 rounded-lg object-cover shrink-0" />
+                        ) : (
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 font-bold text-xs ${brand ? `${brand.bg} ${brand.text}` : 'bg-red-50 text-red-500'}`}>
+                            {co?.name?.[0]?.toUpperCase() || '?'}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <Link
+                            to={co?.slug ? `/companies/${co.slug}` : '#'}
+                            className="text-sm font-semibold text-gray-900 hover:text-red-600 transition-colors block truncate"
+                          >
+                            {co?.name || 'Entreprise'}
+                          </Link>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <StarRating rating={r.rating} size={11} />
+                            <span className="text-xs font-bold text-gray-600">{Number(r.rating).toFixed(1)}</span>
+                          </div>
+                        </div>
+                        <span className="text-[11px] text-gray-300 shrink-0">{timeAgo(r.createdAt)}</span>
                       </div>
-                      <p className="text-xs text-gray-500 leading-snug line-clamp-2">"{r.comment}"</p>
-                      <p className="text-[10px] text-gray-300 mt-0.5">{timeAgo(r.createdAt)}</p>
+                      <p className="text-xs text-gray-500 leading-relaxed mt-2">"{r.comment}"</p>
+                      <div className="flex items-center gap-1.5 mt-2">
+                        <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-[9px] font-bold text-gray-500 shrink-0">
+                          {r.user?.username?.[0]?.toUpperCase() || '?'}
+                        </div>
+                        <span className="text-[11px] font-medium text-gray-500">{r.user?.username}</span>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <p className="text-xs text-gray-400 text-center py-6">Aucun avis récent</p>
               )}
